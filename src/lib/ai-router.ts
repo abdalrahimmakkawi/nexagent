@@ -6,10 +6,19 @@
 
 import OpenAI from 'openai'
 
+// Validate required env vars at startup
+const DEEPSEEK_API_KEY = process.env.DEEPSEEK_API_KEY
+const DEEPSEEK_BASE_URL = process.env.DEEPSEEK_BASE_URL || 'https://api.deepseek.com'
+const DEEPSEEK_MODEL = process.env.DEEPSEEK_MODEL || 'deepseek-chat'
+
+if (!DEEPSEEK_API_KEY) {
+  throw new Error('DEEPSEEK_API_KEY environment variable is required')
+}
+
 // ── Client ──────────────────────────────────────────────────
 const openai = new OpenAI({
-  baseURL: process.env.DEEPSEEK_BASE_URL,
-  apiKey: process.env.DEEPSEEK_API_KEY,
+  baseURL: DEEPSEEK_BASE_URL,
+  apiKey: DEEPSEEK_API_KEY,
 })
 
 // ── Types ─────────────────────────────────────────────────────
