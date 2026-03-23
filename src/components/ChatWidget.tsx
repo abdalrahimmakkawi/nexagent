@@ -60,37 +60,7 @@ export default function ChatWidget({ store, welcomeMessage }: Props) {
     if (!input.trim()) return
     const msg = input
     setInput('')
-    
-    try {
-      await sendMessage(msg)
-    } catch (err: any) {
-      // Handle rate limit errors
-      if (err.status === 429) {
-        const data = await err.json()
-        // add message to chat showing rate limit error
-        setMessages(prev => [...prev, {
-          id: crypto.randomUUID(),
-          role: 'assistant',
-          content: data.error || 'Too many messages. Please wait a moment.',
-          timestamp: new Date()
-        }])
-        return
-      }
-      
-      // Handle other server errors
-      if (!err.ok) {
-        setMessages(prev => [...prev, {
-          id: crypto.randomUUID(),
-          role: 'assistant',
-          content: '⚠️ Service temporarily unavailable. Please try again.',
-          timestamp: new Date()
-        }])
-        return
-      }
-      
-      // Re-throw for other errors
-      throw err
-    }
+    await sendMessage(msg)
   }
 
   function handleKey(e: React.KeyboardEvent) {

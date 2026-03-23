@@ -48,7 +48,28 @@ export function useChat({ storeId, routingMode = 'auto' }: UseChatOptions) {
         }),
       })
 
-      if (!res.ok) throw new Error(`API error: ${res.status}`)
+      if (res.status === 429) {
+        const data = await res.json()
+        const rateLimitMsg: ChatMessage = {
+          id: crypto.randomUUID(),
+          role: 'assistant',
+          content: data.error || '⚠️ You\'ve sent a lot of messages! Please wait a moment before continuing.',
+          timestamp: new Date(),
+        }
+        setMessages(prev => [...prev, rateLimitMsg])
+        return
+      }
+
+      if (!res.ok) {
+        const errorMsg: ChatMessage = {
+          id: crypto.randomUUID(),
+          role: 'assistant',
+          content: '⚠️ Service temporarily unavailable. Please try again.',
+          timestamp: new Date(),
+        }
+        setMessages(prev => [...prev, errorMsg])
+        return
+      }
 
       const data = await res.json()
 
