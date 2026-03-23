@@ -4,41 +4,34 @@ import Head from 'next/head'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+
 export default function Dashboard() {
   const [user, setUser] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const router = useRouter()
 
   useEffect(() => {
-    checkAuth()
-    
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!session) {
+        window.location.href = '/login'
+      } else {
+        setUser(session.user)
+        setLoading(false)
+      }
+    })
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (!session) {
-        router.push('/login')
+        window.location.href = '/login'
       } else {
         setUser(session.user)
       }
     })
 
     return () => subscription.unsubscribe()
-  }, [router])
-
-  async function checkAuth() {
-    try {
-      const { data: { session } } = await supabase.auth.getSession()
-      
-      if (!session) {
-        router.push('/login')
-        return
-      }
-      
-      setUser(session.user)
-    } catch (error) {
-      router.push('/login')
-    } finally {
-      setLoading(false)
-    }
-  }
+  }, [])
 
   async function handleLogout() {
     await supabase.auth.signOut()
