@@ -3,11 +3,5 @@
   "devCommand": "next dev",
   "installCommand": "npm install",
   "framework": "nextjs",
-  "outputDirectory": ".next",
-  "env": {
-    "DEEPSEEK_API_KEY": "@deepseek_api_key",
-    "DEEPSEEK_BASE_URL": "@deepseek_base_url",
-    "DEEPSEEK_MODEL": "@deepseek_model",
-    "AI_ROUTING_MODE": "@ai_routing_mode"
-  }
+  "outputDirectory": ".next"
 }

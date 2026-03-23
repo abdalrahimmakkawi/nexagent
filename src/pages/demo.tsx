@@ -1,6 +1,7 @@
 // src/pages/demo.tsx
 import { useState } from 'react'
 import Head from 'next/head'
+import Link from 'next/link'
 import ChatWidget from '@/components/ChatWidget'
 import { getAllStores, StoreConfig } from '@/lib/store-configs'
 
@@ -45,13 +46,13 @@ export default function DemoPage() {
 
         {/* Top bar */}
         <div className="flex items-center border-b flex-shrink-0" style={{ height: 56, borderColor: 'var(--border)', background: 'var(--s1)' }}>
-          <a href="/" className="flex items-center gap-2.5 px-5 border-r h-full" style={{ borderColor: 'var(--border)', width: 260 }}>
+          <Link href="/" className="flex items-center gap-2.5 px-5 border-r h-full no-underline" style={{ borderColor: 'var(--border)', width: 260 }}>
             <div className="w-7 h-7 rounded-lg flex items-center justify-center text-sm"
               style={{ background: 'linear-gradient(135deg,var(--accent),#a78bfa)' }}>🤖</div>
             <span className="font-bold text-sm">NexAgent</span>
             <span className="text-[10px] font-bold px-2 py-0.5 rounded-full ml-1"
               style={{ background: 'rgba(107,92,231,0.2)', color: '#c4baff', border: '1px solid rgba(107,92,231,0.3)' }}>DEMO</span>
-          </a>
+          </Link>
           <div className="flex items-center gap-2 px-5 flex-1">
             {stores.map(s => (
               <button key={s.id} onClick={() => switchStore(s)}
@@ -67,6 +68,18 @@ export default function DemoPage() {
             style={{ color: 'var(--green)', background: 'rgba(61,255,160,0.06)', borderLeft: '1px solid var(--border)', height: '100%' }}>
             <div className="w-1.5 h-1.5 rounded-full" style={{ background: 'var(--green)', animation: 'pulse 2s infinite' }} />
             LIVE
+          </div>
+          <div className="flex items-center gap-3 px-5">
+            <Link href="/" className="text-xs font-medium hover:underline" style={{ color: 'var(--t2)' }}>
+              ← Back to site
+            </Link>
+            <Link href="/login" className="text-xs font-medium hover:underline" style={{ color: 'var(--t2)' }}>
+              Login
+            </Link>
+            <Link href="/signup" className="text-xs px-3 py-1.5 rounded-lg font-medium transition-colors"
+              style={{ background: 'var(--accent)', color: 'white' }}>
+              Get Started
+            </Link>
           </div>
         </div>
 
