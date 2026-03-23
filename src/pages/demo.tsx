@@ -76,7 +76,7 @@ export default function DemoPage() {
             <Link href="/login" className="text-xs font-medium hover:underline" style={{ color: 'var(--t2)' }}>
               Login
             </Link>
-            <Link href="/signup" className="text-xs px-3 py-1.5 rounded-lg font-medium transition-colors"
+            <Link href="/waitlist" className="text-xs px-3 py-1.5 rounded-lg font-medium transition-colors"
               style={{ background: 'var(--accent)', color: 'white' }}>
               Get Started
             </Link>
@@ -101,6 +101,16 @@ export default function DemoPage() {
                     Online · &lt;1s
                   </div>
                 </div>
+              </div>
+            </div>
+
+            {/* Waitlist banner */}
+            <div className="p-4 border-b" style={{ borderColor: 'var(--border)' }}>
+              <div className="text-xs text-center leading-relaxed" style={{ color: 'var(--t2)' }}>
+                Want this agent for your business?<br />
+                <Link href="/waitlist" className="font-medium hover:underline" style={{ color: 'var(--accent)' }}>
+                  Join the waitlist →
+                </Link>
               </div>
             </div>
 

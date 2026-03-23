@@ -111,7 +111,7 @@ export default function Home() {
         <div className="flex items-center gap-3">
           <Btn href="/demo">See Demo</Btn>
           <Btn href="/login">Login</Btn>
-          <Btn href="/signup" primary>Get Started →</Btn>
+          <Btn href="/waitlist" primary>Get Started →</Btn>
         </div>
       </nav>
 
@@ -252,7 +252,7 @@ export default function Home() {
               Book a free 30-minute call. We'll show you exactly what an agent would look like for your business.
             </p>
             <div className="flex justify-center gap-4 flex-wrap mb-5">
-              <Btn href="/signup" primary>Book free strategy call →</Btn>
+              <Btn href="/waitlist" primary>Join the waitlist →</Btn>
               <Btn href="/demo">See the demo first</Btn>
             </div>
             <div className="text-xs" style={{ color: 'var(--t3)' }}>No commitment · Free demo included · Live in under a week</div>
