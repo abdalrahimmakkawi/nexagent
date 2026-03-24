@@ -4,10 +4,10 @@ import Link from 'next/link'
 import { useEffect, useRef } from 'react'
 
 const SERVICES = [
-  { icon: '🛍️', title: 'E-commerce Support Agent', desc: 'Handles orders, returns, FAQs, and captures leads 24/7 without human touch.', features: ['Order tracking & shipping FAQ', 'Automated returns flow', 'Lead capture (email/SMS)', 'Cart abandonment recovery'], featured: true },
-  { icon: '🎓', title: 'EdTech Onboarding Agent', desc: 'Guide students from first click to enrolled — answering questions and personalizing the journey.', features: ['Student intake & qualification', 'Course & pricing FAQ', 'Personalised recommendations', 'Progress check-ins'] },
-  { icon: '⚖️', title: 'Legal Intake Agent', desc: 'Qualify leads 24/7, handle intake forms, book consultations automatically.', features: ['Case type qualification', 'Appointment scheduling', 'Document request automation', 'GDPR compliant'] },
-  { icon: '🏨', title: 'Hospitality Concierge', desc: 'A 24/7 digital concierge handling reservations, guest FAQ, and upsells.', features: ['Reservation management', 'Menu & availability FAQ', 'Automated review requests', 'Multi-language support'] },
+  { icon: '🛍️', title: 'E-commerce Support Agent', desc: 'Handles orders, returns, FAQs, and captures leads 24/7 without human touch.', features: ['Order tracking & shipping FAQ', 'Automated returns flow', 'Lead capture (email/SMS)', 'Cart abandonment recovery', 'Action-driven — resolves tickets end to end', 'No IT setup required'], featured: true },
+  { icon: '🎓', title: 'EdTech Onboarding Agent', desc: 'Guide students from first click to enrolled — answering questions and personalizing the journey.', features: ['Student intake & qualification', 'Course & pricing FAQ', 'Personalised recommendations', 'Progress check-ins', 'Works for 2-person teams or 10,000 students'] },
+  { icon: '⚖️', title: 'Legal Intake Agent', desc: 'Qualify leads 24/7, handle intake forms, book consultations automatically.', features: ['Case type qualification', 'Appointment scheduling', 'Document request automation', 'GDPR compliant', 'Live in 3 days — no technical knowledge needed'] },
+  { icon: '🏨', title: 'Hospitality Concierge', desc: 'A 24/7 digital concierge handling reservations, guest FAQ, and upsells.', features: ['Reservation management', 'Menu & availability FAQ', 'Automated review requests', 'Multi-language support', 'Self-serve demo available for your team'] },
 ]
 
 const STEPS = [
@@ -25,27 +25,110 @@ const RESULTS = [
 
 const PRICING = [
   {
-    name: 'Starter', price: '$1,500', billing: 'one-time project fee', pop: false,
-    desc: 'Test AI before committing to a monthly plan.',
-    features: ['1 custom AI agent build', 'Up to 3 integrations', '30 days free support', 'Handoff documentation'],
+    name: 'Starter',
+    price: '$499',
+    billing: 'one-time setup fee',
+    pop: false,
+    desc: 'Test AI in your business before committing. Full agent, no strings attached.',
+    features: [
+      'Full custom AI agent build',
+      'Up to 3 integrations',
+      '30 days free support',
+      'Handoff documentation',
+      'Free migration to Growth plan',
+      'Setup in 3 days — we handle everything',
+    ],
   },
   {
-    name: 'Growth', price: '$1,200', billing: '/month · cancel anytime', pop: true,
-    desc: 'For businesses ready to run AI as a core operation.',
-    features: ['1–2 agents (built + maintained)', 'Monthly performance tuning', 'Weekly analytics reports', 'Priority support (<4hr)', 'Unlimited conversations'],
+    name: 'Growth',
+    price: '$299',
+    billing: '/month · cancel anytime',
+    pop: true,
+    desc: 'For businesses ready to run AI as a permanent part of their operations.',
+    features: [
+      '1–2 agents built & maintained',
+      'Monthly performance tuning',
+      'Weekly analytics reports',
+      'Priority support (<4hr response)',
+      'Unlimited conversations',
+      'Lead capture included',
+      'Works for teams of 2 or 200',
+    ],
   },
   {
-    name: 'Scale', price: '$3,000', billing: '/month · cancel anytime', pop: false,
-    desc: 'Full AI operations suite for aggressive automation.',
-    features: ['Up to 5 agents', 'CRM & tool integrations', 'Custom dashboards', 'Dedicated account manager', 'SLA guarantee'],
+    name: 'Scale',
+    price: '$799',
+    billing: '/month · cancel anytime',
+    pop: false,
+    desc: 'Full AI operations suite for businesses that want to automate aggressively.',
+    features: [
+      'Up to 5 custom agents',
+      'CRM & tool integrations',
+      'Custom analytics dashboard',
+      'Dedicated account manager',
+      'SLA guarantee',
+      'White-label option',
+      'Self-serve demo for your clients',
+    ],
+  },
+]
+
+const COMPARISON = [
+  {
+    them: 'Opaque pricing — "contact sales"',
+    us: 'Transparent pricing from $299/month'
+  },
+  {
+    them: 'Requires IT department to deploy',
+    us: 'We set it up for you in 3 days'
+  },
+  {
+    them: '$5,000+/month minimum contract',
+    us: 'Starts at $499 one-time or $299/month'
+  },
+  {
+    them: 'Search-first — still need humans to act',
+    us: 'Action-driven — resolves tickets end to end'
+  },
+  {
+    them: 'Minimum 100 users required',
+    us: 'Works for a team of 2 or 200'
+  },
+  {
+    them: 'Slow quote-based sales cycle',
+    us: 'Self-serve demo — try it in 30 seconds'
+  },
+  {
+    them: 'Months to go live',
+    us: 'Live in under a week, guaranteed'
   },
 ]
 
 const FAQS = [
-  { q: 'How long does it take to deploy?', a: 'Typically 3–5 business days from initial call to live agent. Complex CRM integrations may take 7–10 days.' },
-  { q: 'Do I need technical knowledge?', a: 'Zero. We handle all setup. You answer questions about your business, review the agent, and we embed it on your site.' },
-  { q: 'What if the agent says something wrong?', a: 'We build guardrails and test extensively pre-launch. Post-launch monitoring catches edge cases within 24 hours. Human escalation is always built in.' },
-  { q: 'What happens if I want to cancel?', a: 'No lock-in. Cancel with 30 days notice. All code and documentation stays yours.' },
+  {
+    q: 'How is this different from tools like Glean or Intercom?',
+    a: 'Enterprise tools like Glean start at $5,000/month and require an IT team to deploy. Intercom charges per seat and gets expensive fast. NexAgent is built specifically for small and mid-size businesses — transparent pricing from $299/month, setup in 3 days, and we handle everything for you.'
+  },
+  {
+    q: 'How long does it take to deploy?',
+    a: 'Typically 3 days from your initial call to a live agent on your site. We handle all the technical setup — you just answer questions about your business and approve before we go live.'
+  },
+  {
+    q: 'Do I need technical knowledge or an IT team?',
+    a: 'Zero. This is one of the key reasons businesses choose us over enterprise tools. You need no technical knowledge at all. We build it, deploy it, and maintain it for you.'
+  },
+  {
+    q: 'What if the agent says something wrong?',
+    a: 'We build in guardrails and test extensively before launch. Post-launch monitoring catches edge cases within 24 hours. Every agent also has a built-in human escalation flow as a safety net.'
+  },
+  {
+    q: 'Does it work for small teams?',
+    a: 'Yes — in fact most of our clients are teams of 2 to 20 people. Unlike enterprise tools that require 100+ user minimums, NexAgent works for any business size. A 2-person e-commerce store gets the same AI power as a 500-person company.'
+  },
+  {
+    q: 'What happens if I want to cancel?',
+    a: 'No lock-in. Cancel anytime with 30 days notice. All code, documentation, and configurations stay yours — you own everything we build.'
+  },
 ]
 
 function Btn({ href, children, primary = false }: { href: string; children: React.ReactNode; primary?: boolean }) {
@@ -135,7 +218,7 @@ export default function Home() {
               <Btn href="#pricing">View Pricing</Btn>
             </div>
             <div className="flex items-center justify-center gap-8 flex-wrap text-sm" style={{ color: 'var(--t2)', animation: 'fadeUp 0.6s 0.4s ease both' }}>
-              {['⚡ Deployed in 3–5 days', '🎯 94% resolution rate', '💰 ROI positive week 1', '🔒 No lock-in'].map(s => (
+              {['⚡ Live in 3 days — we handle setup', '🎯 94% ticket resolution rate', '💰 From $299/month', '🔒 No IT department needed', '👥 Works for teams of 2 or 200', '� Self-serve demo — no signup needed'].map(s => (
                 <span key={s}>{s}</span>
               ))}
             </div>
@@ -207,6 +290,42 @@ export default function Home() {
           </div>
         </section>
 
+        {/* WHY NEXAGENT */}
+        <section id="why-nexagent" className="px-6 pb-32">
+          <div ref={reveal} className="text-center mb-16">
+            <div className="text-xs font-bold tracking-widest uppercase mb-4" style={{ color: 'var(--accent2)' }}>Why NexAgent</div>
+            <h2 className="font-serif mb-4" style={{ fontSize: 'clamp(36px,4vw,54px)', letterSpacing: -1 }}>
+              Everything enterprise AI does.<br />None of the enterprise headaches.
+            </h2>
+            <p style={{ color: 'var(--t2)' }}>
+              Tools like Glean charge $5,000/month minimum and require an IT department to set up. 
+              We built the same power for businesses that actually need to watch their costs.
+            </p>
+          </div>
+          <div ref={reveal} className="mx-auto" style={{ maxWidth: 800 }}>
+            <div className="rounded-2xl overflow-hidden" style={{ border: '1px solid var(--border)' }}>
+              <div className="grid grid-cols-2 divide-x" style={{ borderColor: 'var(--border)' }}>
+                <div className="p-6 text-center" style={{ background: 'var(--s1)' }}>
+                  <div className="text-sm font-bold mb-4" style={{ color: 'var(--t2)' }}>Enterprise AI (e.g. Glean)</div>
+                </div>
+                <div className="p-6 text-center" style={{ background: 'var(--s1)' }}>
+                  <div className="text-sm font-bold mb-4" style={{ color: 'var(--accent)' }}>NexAgent ✦</div>
+                </div>
+              </div>
+              {COMPARISON.map((item, i) => (
+                <div key={i} className="grid grid-cols-2 divide-x" style={{ borderColor: 'var(--border)', background: i % 2 === 0 ? 'transparent' : 'var(--s1)' }}>
+                  <div className="p-4 text-sm" style={{ color: 'var(--t2)' }}>
+                    <span style={{ color: '#ef4444' }}>✗</span> {item.them}
+                  </div>
+                  <div className="p-4 text-sm" style={{ color: 'var(--text)' }}>
+                    <span style={{ color: '#10b981' }}>✓</span> {item.us}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
         {/* PRICING */}
         <section id="pricing" className="px-6 pb-32">
           <div ref={reveal} className="text-center mb-16">
@@ -239,6 +358,11 @@ export default function Home() {
               </div>
             ))}
           </div>
+          <p style={{ textAlign: 'center', marginTop: 24, fontSize: 13, color: 'var(--t3)', lineHeight: 1.7 }}>
+            All plans include a free 30-min strategy call · 
+            No hidden setup fees · API costs included in 
+            monthly plans · Cancel anytime
+          </p>
         </section>
 
         {/* CTA */}

@@ -120,9 +120,19 @@ export default function Waitlist() {
             
             {/* Subtext */}
             <p className="text-center mb-6 leading-relaxed" style={{ color: 'var(--t2)' }}>
-              We're onboarding businesses one by one to make sure every agent is built right. 
-              Join the waitlist and we'll reach out within 48 hours.
+              We're onboarding businesses one by one — no IT department needed, live in 3 days. 
+              Join the waitlist and we'll reach out within 48 hours with a custom demo built for your specific business.
             </p>
+
+            {/* Trust strip */}
+            <div className="flex justify-center gap-3 mb-8">
+              {['⚡ Setup in 3 days', '💰 From $299/month', '🔒 No technical knowledge needed'].map(item => (
+                <span key={item} className="text-xs px-3 py-1.5 rounded-full font-medium"
+                  style={{ background: 'rgba(107,92,231,0.1)', color: 'var(--accent)', border: '1px solid rgba(107,92,231,0.2)' }}>
+                  {item}
+                </span>
+              ))}
+            </div>
 
             {/* Social proof */}
             <div className="text-center mb-8 text-sm" style={{ color: 'var(--t2)' }}>
