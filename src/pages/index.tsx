@@ -3,6 +3,14 @@ import Head from 'next/head'
 import Link from 'next/link'
 import { useEffect, useRef } from 'react'
 import Icon from '@/components/Icon'
+import ParticleField from '@/components/ParticleField'
+
+const TICKER_ITEMS = [
+  'E-commerce Support', 'Legal Intake', 'EdTech Onboarding',
+  'Hospitality Concierge', 'Lead Capture', 'Cart Recovery',
+  'Returns Automation', 'Sentiment Analysis', '24/7 Coverage',
+  '3-Day Setup',
+]
 
 const SERVICES = [
   { icon: 'store', title: 'E-commerce Support Agent', desc: 'Handles orders, returns, FAQs, and captures leads 24/7 without human touch.', features: ['Order tracking & shipping FAQ', 'Automated returns flow', 'Lead capture (email/SMS)', 'Cart abandonment recovery', 'Action-driven — resolves tickets end to end', 'No IT setup required'], featured: true },
@@ -201,36 +209,376 @@ export default function Home() {
 
       <main className="relative z-10">
         {/* HERO */}
-        <section className="min-h-screen flex items-center justify-center text-center px-6" style={{ paddingTop: 120, paddingBottom: 80 }}>
-          <div style={{ maxWidth: 860 }}>
-            <div className="inline-flex items-center gap-2 rounded-full text-xs font-bold tracking-wider uppercase mb-9" style={{ background: 'rgba(107,92,231,0.1)', border: '1px solid rgba(107,92,231,0.25)', color: '#c4baff', padding: '6px 16px', animation: 'fadeUp 0.6s ease both' }}>
-              <div className="w-1.5 h-1.5 rounded-full" style={{ background: 'var(--green)', animation: 'pulse 2s infinite' }} />
-              Now accepting Q2 clients
+        <section style={{
+          position: 'relative',
+          background: '#0a0a12',
+          overflow: 'hidden',
+          paddingTop: 64,
+        }}>
+          <ParticleField />
+
+          {/* Grid overlay */}
+          <div style={{
+            position: 'absolute', inset: 0,
+            backgroundImage: 'linear-gradient(rgba(99,102,241,0.05) 1px,transparent 1px),linear-gradient(90deg,rgba(99,102,241,0.05) 1px,transparent 1px)',
+            backgroundSize: '60px 60px',
+            pointerEvents: 'none',
+          }} />
+
+          {/* Hero body */}
+          <div className="hero-body" style={{
+            position: 'relative', zIndex: 1,
+            maxWidth: 1200, margin: '0 auto',
+            padding: '80px 24px 100px',
+            display: 'grid',
+            gridTemplateColumns: '1fr',
+            gap: 48,
+            alignItems: 'center',
+          }}>
+
+            {/* LEFT — copy */}
+            <div className="hero-copy" style={{ textAlign: 'center' }}>
+              {/* Badge */}
+              <div style={{
+                display: 'inline-flex', alignItems: 'center', gap: 8,
+                border: '0.5px solid rgba(99,102,241,0.35)',
+                background: 'rgba(99,102,241,0.08)',
+                color: '#a5b4fc',
+                fontSize: 11, fontWeight: 700,
+                letterSpacing: '0.12em', textTransform: 'uppercase',
+                padding: '5px 13px', borderRadius: 100,
+                marginBottom: 28,
+              }}>
+                <div style={{
+                  width: 5, height: 5, background: '#4ade80',
+                  borderRadius: '50%', animation: 'pulse 2s infinite'
+                }} />
+                Now accepting clients
+              </div>
+
+              {/* H1 */}
+              <h1 style={{
+                fontFamily: "'Playfair Display', serif",
+                fontSize: 'clamp(32px, 6vw, 48px)',
+                lineHeight: 1.05,
+                letterSpacing: -1.5,
+                color: '#fff',
+                marginBottom: 20,
+              }}>
+                AI agents that<br />
+                handle your{' '}
+                <em style={{ fontStyle: 'italic', color: '#a5b4fc' }}>support,</em>
+                <br />
+                <span style={{ color: 'rgba(255,255,255,0.2)' }}>end to end.</span>
+              </h1>
+
+              {/* Sub */}
+              <p style={{
+                fontSize: 15, color: 'rgba(255,255,255,0.45)',
+                lineHeight: 1.75, maxWidth: 380,
+                margin: '0 auto 36px', fontWeight: 400,
+              }}>
+                Custom AI agents for e-commerce and education
+                businesses. Deployed in 3 days, from $299/month.
+                No IT team required.
+              </p>
+
+              {/* Buttons */}
+              <div className="hero-buttons" style={{ display: 'flex', gap: 12, marginBottom: 44, flexWrap: 'wrap', justifyContent: 'center' }}>
+                <Link href="/demo" style={{
+                  padding: '13px 28px', borderRadius: 10,
+                  background: '#6366f1', color: '#fff',
+                  fontSize: 14, fontWeight: 700,
+                  textDecoration: 'none',
+                  display: 'inline-flex', alignItems: 'center', gap: 8,
+                  transition: 'all 0.2s',
+                }}>
+                  Try live demo →
+                </Link>
+                <Link href="#pricing" style={{
+                  padding: '13px 28px', borderRadius: 10,
+                  border: '0.5px solid rgba(255,255,255,0.15)',
+                  background: 'transparent', color: 'rgba(255,255,255,0.75)',
+                  fontSize: 14, fontWeight: 600,
+                  textDecoration: 'none',
+                }}>
+                  View pricing
+                </Link>
+              </div>
+
+              {/* Stats */}
+              <div className="hero-stats" style={{ display: 'flex', gap: 20, justifyContent: 'center', flexWrap: 'wrap' }}>
+                {[
+                  { val: '94%', label: 'Resolution rate', color: '#4ade80' },
+                  { val: '3 days', label: 'To go live', color: '#fff' },
+                  { val: '$299', label: 'Starting price', color: '#a5b4fc' },
+                ].map(s => (
+                  <div key={s.label} style={{
+                    borderLeft: '1.5px solid rgba(99,102,241,0.3)',
+                    paddingLeft: 12,
+                  }}>
+                    <div style={{
+                      fontFamily: "'Playfair Display', serif",
+                      fontSize: 22, color: s.color,
+                      lineHeight: 1, marginBottom: 4,
+                    }}>{s.val}</div>
+                    <div style={{
+                      fontSize: 10, color: 'rgba(255,255,255,0.35)',
+                      fontWeight: 500, letterSpacing: '0.04em',
+                    }}>{s.label}</div>
+                  </div>
+                ))}
+              </div>
             </div>
-            <h1 className="font-serif leading-none mb-6" style={{ fontSize: 'clamp(52px,7vw,88px)', letterSpacing: -2, animation: 'fadeUp 0.6s 0.1s ease both' }}>
-              AI agents that<br />run your <em style={{ fontStyle: 'italic', color: '#c4baff' }}>support,</em><br />
-              <span style={{ color: 'var(--t3)' }}>while you sleep.</span>
-            </h1>
-            <p className="text-lg mb-12 mx-auto" style={{ color: 'var(--t2)', maxWidth: 540, lineHeight: 1.7, animation: 'fadeUp 0.6s 0.2s ease both' }}>
-              We build, deploy, and maintain custom AI agents for e-commerce and education businesses — cutting support costs by 60% and capturing leads 24/7.
-            </p>
-            <div className="flex items-center justify-center gap-4 flex-wrap mb-16" style={{ animation: 'fadeUp 0.6s 0.3s ease both' }}>
-              <Btn href="/demo" primary>↗ Try Live Demo</Btn>
-              <Btn href="#pricing">View Pricing</Btn>
+
+            {/* RIGHT — chat card */}
+            <div className="hero-chat" style={{ position: 'relative', maxWidth: 500, margin: '0 auto' }}>
+
+              {/* Float badge top right */}
+              <div style={{
+                position: 'absolute', top: -16, right: -16,
+                background: 'rgba(10,10,18,0.95)',
+                border: '0.5px solid rgba(99,102,241,0.4)',
+                borderRadius: 12, padding: '10px 14px',
+                backdropFilter: 'blur(10px)', zIndex: 2,
+              }}>
+                <div style={{
+                  fontFamily: "'Playfair Display', serif",
+                  fontSize: 22, color: '#4ade80', lineHeight: 1, marginBottom: 2
+                }}>+41</div>
+                <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', fontWeight: 500 }}>
+                  Leads this week
+                </div>
+              </div>
+
+              {/* Chat card */}
+              <div style={{
+                background: 'rgba(255,255,255,0.03)',
+                border: '0.5px solid rgba(255,255,255,0.1)',
+                borderRadius: 20, overflow: 'hidden',
+                backdropFilter: 'blur(20px)',
+              }}>
+                {/* Header */}
+                <div style={{
+                  padding: '16px 20px',
+                  borderBottom: '0.5px solid rgba(255,255,255,0.07)',
+                  display: 'flex', alignItems: 'center', gap: 12,
+                  background: 'rgba(255,255,255,0.02)',
+                }}>
+                  <div style={{
+                    width: 36, height: 36, borderRadius: 10,
+                    background: 'linear-gradient(135deg,#6366f1,#8b5cf6)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    flexShrink: 0,
+                  }}>
+                    <Icon name="robot" size={16} style={{ color: '#fff' }} />
+                  </div>
+                  <div>
+                    <div style={{ fontSize: 13.5, fontWeight: 700, color: '#fff', marginBottom: 2 }}>
+                      Aria — Support Agent
+                    </div>
+                    <div style={{ fontSize: 11, color: '#4ade80', display: 'flex', alignItems: 'center', gap: 4, fontWeight: 500 }}>
+                      <div style={{ width: 5, height: 5, background: '#4ade80', borderRadius: '50%', animation: 'pulse 2s infinite' }} />
+                      Online · &lt;1s response
+                    </div>
+                  </div>
+                </div>
+
+                {/* Store tabs */}
+                <div style={{
+                  display: 'flex', gap: 4, padding: '10px 16px',
+                  borderBottom: '0.5px solid rgba(255,255,255,0.07)',
+                  overflowX: 'auto',
+                }}>
+                  {['Nova Apparel','TechVault','Lumière','Crust & Co.'].map((s, i) => (
+                    <div key={s} style={{
+                      padding: '5px 12px', borderRadius: 7,
+                      fontSize: 11.5, fontWeight: 600,
+                      cursor: 'pointer', whiteSpace: 'nowrap',
+                      color: i === 0 ? '#a5b4fc' : 'rgba(255,255,255,0.3)',
+                      background: i === 0 ? 'rgba(99,102,241,0.15)' : 'transparent',
+                      border: `0.5px solid ${i === 0 ? 'rgba(99,102,241,0.3)' : 'transparent'}`,
+                    }}>{s}</div>
+                  ))}
+                </div>
+
+                {/* Messages - 3 sample messages */}
+                <div style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 10, minHeight: 160 }}>
+                  {[
+                    { role: 'ai', text: "Hey! I'm Aria, Nova Apparel's assistant. How can I help?" },
+                    { role: 'user', text: 'Where is my order? I placed it 3 days ago.' },
+                    { role: 'ai', text: 'Standard orders take **3–5 business days**. Track at nova-apparel.com/track — need anything else?' },
+                  ].map((m, i) => (
+                    <div key={i} style={{
+                      display: 'flex', gap: 8, alignItems: 'flex-start',
+                      flexDirection: m.role === 'user' ? 'row-reverse' : 'row',
+                    }}>
+                      <div style={{
+                        width: 26, height: 26, borderRadius: 7,
+                        background: m.role === 'ai'
+                          ? 'linear-gradient(135deg,#6366f1,#8b5cf6)'
+                          : 'rgba(255,255,255,0.08)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        flexShrink: 0, fontSize: 11, fontWeight: 700,
+                        color: m.role === 'ai' ? '#fff' : 'rgba(255,255,255,0.4)',
+                        border: m.role === 'user' ? '0.5px solid rgba(255,255,255,0.1)' : 'none',
+                      }}>
+                        {m.role === 'ai' ? 'A' : 'U'}
+                      </div>
+                      <div style={{
+                        padding: '9px 13px', borderRadius: 12, maxWidth: '78%',
+                        fontSize: 12.5, lineHeight: 1.6,
+                        ...(m.role === 'ai'
+                          ? { background: 'rgba(255,255,255,0.05)', border: '0.5px solid rgba(255,255,255,0.08)', borderTopLeftRadius: 3, color: 'rgba(255,255,255,0.85)' }
+                          : { background: '#6366f1', borderTopRightRadius: 3, color: '#fff' }
+                        )
+                      }} dangerouslySetInnerHTML={{ __html: m.text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') }} />
+                    </div>
+                  ))}
+                </div>
+
+                {/* Metrics bar */}
+                <div style={{
+                  display: 'grid', gridTemplateColumns: 'repeat(4,1fr)',
+                  borderTop: '0.5px solid rgba(255,255,255,0.07)',
+                }}>
+                  {[
+                    { val: '94%', label: 'Resolved', color: '#4ade80' },
+                    { val: '1.1s', label: 'Response', color: '#fff' },
+                    { val: '24/7', label: 'Always on', color: '#a5b4fc' },
+                    { val: '3.2×', label: 'Avg ROI', color: '#fff' },
+                  ].map((m, i) => (
+                    <div key={m.label} style={{
+                      padding: '10px 8px', textAlign: 'center',
+                      borderLeft: i > 0 ? '0.5px solid rgba(255,255,255,0.07)' : 'none',
+                    }}>
+                      <div style={{
+                        fontFamily: "'Playfair Display', serif",
+                        fontSize: 18, color: m.color, lineHeight: 1, marginBottom: 2,
+                      }}>{m.val}</div>
+                      <div style={{ fontSize: 9.5, color: 'rgba(255,255,255,0.3)', fontWeight: 500, letterSpacing: '0.04em' }}>
+                        {m.label}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Input */}
+                <div style={{
+                  padding: '10px 14px',
+                  borderTop: '0.5px solid rgba(255,255,255,0.07)',
+                  display: 'flex', gap: 8, alignItems: 'center',
+                  background: 'rgba(255,255,255,0.02)',
+                }}>
+                  <input
+                    placeholder="Ask about orders, products, returns…"
+                    style={{
+                      flex: 1, background: 'rgba(255,255,255,0.05)',
+                      border: '0.5px solid rgba(255,255,255,0.1)',
+                      borderRadius: 8, padding: '8px 12px',
+                      fontSize: 12, color: 'rgba(255,255,255,0.6)',
+                      outline: 'none', fontFamily: 'inherit',
+                    }}
+                  />
+                  <div style={{
+                    width: 32, height: 32, background: '#6366f1',
+                    borderRadius: 8, display: 'flex',
+                    alignItems: 'center', justifyContent: 'center',
+                    cursor: 'pointer', flexShrink: 0,
+                  }}>
+                    <Icon name="arrow-right" size={13} style={{ color: '#fff' }} />
+                  </div>
+                </div>
+              </div>
+
+              {/* Float badge bottom left */}
+              <div style={{
+                position: 'absolute', bottom: -16, left: -16,
+                background: 'rgba(10,10,18,0.95)',
+                border: '0.5px solid rgba(99,102,241,0.4)',
+                borderRadius: 12, padding: '10px 14px',
+                backdropFilter: 'blur(10px)', zIndex: 2,
+              }}>
+                <div style={{
+                  fontFamily: "'Playfair Display', serif",
+                  fontSize: 22, color: '#a5b4fc', lineHeight: 1, marginBottom: 2
+                }}>3 days</div>
+                <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', fontWeight: 500 }}>
+                  Average setup time
+                </div>
+              </div>
             </div>
-            <div className="flex items-center justify-center gap-8 flex-wrap text-sm" style={{ color: 'var(--t2)', animation: 'fadeUp 0.6s 0.4s ease both' }}>
-              {[
-                <><Icon name="zap" size={14} /> Live in 3 days — we handle setup</>,
-                <><Icon name="target" size={14} /> 94% ticket resolution rate</>,
-                <><Icon name="bar-chart" size={14} /> From $299/month</>,
-                <><Icon name="lock" size={14} /> No IT department needed</>,
-                <><Icon name="users" size={14} /> Works for teams of 2 or 200</>,
-                <><Icon name="bar-chart" size={14} /> Self-serve demo — no signup needed</>
-              ].map((item, i) => (
-                <span key={i}>{item}</span>
+          </div>
+
+          {/* Ticker */}
+          <div style={{
+            borderTop: '0.5px solid rgba(255,255,255,0.06)',
+            borderBottom: '0.5px solid rgba(255,255,255,0.06)',
+            padding: '14px 0', overflow: 'hidden',
+            background: 'rgba(255,255,255,0.01)',
+            position: 'relative', zIndex: 1,
+          }}>
+            <div style={{
+              display: 'flex', gap: 56,
+              animation: 'tick 30s linear infinite',
+              whiteSpace: 'nowrap',
+            }}>
+              {[...TICKER_ITEMS, ...TICKER_ITEMS, ...TICKER_ITEMS].map((item, i) => (
+                <div key={i} style={{
+                  display: 'flex', alignItems: 'center', gap: 10,
+                  fontSize: 11.5, fontWeight: 600,
+                  letterSpacing: '0.1em', textTransform: 'uppercase',
+                  color: 'rgba(255,255,255,0.18)',
+                }}>
+                  <div style={{ width: 3, height: 3, background: 'rgba(99,102,241,0.6)', borderRadius: '50%' }} />
+                  {item}
+                </div>
               ))}
             </div>
           </div>
+
+          <style>{`
+            @keyframes tick { from{transform:translateX(0)} to{transform:translateX(-33.33%)} }
+            @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+            @media (min-width: 768px) {
+              .hero-body {
+                padding: 80px 48px 100px !important;
+                grid-template-columns: 1fr 1fr !important;
+                gap: 64px !important;
+              }
+              .hero-copy {
+                text-align: left !important;
+              }
+              .hero-copy h1 {
+                font-size: clamp(40px, 4.5vw, 60px) !important;
+              }
+              .hero-copy p {
+                maxWidth: 420px !important;
+                margin: 0 0 36px !important;
+                fontSize: 16px !important;
+              }
+              .hero-buttons {
+                justify-content: flex-start !important;
+              }
+              .hero-stats {
+                justify-content: flex-start !important;
+                gap: 28px !important;
+              }
+              .hero-stats div {
+                paddingLeft: 16px !important;
+              }
+              .hero-stats div div:first-child {
+                fontSize: 26px !important;
+              }
+              .hero-stats div div:last-child {
+                fontSize: 11px !important;
+              }
+              .hero-chat {
+                maxWidth: none !important;
+                margin: 0 !important;
+              }
+            }
+          `}</style>
         </section>
 
         {/* HOW IT WORKS */}
