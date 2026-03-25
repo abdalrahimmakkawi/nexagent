@@ -4,12 +4,13 @@ import Head from 'next/head'
 import Link from 'next/link'
 import ChatWidget from '@/components/ChatWidget'
 import { getAllStores, StoreConfig } from '@/lib/store-configs'
+import Icon from '@/components/Icon'
 
 const WELCOME: Record<string, string> = {
-  fashion: "👋 Hey! I'm Aria, Nova Apparel's support assistant. I can help with orders, returns, sizing, or finding your next favourite outfit.",
-  electronics: "👋 Hi! I'm Nex from TechVault. Looking for a product recommendation, tracking an order, or need tech support?",
-  beauty: "✨ Welcome to Lumière! I'm Belle, your personal beauty advisor. Skincare advice or order help — I'm here.",
-  food: "🍕 Ciao! I'm Marco, your Crust & Co. concierge. Ready to order, check the menu, or plan a group feast?",
+  fashion: "Hey! I'm Aria, Nova Apparel's support assistant. I can help with orders, returns, sizing, or finding your next favourite outfit.",
+  electronics: "Hi! I'm Nex from TechVault. Looking for a product recommendation, tracking an order, or need tech support?",
+  beauty: "Welcome to Lumière! I'm Belle, your personal beauty advisor. Skincare advice or order help — I'm here.",
+  food: "Ciao! I'm Marco, your Crust & Co. concierge. Ready to order, check the menu, or plan a group feast?",
 }
 
 const METRICS = [
@@ -20,11 +21,11 @@ const METRICS = [
 ]
 
 const CAPS = [
-  { icon: '🎯', name: 'Lead Capture', badge: 'ON', type: 'on' },
-  { icon: '📦', name: 'Order & Shipping FAQ', badge: 'ON', type: 'on' },
-  { icon: '🔄', name: 'Returns & Refunds', badge: 'ON', type: 'on' },
-  { icon: '🛒', name: 'Cart Recovery', badge: 'PRO', type: 'pro' },
-  { icon: '📊', name: 'Sentiment Analysis', badge: 'PRO', type: 'pro' },
+  { icon: 'target', name: 'Lead Capture', badge: 'ON', type: 'on' },
+  { icon: 'store', name: 'Order & Shipping FAQ', badge: 'ON', type: 'on' },
+  { icon: 'refresh', name: 'Returns & Refunds', badge: 'ON', type: 'on' },
+  { icon: 'store', name: 'Cart Recovery', badge: 'PRO', type: 'pro' },
+  { icon: 'bar-chart', name: 'Sentiment Analysis', badge: 'PRO', type: 'pro' },
 ]
 
 export default function DemoPage() {
@@ -93,7 +94,7 @@ export default function DemoPage() {
               <div className="text-[10px] font-bold tracking-widest uppercase mb-3" style={{ color: 'var(--t3)' }}>Agent</div>
               <div className="flex items-center gap-3 p-3 rounded-xl" style={{ background: 'var(--s2)', border: '1px solid var(--border)' }}>
                 <div className="w-10 h-10 rounded-xl flex items-center justify-center text-lg flex-shrink-0"
-                  style={{ background: 'linear-gradient(135deg,var(--accent),#a78bfa)' }}>🤖</div>
+                  style={{ background: 'linear-gradient(135deg,var(--accent),#a78bfa)' }}><Icon name="robot" size={20} style={{color: 'white'}} /></div>
                 <div>
                   <div className="font-bold text-sm">{activeStore.agentName}</div>
                   <div className="flex items-center gap-1 text-[11px]" style={{ color: 'var(--green)' }}>
@@ -134,7 +135,7 @@ export default function DemoPage() {
               <div className="flex flex-col gap-1.5">
                 {CAPS.map(c => (
                   <div key={c.name} className="flex items-center gap-2.5 px-3 py-2 rounded-lg" style={{ background: 'var(--s2)', border: '1px solid var(--border)' }}>
-                    <span className="text-sm">{c.icon}</span>
+                    <Icon name={c.icon as any} size={14} />
                     <span className="text-xs font-medium flex-1">{c.name}</span>
                     <span className="text-[9px] font-bold px-1.5 py-0.5 rounded"
                       style={c.type === 'on'

@@ -2,18 +2,19 @@
 import Head from 'next/head'
 import Link from 'next/link'
 import { useEffect, useRef } from 'react'
+import Icon from '@/components/Icon'
 
 const SERVICES = [
-  { icon: '🛍️', title: 'E-commerce Support Agent', desc: 'Handles orders, returns, FAQs, and captures leads 24/7 without human touch.', features: ['Order tracking & shipping FAQ', 'Automated returns flow', 'Lead capture (email/SMS)', 'Cart abandonment recovery', 'Action-driven — resolves tickets end to end', 'No IT setup required'], featured: true },
-  { icon: '🎓', title: 'EdTech Onboarding Agent', desc: 'Guide students from first click to enrolled — answering questions and personalizing the journey.', features: ['Student intake & qualification', 'Course & pricing FAQ', 'Personalised recommendations', 'Progress check-ins', 'Works for 2-person teams or 10,000 students'] },
-  { icon: '⚖️', title: 'Legal Intake Agent', desc: 'Qualify leads 24/7, handle intake forms, book consultations automatically.', features: ['Case type qualification', 'Appointment scheduling', 'Document request automation', 'GDPR compliant', 'Live in 3 days — no technical knowledge needed'] },
-  { icon: '🏨', title: 'Hospitality Concierge', desc: 'A 24/7 digital concierge handling reservations, guest FAQ, and upsells.', features: ['Reservation management', 'Menu & availability FAQ', 'Automated review requests', 'Multi-language support', 'Self-serve demo available for your team'] },
+  { icon: 'store', title: 'E-commerce Support Agent', desc: 'Handles orders, returns, FAQs, and captures leads 24/7 without human touch.', features: ['Order tracking & shipping FAQ', 'Automated returns flow', 'Lead capture (email/SMS)', 'Cart abandonment recovery', 'Action-driven — resolves tickets end to end', 'No IT setup required'], featured: true },
+  { icon: 'users', title: 'EdTech Onboarding Agent', desc: 'Guide students from first click to enrolled — answering questions and personalizing the journey.', features: ['Student intake & qualification', 'Course & pricing FAQ', 'Personalised recommendations', 'Progress check-ins', 'Works for 2-person teams or 10,000 students'] },
+  { icon: 'shield', title: 'Legal Intake Agent', desc: 'Qualify leads 24/7, handle intake forms, book consultations automatically.', features: ['Case type qualification', 'Appointment scheduling', 'Document request automation', 'GDPR compliant', 'Live in 3 days — no technical knowledge needed'] },
+  { icon: 'star', title: 'Hospitality Concierge', desc: 'A 24/7 digital concierge handling reservations, guest FAQ, and upsells.', features: ['Reservation management', 'Menu & availability FAQ', 'Automated review requests', 'Multi-language support', 'Self-serve demo available for your team'] },
 ]
 
 const STEPS = [
-  { num: '01', icon: '🔍', title: '30-min strategy call', desc: 'We map your top support tickets, lead funnel, and business goals. No technical knowledge needed.', tag: 'Day 1' },
-  { num: '02', icon: '⚙️', title: 'Agent design & training', desc: 'We build your agent, train it on your brand voice and policies. You review before launch.', tag: 'Days 2–4' },
-  { num: '03', icon: '🚀', title: 'Deploy & monitor', desc: 'Your agent goes live on your site. We monitor, tune, and send weekly performance reports.', tag: 'Day 5+' },
+  { num: '01', icon: 'target', title: '30-min strategy call', desc: 'We map your top support tickets, lead funnel, and business goals. No technical knowledge needed.', tag: 'Day 1' },
+  { num: '02', icon: 'refresh', title: 'Agent design & training', desc: 'We build your agent, train it on your brand voice and policies. You review before launch.', tag: 'Days 2–4' },
+  { num: '03', icon: 'zap', title: 'Deploy & monitor', desc: 'Your agent goes live on your site. We monitor, tune, and send weekly performance reports.', tag: 'Day 5+' },
 ]
 
 const RESULTS = [
@@ -218,8 +219,15 @@ export default function Home() {
               <Btn href="#pricing">View Pricing</Btn>
             </div>
             <div className="flex items-center justify-center gap-8 flex-wrap text-sm" style={{ color: 'var(--t2)', animation: 'fadeUp 0.6s 0.4s ease both' }}>
-              {['⚡ Live in 3 days — we handle setup', '🎯 94% ticket resolution rate', '💰 From $299/month', '🔒 No IT department needed', '👥 Works for teams of 2 or 200', '� Self-serve demo — no signup needed'].map(s => (
-                <span key={s}>{s}</span>
+              {[
+                <><Icon name="zap" size={14} /> Live in 3 days — we handle setup</>,
+                <><Icon name="target" size={14} /> 94% ticket resolution rate</>,
+                <><Icon name="bar-chart" size={14} /> From $299/month</>,
+                <><Icon name="lock" size={14} /> No IT department needed</>,
+                <><Icon name="users" size={14} /> Works for teams of 2 or 200</>,
+                <><Icon name="bar-chart" size={14} /> Self-serve demo — no signup needed</>
+              ].map((item, i) => (
+                <span key={i}>{item}</span>
               ))}
             </div>
           </div>
@@ -238,7 +246,7 @@ export default function Home() {
                 onMouseOver={e => (e.currentTarget.style.background = 'var(--s2)')}
                 onMouseOut={e => (e.currentTarget.style.background = 'var(--s1)')}>
                 <div className="text-xs font-mono mb-4" style={{ color: 'var(--accent2)', letterSpacing: '0.1em' }}>{s.num} / {s.title.split(' ')[0]}</div>
-                <div className="text-3xl mb-4">{s.icon}</div>
+                <div className="text-3xl mb-4"><Icon name={s.icon as any} size={28} /></div>
                 <div className="font-bold text-base mb-2.5">{s.title}</div>
                 <div className="text-sm mb-4 leading-relaxed" style={{ color: 'var(--t2)' }}>{s.desc}</div>
                 <span className="text-xs font-bold px-2.5 py-1 rounded-md" style={{ background: 'rgba(107,92,231,0.1)', border: '1px solid rgba(107,92,231,0.2)', color: '#c4baff' }}>{s.tag}</span>
@@ -258,7 +266,7 @@ export default function Home() {
               <div key={s.title} className="relative rounded-2xl p-9 transition-all"
                 style={{ background: s.featured ? 'linear-gradient(135deg,rgba(107,92,231,0.1),rgba(107,92,231,0.03))' : 'var(--s1)', border: `1px solid ${s.featured ? 'rgba(107,92,231,0.3)' : 'var(--border)'}` }}>
                 {s.featured && <span className="absolute top-6 right-6 text-[10px] font-bold px-2.5 py-1 rounded-md text-white" style={{ background: 'var(--accent)' }}>Most Popular</span>}
-                <div className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl mb-5" style={{ background: 'var(--s3)' }}>{s.icon}</div>
+                <div className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl mb-5" style={{ background: 'var(--s3)' }}><Icon name={s.icon as any} size={24} /></div>
                 <h3 className="text-xl font-bold mb-2.5" style={{ letterSpacing: -0.3 }}>{s.title}</h3>
                 <p className="text-sm leading-relaxed mb-5" style={{ color: 'var(--t2)' }}>{s.desc}</p>
                 <div className="flex flex-col gap-2">
@@ -345,7 +353,7 @@ export default function Home() {
                 <div className="flex flex-col gap-2.5 mb-7">
                   {p.features.map(f => (
                     <div key={f} className="flex items-start gap-2.5 text-sm" style={{ color: 'var(--t2)' }}>
-                      <span style={{ color: 'var(--green)', marginTop: 1 }}>✓</span>{f}
+                      <Icon name="check" size={13} style={{color: 'var(--green)', marginTop: 1}} />{f}
                     </div>
                   ))}
                 </div>
@@ -387,7 +395,7 @@ export default function Home() {
       {/* FOOTER */}
       <footer className="relative z-10 flex items-center justify-between px-10 py-8" style={{ borderTop: '1px solid var(--border)' }}>
         <div className="flex items-center gap-2 font-bold text-sm">
-          <div className="w-6 h-6 rounded-lg flex items-center justify-center text-xs" style={{ background: 'linear-gradient(135deg,var(--accent),#a78bfa)' }}>🤖</div>
+          <div className="w-6 h-6 rounded-lg flex items-center justify-center text-xs" style={{ background: 'linear-gradient(135deg,var(--accent),#a78bfa)' }}><Icon name="robot" size={12} style={{color: 'white'}} /></div>
           NexAgent
         </div>
         <div className="flex gap-6">

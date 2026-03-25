@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import Head from 'next/head'
 import Link from 'next/link'
+import Icon from '@/components/Icon'
 
 export default function Waitlist() {
   const [email, setEmail] = useState('')
@@ -65,7 +66,7 @@ export default function Waitlist() {
         <div className="min-h-screen flex items-center justify-center px-6" style={{ background: 'var(--bg)' }}>
           <div className="w-full max-w-md text-center">
             <div className="w-16 h-16 rounded-xl flex items-center justify-center text-3xl mx-auto mb-6"
-              style={{ background: 'linear-gradient(135deg,#10b981,#059669)' }}>✓</div>
+              style={{ background: 'linear-gradient(135deg,#10b981,#059669)' }}><Icon name="check" size={32} style={{color: 'white'}} /></div>
             
             <h1 className="text-3xl font-bold mb-4" style={{ fontFamily: 'Instrument Serif, serif' }}>
               You're #{position} on the waitlist!
@@ -126,8 +127,12 @@ export default function Waitlist() {
 
             {/* Trust strip */}
             <div className="flex justify-center gap-3 mb-8">
-              {['⚡ Setup in 3 days', '💰 From $299/month', '🔒 No technical knowledge needed'].map(item => (
-                <span key={item} className="text-xs px-3 py-1.5 rounded-full font-medium"
+              {[
+                <><Icon name="zap" size={14} /> Setup in 3 days</>,
+                <><Icon name="bar-chart" size={14} /> From $299/month</>,
+                <><Icon name="lock" size={14} /> No technical knowledge needed</>
+              ].map((item, i) => (
+                <span key={i} className="text-xs px-3 py-1.5 rounded-full font-medium"
                   style={{ background: 'rgba(107,92,231,0.1)', color: 'var(--accent)', border: '1px solid rgba(107,92,231,0.2)' }}>
                   {item}
                 </span>
@@ -136,7 +141,7 @@ export default function Waitlist() {
 
             {/* Social proof */}
             <div className="text-center mb-8 text-sm" style={{ color: 'var(--t2)' }}>
-              ⚡ 24 businesses already waiting
+              <Icon name="zap" size={14} /> 24 businesses already waiting
             </div>
 
             {/* Form */}
