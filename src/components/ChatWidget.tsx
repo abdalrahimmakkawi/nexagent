@@ -67,13 +67,29 @@ export default function ChatWidget({ store, welcomeMessage }: Props) {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend() }
   }
 
-  function captureLead() {
+  async function captureLead() {
     const isEmail = store.leadField === 'email'
     if (!leadValue || (isEmail && !leadValue.includes('@'))) return
+
     setLeadCaptured(true)
     setShowLead(false)
-    // In production: POST to /api/leads with leadValue, storeId, timestamp
-    console.log('[Lead captured]', { store: store.id, field: store.leadField, value: leadValue })
+
+    // Save lead via API (also fires n8n webhook)
+    try {
+      await fetch('/api/leads', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          value: leadValue,
+          fieldType: store.leadField,
+          storeId: store.id,
+          storeName: store.name,
+        }),
+      })
+    } catch (err) {
+      console.error('Lead capture failed:', err)
+      // Silent fail — UX already updated
+    }
   }
 
   const allMessages = [

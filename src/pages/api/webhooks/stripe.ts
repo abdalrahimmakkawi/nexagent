@@ -1,6 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next'
 import Stripe from 'stripe'
 import { supabaseAdmin } from '@/lib/supabase'
+import { fireWebhook } from '@/lib/webhooks'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
 
@@ -58,6 +59,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             console.error('Error updating client plan:', error)
             return res.status(500).json({ error: 'Database update failed' })
           }
+
+          // Fire n8n webhook — non-blocking
+          fireWebhook('webhook/payment-completed', {
+            event: 'payment.completed',
+            clientEmail: session.customer_email || customerEmail || '',
+            plan: session.metadata?.plan || 'growth',
+            amount: session.amount_total ? session.amount_total / 100 : 0,
+            stripeSessionId: session.id,
+            timestamp: new Date().toISOString(),
+          })
 
           console.log(`Activated plan for customer: ${customerEmail}`)
         }

@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { supabaseAdmin } from '@/lib/supabase'
 import { authRateLimiter, getClientIP } from '@/lib/rate-limiter'
+import { fireWebhook } from '@/lib/webhooks'
 
 export default async function handler(
   req: NextApiRequest,
@@ -49,6 +50,17 @@ export default async function handler(
       }
       throw error
     }
+
+    // Fire n8n webhook — non-blocking
+    fireWebhook('webhook/waitlist-signup', {
+      event: 'waitlist.signup',
+      email: email.toLowerCase().trim(),
+      businessName: businessName || '',
+      businessType: businessType || '',
+      message: message || '',
+      position: data.position,
+      timestamp: new Date().toISOString(),
+    })
 
     return res.status(200).json({
       success: true,
