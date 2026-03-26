@@ -10,6 +10,8 @@ export type WebhookEvent =
   | 'waitlist.signup'
   | 'payment.completed'
   | 'weekly.report'
+  | 'agent.generated'
+  | 'agent.approved'
 
 export interface LeadPayload {
   event: 'lead.captured'
@@ -39,10 +41,34 @@ export interface PaymentPayload {
   timestamp: string
 }
 
+export interface AgentGeneratedPayload {
+  event: 'agent.generated'
+  clientId: string
+  businessName: string
+  agentName: string
+  agentId: string
+  businessType: string
+  reviewUrl: string
+  timestamp: string
+}
+
+export interface AgentApprovedPayload {
+  event: 'agent.approved'
+  clientEmail: string
+  clientName: string
+  agentName: string
+  agentId: string
+  widgetUrl: string
+  dashboardUrl: string
+  timestamp: string
+}
+
 export type WebhookPayload = 
   | LeadPayload 
   | WaitlistPayload 
   | PaymentPayload
+  | AgentGeneratedPayload
+  | AgentApprovedPayload
 
 // Fire webhook to n8n — never blocks the main request
 export async function fireWebhook(
