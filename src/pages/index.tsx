@@ -187,7 +187,7 @@ export default function Home() {
           <span className="font-bold text-base text-white">NexAgent</span>
         </Link>
         <div className="hidden md:flex items-center gap-8">
-          {['#how', '#services', '#results', '#pricing'].map(h => (
+          {['#how', '#services', '#results', '#pricing', '#feedback'].map(h => (
             <a key={h} href={h} className="text-sm no-underline transition-colors" style={{ color: 'var(--t2)' }}
               onMouseOver={e => (e.currentTarget.style.color = 'var(--text)')}
               onMouseOut={e => (e.currentTarget.style.color = 'var(--t2)')}>
@@ -202,7 +202,7 @@ export default function Home() {
         </div>
         <div className="flex items-center gap-3">
           <Btn href="/demo">See Demo</Btn>
-          <Btn href="/login">Login</Btn>
+          {/* <Btn href="/login">Login</Btn> */}
           <Btn href="/waitlist" primary>Get Started →</Btn>
         </div>
       </nav>
@@ -736,6 +736,79 @@ export default function Home() {
               <Btn href="/demo">See the demo first</Btn>
             </div>
             <div className="text-xs" style={{ color: 'var(--t3)' }}>No commitment · Free demo included · Live in under a week</div>
+          </div>
+        </section>
+
+        {/* FEEDBACK */}
+        <section id="feedback" className="px-6 pb-32">
+          <div className="text-center mb-16">
+            <div className="text-xs font-bold tracking-widest uppercase mb-4" style={{ color: 'var(--accent2)' }}>Feedback</div>
+            <h2 className="font-serif mb-4" style={{ fontSize: 'clamp(36px,4vw,54px)', letterSpacing: -1 }}>What do you think?<br /><em style={{ fontStyle: 'italic', color: '#c4baff' }}>Help us improve.</em></h2>
+            <p style={{ color: 'var(--t2)' }}>Your feedback helps us build the perfect AI agent for your business.</p>
+          </div>
+          <div className="max-w-2xl mx-auto">
+            <div className="rounded-2xl p-8" style={{ background: 'var(--s1)', border: '1px solid var(--border)' }}>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div>
+                  <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text)' }}>Name</label>
+                  <input 
+                    type="text" 
+                    placeholder="Your name"
+                    className="w-full px-4 py-3 rounded-lg"
+                    style={{ background: 'var(--s2)', border: '1px solid var(--border)', color: 'var(--text)' }}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text)' }}>Email</label>
+                  <input 
+                    type="email" 
+                    placeholder="your@email.com"
+                    className="w-full px-4 py-3 rounded-lg"
+                    style={{ background: 'var(--s2)', border: '1px solid var(--border)', color: 'var(--text)' }}
+                  />
+                </div>
+              </div>
+              <div className="mb-6">
+                <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text)' }}>What features would you like to see?</label>
+                <textarea 
+                  placeholder="Tell us what would make this product perfect for your business..."
+                  rows={4}
+                  className="w-full px-4 py-3 rounded-lg"
+                  style={{ background: 'var(--s2)', border: '1px solid var(--border)', color: 'var(--text)' }}
+                />
+              </div>
+              <div className="mb-6">
+                <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text)' }}>How likely are you to use NexAgent?</label>
+                <div className="flex gap-3">
+                  {['Very Likely', 'Likely', 'Maybe', 'Unlikely'].map((option) => (
+                    <button
+                      key={option}
+                      className="px-4 py-2 rounded-lg text-sm border transition-all"
+                      style={{ 
+                        background: 'var(--s1)', 
+                        borderColor: 'var(--border)', 
+                        color: 'var(--t2)'
+                      }}
+                      onMouseOver={(e) => {
+                        e.currentTarget.style.background = 'var(--accent)'
+                        e.currentTarget.style.color = 'white'
+                      }}
+                      onMouseOut={(e) => {
+                        e.currentTarget.style.background = 'var(--s1)'
+                        e.currentTarget.style.color = 'var(--t2)'
+                      }}
+                    >
+                      {option}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className="text-center">
+                <button className="px-8 py-3 rounded-lg font-semibold transition-all" style={{ background: 'var(--accent)', color: 'white' }}>
+                  Send Feedback →
+                </button>
+              </div>
+            </div>
           </div>
         </section>
       </main>
