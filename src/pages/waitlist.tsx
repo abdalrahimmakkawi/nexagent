@@ -129,7 +129,7 @@ export default function Waitlist() {
             <div className="flex justify-center gap-3 mb-8">
               {[
                 <><Icon name="zap" size={14} /> Setup in 3 days</>,
-                <><Icon name="bar-chart" size={14} /> From $299/month</>,
+                <><Icon name="bar-chart" size={14} /> From $99/month</>,
                 <><Icon name="lock" size={14} /> No technical knowledge needed</>
               ].map((item, i) => (
                 <span key={i} className="text-xs px-3 py-1.5 rounded-full font-medium"

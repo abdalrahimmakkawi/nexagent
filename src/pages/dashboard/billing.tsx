@@ -27,34 +27,55 @@ export default function BillingPage() {
 
   const plans: Plan[] = [
     {
-      name: 'Starter',
-      price: 29,
+      name: 'Founders Program',
+      price: 199,
       features: [
+        '🚀 Limited to first 10 clients only',
+        '$0 setup fee (normally $299)',
+        'All Growth features included',
+        '6-month commitment required',
+        'Early access to new features',
+        'Case study participation',
+        'Priority support',
+        '3-day deployment guarantee',
+        'Money-back if not live in 3 days'
+      ],
+      highlighted: true
+    },
+    {
+      name: 'Starter',
+      price: 99,
+      features: [
+        'No setup fee',
         'Up to 500 conversations/month',
         'Basic AI agent',
         'Email support',
         'Standard analytics',
-        '1 active agent'
+        '1 active agent',
+        '3-day deployment guarantee'
       ]
     },
     {
-      name: 'Professional',
-      price: 79,
+      name: 'Growth',
+      price: 199,
       features: [
+        '$299 setup fee',
         'Up to 2,000 conversations/month',
         'Advanced AI agent',
         'Priority support',
         'Advanced analytics',
         '3 active agents',
         'Custom branding',
-        'Lead capture'
-      ],
-      highlighted: true
+        'Lead capture',
+        '3-day deployment guarantee',
+        'Custom integrations'
+      ]
     },
     {
-      name: 'Enterprise',
-      price: 199,
+      name: 'Scale',
+      price: 499,
       features: [
+        '$499 setup fee',
         'Unlimited conversations',
         'Custom AI agents',
         '24/7 phone support',
@@ -62,7 +83,8 @@ export default function BillingPage() {
         'Unlimited agents',
         'Custom integrations',
         'Dedicated account manager',
-        'SLA guarantee'
+        'SLA guarantee',
+        '3-day deployment guarantee'
       ]
     }
   ]

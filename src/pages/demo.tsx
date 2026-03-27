@@ -109,7 +109,7 @@ export default function DemoPage() {
             <div className="p-4 border-b" style={{ borderColor: 'var(--border)' }}>
               <div className="text-xs text-center leading-relaxed" style={{ color: 'var(--t2)' }}>
                 Want this agent for your business?<br />
-                Setup in 3 days from $299/month.<br />
+                Setup in 3 days from $99/month.<br />
                 <Link href="/waitlist" className="font-medium hover:underline" style={{ color: 'var(--accent)' }}>
                   Join the waitlist →
                 </Link>

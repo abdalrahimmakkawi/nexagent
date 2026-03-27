@@ -34,50 +34,69 @@ const RESULTS = [
 
 const PRICING = [
   {
-    name: 'Starter',
-    price: '$499',
-    billing: 'one-time setup fee',
-    pop: false,
-    desc: 'Test AI in your business before committing. Full agent, no strings attached.',
+    name: 'Founders Program',
+    price: '$199',
+    billing: '/month · 6-month commitment',
+    pop: true,
+    desc: '🚀 Limited to first 10 clients only. Get all Growth features with $0 setup fee.',
     features: [
-      'Full custom AI agent build',
-      'Up to 3 integrations',
-      '30 days free support',
-      'Handoff documentation',
-      'Free migration to Growth plan',
-      'Setup in 3 days — we handle everything',
+      '$0 setup fee (save $299)',
+      'All Growth features included',
+      'Early access to new features',
+      'Case study participation',
+      'Priority support',
+      '3-day deployment guarantee',
+      'Money-back if not live in 3 days',
+      'Limited to first 10 clients',
+    ],
+  },
+  {
+    name: 'Starter',
+    price: '$99',
+    billing: '/month · cancel anytime',
+    pop: false,
+    desc: 'Perfect for businesses wanting to test AI with no setup risk.',
+    features: [
+      'No setup fee',
+      '1 custom AI agent',
+      'Up to 500 conversations/month',
+      'Email support',
+      'Standard analytics',
+      '3-day deployment guarantee',
     ],
   },
   {
     name: 'Growth',
-    price: '$299',
+    price: '$199',
     billing: '/month · cancel anytime',
-    pop: true,
-    desc: 'For businesses ready to run AI as a permanent part of their operations.',
+    pop: false,
+    desc: 'For businesses ready to scale with AI operations.',
     features: [
-      '1–2 agents built & maintained',
-      'Monthly performance tuning',
-      'Weekly analytics reports',
+      '$299 setup fee',
+      '1–2 custom AI agents',
+      'Up to 2,000 conversations/month',
       'Priority support (<4hr response)',
-      'Unlimited conversations',
+      'Advanced analytics',
       'Lead capture included',
-      'Works for teams of 2 or 200',
+      'Custom branding',
+      '3-day deployment guarantee',
     ],
   },
   {
     name: 'Scale',
-    price: '$799',
+    price: '$499',
     billing: '/month · cancel anytime',
     pop: false,
-    desc: 'Full AI operations suite for businesses that want to automate aggressively.',
+    desc: 'Full AI operations suite for aggressive automation.',
     features: [
+      '$499 setup fee',
       'Up to 5 custom agents',
-      'CRM & tool integrations',
-      'Custom analytics dashboard',
+      'Unlimited conversations',
+      '24/7 phone support',
+      'Custom integrations',
       'Dedicated account manager',
       'SLA guarantee',
-      'White-label option',
-      'Self-serve demo for your clients',
+      '3-day deployment guarantee',
     ],
   },
 ]
@@ -85,19 +104,23 @@ const PRICING = [
 const COMPARISON = [
   {
     them: 'Opaque pricing — "contact sales"',
-    us: 'Transparent pricing from $299/month'
+    us: 'Transparent pricing from $99/month'
   },
   {
     them: 'Requires IT department to deploy',
-    us: 'We set it up for you in 3 days'
+    us: 'Setup in 3 days — no technical knowledge needed'
   },
   {
     them: '$5,000+/month minimum contract',
-    us: 'Starts at $499 one-time or $299/month'
+    us: 'Starts at $99/month with no setup fee'
   },
   {
     them: 'Search-first — still need humans to act',
-    us: 'Action-driven — resolves tickets end to end'
+    us: 'Action-driven — resolves tickets end-to-end'
+  },
+  {
+    them: 'Per-seat pricing gets expensive',
+    us: 'Unlimited conversations, fixed monthly price'
   },
   {
     them: 'Minimum 100 users required',
@@ -116,7 +139,7 @@ const COMPARISON = [
 const FAQS = [
   {
     q: 'How is this different from tools like Glean or Intercom?',
-    a: 'Enterprise tools like Glean start at $5,000/month and require an IT team to deploy. Intercom charges per seat and gets expensive fast. NexAgent is built specifically for small and mid-size businesses — transparent pricing from $299/month, setup in 3 days, and we handle everything for you.'
+    a: 'Enterprise tools like Glean start at $5,000/month and require an IT team to deploy. Intercom charges per seat and gets expensive fast. NexAgent is built specifically for small and mid-size businesses — transparent pricing from $99/month, setup in 3 days, and we handle everything for you.'
   },
   {
     q: 'How long does it take to deploy?',
@@ -279,7 +302,7 @@ export default function Home() {
                 margin: '0 auto 36px', fontWeight: 400,
               }}>
                 Custom AI agents for e-commerce and education
-                businesses. Deployed in 3 days, from $299/month.
+                businesses. Deployed in 3 days, from $99/month.
                 No IT team required.
               </p>
 
@@ -311,7 +334,7 @@ export default function Home() {
                 {[
                   { val: '94%', label: 'Resolution rate', color: '#4ade80' },
                   { val: '3 days', label: 'To go live', color: '#fff' },
-                  { val: '$299', label: 'Starting price', color: '#a5b4fc' },
+                  { val: '$99', label: 'Starting price', color: '#a5b4fc' },
                 ].map(s => (
                   <div key={s.label} style={{
                     borderLeft: '1.5px solid rgba(99,102,241,0.3)',
