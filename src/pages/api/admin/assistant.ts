@@ -10,6 +10,51 @@ const deepseek = new OpenAI({
 // Admin secret key for protection
 const ADMIN_SECRET_KEY = process.env.ADMIN_SECRET_KEY || 'nexagent-admin-2024'
 
+function formatCollectiveBrainInsights(learningData: any, insights: string[]): string {
+  if (!learningData || insights.length === 0) {
+    return ""
+  }
+
+  let formatted = "COLLECTIVE BRAIN INSIGHTS:\n\n"
+  
+  // Add common questions and effective responses
+  if (learningData.commonQuestions && learningData.commonQuestions.length > 0) {
+    formatted += "Common Customer Questions:\n"
+    learningData.commonQuestions.slice(0, 5).forEach((q: any, index: number) => {
+      formatted += `${index + 1}. ${q.question.replace('_', ' ')} (asked ${q.frequency} times)\n`
+    })
+    formatted += "\n"
+  }
+
+  // Add effective response patterns
+  if (learningData.effectiveResponses && learningData.effectiveResponses.length > 0) {
+    formatted += "High-Performing Response Patterns:\n"
+    learningData.effectiveResponses.slice(0, 3).forEach((response: any, index: number) => {
+      formatted += `${index + 1}. ${response.context}...\n`
+    })
+    formatted += "\n"
+  }
+
+  // Add industry insights if available
+  if (learningData.industryInsights && Object.keys(learningData.industryInsights).length > 0) {
+    formatted += "Industry-Specific Insights:\n"
+    Object.entries(learningData.industryInsights).slice(0, 3).forEach(([industry, data]: [string, any]) => {
+      formatted += `- ${industry}: ${data.conversationCount} successful conversations\n`
+    })
+    formatted += "\n"
+  }
+
+  // Add general insights
+  if (insights.length > 0) {
+    formatted += "Key Learnings:\n"
+    insights.slice(0, 3).forEach((insight, index) => {
+      formatted += `${index + 1}. ${insight}\n`
+    })
+  }
+
+  return formatted
+}
+
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
@@ -63,6 +108,18 @@ export default async function handler(
         .filter(Boolean)
     ))
 
+    // Fetch collective brain insights
+    let collectiveBrainInsights = ""
+    try {
+      const brainResponse = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/collective-brain`)
+      if (brainResponse.ok) {
+        const brainData = await brainResponse.json()
+        collectiveBrainInsights = formatCollectiveBrainInsights(brainData.learningData, brainData.insights)
+      }
+    } catch (error) {
+      console.log('Failed to fetch collective brain data:', error)
+    }
+
     const metrics = {
       totalClients: totalClients || 0,
       activeAgents: activeAgents || 0,
@@ -99,6 +156,8 @@ BUSINESS CONTEXT:
 LIVE SITE: https://nexagent-one.vercel.app
 GITHUB: https://github.com/abdalrahimmakkawi/nexagent
 
+${collectiveBrainInsights}
+
 YOUR CAPABILITIES:
 1. Analyze platform metrics and suggest actions
 2. Write LinkedIn posts, Reddit posts, cold DMs
@@ -109,8 +168,8 @@ YOUR CAPABILITIES:
 7. Content calendar planning
 8. Outreach message templates
 
-Be direct, strategic, and data-driven. You have access to real platform data above. Use it.
-Never be generic — always tie advice to NexAgent's specific situation.`
+Be direct, strategic, and data-driven. You have access to real platform data and collective intelligence from thousands of customer conversations above. Use it.
+Never be generic — always tie advice to NexAgent's specific situation and real performance data.`
 
     // Handle special commands
     if (message.startsWith('/linkedin')) {

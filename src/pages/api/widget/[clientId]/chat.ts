@@ -8,6 +8,51 @@ const deepseek = new OpenAI({
   apiKey: process.env.DEEPSEEK_API_KEY,
 })
 
+function formatCollectiveBrainInsights(learningData: any, insights: string[]): string {
+  if (!learningData || insights.length === 0) {
+    return ""
+  }
+
+  let formatted = "COLLECTIVE BRAIN INSIGHTS:\n\n"
+  
+  // Add common questions and effective responses
+  if (learningData.commonQuestions && learningData.commonQuestions.length > 0) {
+    formatted += "Common Customer Questions:\n"
+    learningData.commonQuestions.slice(0, 5).forEach((q: any, index: number) => {
+      formatted += `${index + 1}. ${q.question.replace('_', ' ')} (asked ${q.frequency} times)\n`
+    })
+    formatted += "\n"
+  }
+
+  // Add effective response patterns
+  if (learningData.effectiveResponses && learningData.effectiveResponses.length > 0) {
+    formatted += "High-Performing Response Patterns:\n"
+    learningData.effectiveResponses.slice(0, 3).forEach((response: any, index: number) => {
+      formatted += `${index + 1}. ${response.context}...\n`
+    })
+    formatted += "\n"
+  }
+
+  // Add industry insights if available
+  if (learningData.industryInsights && Object.keys(learningData.industryInsights).length > 0) {
+    formatted += "Industry-Specific Insights:\n"
+    Object.entries(learningData.industryInsights).slice(0, 3).forEach(([industry, data]: [string, any]) => {
+      formatted += `- ${industry}: ${data.conversationCount} successful conversations\n`
+    })
+    formatted += "\n"
+  }
+
+  // Add general insights
+  if (insights.length > 0) {
+    formatted += "Key Learnings:\n"
+    insights.slice(0, 3).forEach((insight, index) => {
+      formatted += `${index + 1}. ${insight}\n`
+    })
+  }
+
+  return formatted
+}
+
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
@@ -51,12 +96,34 @@ export default async function handler(
 
     const start = Date.now()
 
-    // Call DeepSeek with agent's actual system prompt
+    // Fetch collective brain insights for enhanced responses
+    let collectiveBrainInsights = ""
+    try {
+      const brainResponse = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/collective-brain`)
+      if (brainResponse.ok) {
+        const brainData = await brainResponse.json()
+        collectiveBrainInsights = formatCollectiveBrainInsights(brainData.learningData, brainData.insights)
+      }
+    } catch (error) {
+      console.log('Failed to fetch collective brain data:', error)
+    }
+
+    // Enhanced system prompt with collective brain
+    const enhancedSystemPrompt = `${agent.system_prompt}
+
+${collectiveBrainInsights}
+
+COLLECTIVE INTELLIGENCE:
+You have access to insights from thousands of successful customer conversations across all NexAgent agents.
+Use this knowledge to provide better, more informed responses based on what has worked well for similar inquiries.
+Adapt successful response patterns while maintaining your unique personality and the client's specific context.`
+
+    // Call DeepSeek with enhanced system prompt
     const response = await deepseek.chat.completions.create({
       model: process.env.DEEPSEEK_MODEL || 'deepseek-chat',
       max_tokens: 1024,
       messages: [
-        { role: 'system', content: agent.system_prompt },
+        { role: 'system', content: enhancedSystemPrompt },
         ...messages.slice(-20).map((m: any) => ({
           role: m.role,
           content: m.content

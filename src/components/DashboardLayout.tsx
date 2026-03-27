@@ -10,12 +10,13 @@ interface DashboardLayoutProps {
 }
 
 const navItems = [
-  { key: 'overview', label: 'Overview', href: '/dashboard', icon: 'bar-chart' },
+  { key: 'overview', label: 'Overview', href: '/dashboard', icon: 'store' },
   { key: 'conversations', label: 'Conversations', href: '/dashboard/conversations', icon: 'message' },
   { key: 'leads', label: 'Leads', href: '/dashboard/leads', icon: 'target' },
   { key: 'agent', label: 'My Agent', href: '/dashboard/agent', icon: 'robot' },
+  { key: 'billing', label: 'Billing', href: '/dashboard/billing', icon: 'bar-chart' },
+  { key: 'collective-brain', label: 'Collective Brain', href: '/dashboard/collective-brain', icon: 'sparkle' },
   { key: 'install', label: 'Install Widget', href: '/dashboard/install', icon: 'zap' },
-  { key: 'billing', label: 'Billing', href: '/dashboard/billing', icon: 'star' },
 ]
 
 export default function DashboardLayout({ children, activeTab }: DashboardLayoutProps) {
