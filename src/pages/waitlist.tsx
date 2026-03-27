@@ -1,64 +1,34 @@
-import { useState } from 'react'
+import { useEffect } from 'react'
 import Head from 'next/head'
-import Link from 'next/link'
-import Icon from '@/components/Icon'
 
-export default function Waitlist() {
-  const [email, setEmail] = useState('')
-  const [businessName, setBusinessName] = useState('')
-  const [businessType, setBusinessType] = useState('')
-  const [message, setMessage] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
-  const [success, setSuccess] = useState(false)
-  const [position, setPosition] = useState<number | null>(null)
+export default function WaitlistRedirect() {
+  useEffect(() => {
+    window.location.href = '/app#waitlist'
+  }, [])
 
-  const businessTypes = [
-    'E-commerce',
-    'Education', 
-    'Legal',
-    'Restaurant',
-    'Real Estate',
-    'Other'
-  ]
-
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    setLoading(true)
-    setError('')
-
-    try {
-      const res = await fetch('/api/waitlist', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email,
-          businessName,
-          businessType,
-          message
-        })
-      })
-
-      const data = await res.json()
-
-      if (!res.ok) {
-        throw new Error(data.error || 'Failed to join waitlist')
-      }
-
-      setSuccess(true)
-      setPosition(data.position)
-      setEmail('')
-      setBusinessName('')
-      setBusinessType('')
-      setMessage('')
-    } catch (err: any) {
-      setError(err.message || 'Something went wrong. Please try again.')
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  if (success) {
+  return (
+    <>
+      <Head>
+        <title>Redirecting to NexAgent Waitlist</title>
+        <meta httpEquiv="refresh" content="0; url=/app#waitlist" />
+      </Head>
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        minHeight: '100vh',
+        background: '#0a0a12',
+        color: '#fff',
+        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+      }}>
+        <div style={{ textAlign: 'center' }}>
+          <h1>Redirecting to NexAgent Waitlist...</h1>
+          <p>If you're not redirected, <a href="/app#waitlist" style={{ color: '#6366f1' }}>click here</a>.</p>
+        </div>
+      </div>
+    </>
+  )
+}
     return (
       <>
         <Head><title>Waitlist — NexAgent</title></Head>

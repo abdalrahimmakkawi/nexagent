@@ -1,16 +1,35 @@
-// src/pages/index.tsx
+import { useEffect } from 'react'
 import Head from 'next/head'
-import Link from 'next/link'
-import { useEffect, useRef } from 'react'
-import Icon from '@/components/Icon'
-import ParticleField from '@/components/ParticleField'
 
-const TICKER_ITEMS = [
-  'E-commerce Support', 'Legal Intake', 'EdTech Onboarding',
-  'Hospitality Concierge', 'Lead Capture', 'Cart Recovery',
-  'Returns Automation', 'Sentiment Analysis', '24/7 Coverage',
-  '3-Day Setup',
-]
+export default function IndexRedirect() {
+  useEffect(() => {
+    window.location.href = '/app'
+  }, [])
+
+  return (
+    <>
+      <Head>
+        <title>NexAgent - Custom AI Agents for Small Business</title>
+        <meta httpEquiv="refresh" content="0; url=/app" />
+      </Head>
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        minHeight: '100vh',
+        background: '#0a0a12',
+        color: '#fff',
+        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+      }}>
+        <div style={{ textAlign: 'center' }}>
+          <h1>Welcome to NexAgent</h1>
+          <p>Redirecting to our unified experience...</p>
+          <p>If you're not redirected, <a href="/app" style={{ color: '#6366f1' }}>click here</a>.</p>
+        </div>
+      </div>
+    </>
+  )
+}
 
 const SERVICES = [
   { icon: 'store', title: 'E-commerce Support Agent', desc: 'Handles orders, returns, FAQs, and captures leads 24/7 without human touch.', features: ['Order tracking & shipping FAQ', 'Automated returns flow', 'Lead capture (email/SMS)', 'Cart abandonment recovery', 'Action-driven — resolves tickets end to end', 'No IT setup required'], featured: true },

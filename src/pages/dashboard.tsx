@@ -6,77 +6,12 @@ import { supabase } from '@/lib/supabase'
 import DashboardLayout from '@/components/DashboardLayout'
 import Icon from '@/components/Icon'
 
-export default function Dashboard() {
-  const [user, setUser] = useState<any>(null)
-  const [loading, setLoading] = useState(true)
-  const [clientData, setClientData] = useState<any>(null)
-  const [agent, setAgent] = useState<any>(null)
-  const [stats, setStats] = useState({
-    conversations: 0,
-    leads: 0,
-    messages: 0,
-    weeklyData: [] as { day: string; count: number }[]
-  })
+export default function DashboardRedirect() {
   const router = useRouter()
 
-  const copyWidgetCode = () => {
-    const code = `<script 
-  src="https://nexagent-one.vercel.app/widget.js"
-  data-client="${user?.id}">
-</script>`
-    navigator.clipboard.writeText(code)
-  }
-
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!session) {
-        router.push('/login')
-      } else {
-        setUser(session.user)
-        fetchClientData(session.user.id)
-      }
-    })
+    router.push('/app#pricing')
   }, [router])
-
-  const fetchClientData = async (userId: string) => {
-    try {
-      // Get client data
-      const { data: client } = await supabase
-        .from('clients')
-        .select('*')
-        .eq('id', userId)
-        .single()
-
-      setClientData(client)
-
-      // Get agent if exists
-      if (client) {
-        const { data: agentData } = await supabase
-          .from('agents')
-          .select('*')
-          .eq('client_id', userId)
-          .single()
-
-        setAgent(agentData)
-
-        // Fetch stats
-        await fetchStats(userId)
-      }
-    } catch (err) {
-      console.error('Failed to fetch client data:', err)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const fetchStats = async (userId: string) => {
-    try {
-      // Get conversation stats
-      const { data: conversations } = await supabase
-        .from('conversations')
-        .select('message_count, created_at')
-        .eq('client_id', userId)
-        .order('created_at', { ascending: false })
 
       // Get leads count
       const { count: leadsCount } = await supabase
