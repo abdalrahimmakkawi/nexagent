@@ -3,6 +3,7 @@ import { useRouter } from 'next/router'
 import Head from 'next/head'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
+import DashboardLayout from '@/components/DashboardLayout'
 import Icon from '@/components/Icon'
 
 export default function Dashboard() {
@@ -13,6 +14,8 @@ export default function Dashboard() {
   const [stats, setStats] = useState({
     conversations: 0,
     leads: 0,
+    messages: 0,
+    weeklyData: [] as { day: string; count: number }[]
   })
   const router = useRouter()
 
@@ -56,28 +59,58 @@ export default function Dashboard() {
 
         setAgent(agentData)
 
-        // Fetch stats if agent is active
-        if (agentData?.status === 'active') {
-          const { count: conversations } = await supabase
-            .from('conversations')
-            .select('*', { count: 'exact', head: true })
-            .eq('agent_id', agentData.id)
-
-          const { count: leads } = await supabase
-            .from('leads')
-            .select('*', { count: 'exact', head: true })
-            .eq('agent_id', agentData.id)
-
-          setStats({
-            conversations: conversations || 0,
-            leads: leads || 0,
-          })
-        }
+        // Fetch stats
+        await fetchStats(userId)
       }
     } catch (err) {
       console.error('Failed to fetch client data:', err)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const fetchStats = async (userId: string) => {
+    try {
+      // Get conversation stats
+      const { data: conversations } = await supabase
+        .from('conversations')
+        .select('message_count, created_at')
+        .eq('client_id', userId)
+        .order('created_at', { ascending: false })
+
+      // Get leads count
+      const { count: leadsCount } = await supabase
+        .from('leads')
+        .select('*', { count: 'exact', head: true })
+        .eq('client_id', userId)
+
+      // Calculate weekly data for chart
+      const weeklyData = []
+      const now = new Date()
+      for (let i = 6; i >= 0; i--) {
+        const date = new Date(now.getTime() - i * 24 * 60 * 60 * 1000)
+        const dayName = date.toLocaleDateString('en-US', { weekday: 'short' })
+        
+        // Count conversations for this day
+        const dayCount = conversations?.filter(conv => {
+          const convDate = new Date(conv.created_at)
+          return convDate.toDateString() === date.toDateString()
+        }).length || 0
+
+        weeklyData.push({ day: dayName, count: dayCount })
+      }
+
+      const totalMessages = conversations?.reduce((sum, conv) => sum + (conv.message_count || 0), 0) || 0
+
+      setStats({
+        conversations: conversations?.length || 0,
+        leads: leadsCount || 0,
+        messages: totalMessages,
+        weeklyData
+      })
+
+    } catch (error) {
+      console.error('Failed to fetch stats:', error)
     }
   }
 
@@ -88,49 +121,70 @@ export default function Dashboard() {
     return (
       <>
         <Head><title>Dashboard — NexAgent</title></Head>
-        <div className="min-h-screen flex items-center justify-center px-6" style={{ background: '#0a0a12' }}>
-          <div className="text-center max-w-md">
-            <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6" style={{ background: 'linear-gradient(135deg,#6366f1,#8b5cf6)' }}>
-              <Icon name="robot" size={32} style={{ color: '#fff' }} />
+        <DashboardLayout activeTab="overview">
+          <div className="min-h-screen flex items-center justify-center px-6" style={{ background: '#07070d' }}>
+            <div className="text-center max-w-md">
+              <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6" style={{ background: 'linear-gradient(135deg,#6366f1,#8b5cf6)' }}>
+                <Icon name="robot" size={32} style={{ color: '#fff' }} />
+              </div>
+              <h1 className="text-3xl font-bold mb-4" style={{ color: '#fff', fontFamily: "'Playfair Display', serif" }}>
+                Welcome to NexAgent!
+              </h1>
+              <p className="text-lg mb-8" style={{ color: 'rgba(255,255,255,0.6)' }}>
+                Let's set up your AI agent to handle customer support 24/7.
+              </p>
+              <Link href="/onboarding">
+                <button className="px-8 py-3 rounded-lg font-semibold transition-all inline-flex items-center gap-2" style={{ background: '#6366f1', color: '#fff' }}>
+                  Set up your AI agent →
+                </button>
+              </Link>
             </div>
-            <h1 className="text-3xl font-bold mb-4" style={{ color: '#fff', fontFamily: "'Playfair Display', serif" }}>
-              Welcome to NexAgent!
-            </h1>
-            <p className="text-lg mb-8" style={{ color: 'rgba(255,255,255,0.6)' }}>
-              Let's set up your AI agent to handle customer support 24/7.
-            </p>
-            <Link href="/onboarding">
-              <button className="px-8 py-3 rounded-lg font-semibold transition-all inline-flex items-center gap-2" style={{ background: '#6366f1', color: '#fff' }}>
-                Set up your AI agent →
-              </button>
-            </Link>
           </div>
-        </div>
+        </DashboardLayout>
       </>
     )
   }
 
-  // STATE 2 — Onboarding done, pending review
-  if (!clientData?.agent_approved) {
+  // STATE 2 — Agent created but not approved yet
+  if (!agent || agent.status !== 'active') {
     return (
       <>
         <Head><title>Dashboard — NexAgent</title></Head>
-        <div className="min-h-screen flex items-center justify-center px-6" style={{ background: '#0a0a12' }}>
-          <div className="text-center max-w-md">
-            <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6" style={{ background: 'linear-gradient(135deg,#fbbf24,#f59e0b)' }}>
-              <Icon name="clock" size={32} style={{ color: '#fff' }} />
-            </div>
-            <h1 className="text-3xl font-bold mb-4" style={{ color: '#fff', fontFamily: "'Playfair Display', serif" }}>
-              Your agent is being reviewed
-            </h1>
-            <p className="text-lg mb-8" style={{ color: 'rgba(255,255,255,0.6)' }}>
-              We'll notify you by email within 24 hours once your AI agent is ready to go live.
-            </p>
-            <div className="flex justify-center">
-              <div className="w-12 h-12 border-3 border-yellow-500 border-t-transparent rounded-full animate-spin" />
+        <DashboardLayout activeTab="overview">
+          <div className="min-h-screen flex items-center justify-center px-6" style={{ background: '#07070d' }}>
+            <div className="text-center max-w-md">
+              <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6" style={{ background: 'linear-gradient(135deg,#f59e0b,#ef4444)' }}>
+                <Icon name="clock" size={32} style={{ color: '#fff' }} />
+              </div>
+              <h1 className="text-3xl font-bold mb-4" style={{ color: '#fff', fontFamily: "'Playfair Display', serif" }}>
+                Agent Under Review
+              </h1>
+              <p className="text-lg mb-8" style={{ color: 'rgba(255,255,255,0.6)' }}>
+                Your AI agent is being reviewed by our team. This usually takes 24-48 hours.
+              </p>
+              <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+                <div className="text-left space-y-2">
+                  <div className="flex justify-between">
+                    <span style={{ color: 'rgba(255,255,255,0.6)' }}>Agent Name:</span>
+                    <span style={{ color: '#fff' }}>{agent?.name || 'Your Agent'}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span style={{ color: 'rgba(255,255,255,0.6)' }}>Status:</span>
+                    <span className="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded-full">
+                      {agent?.status || 'pending'}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span style={{ color: 'rgba(255,255,255,0.6)' }}>Submitted:</span>
+                    <span style={{ color: '#fff' }}>
+                      {agent?.created_at ? new Date(agent.created_at).toLocaleDateString() : 'Recently'}
+                    </span>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
+        </DashboardLayout>
       </>
     )
   }
@@ -139,32 +193,11 @@ export default function Dashboard() {
   return (
     <>
       <Head><title>Dashboard — NexAgent</title></Head>
-      <div className="min-h-screen" style={{ background: '#0a0a12' }}>
-        {/* Header */}
-        <div className="border-b px-6 py-4" style={{ borderColor: 'rgba(255,255,255,0.1)' }}>
-          <div className="max-w-7xl mx-auto flex items-center justify-between">
-            <div>
-              <h1 className="text-xl font-bold" style={{ color: '#fff', fontFamily: "'Playfair Display', serif" }}>
-                Dashboard
-              </h1>
-              <p className="text-sm" style={{ color: 'rgba(255,255,255,0.6)' }}>
-                {agent?.name} • <span className="px-2 py-1 rounded-full text-xs" style={{ background: 'rgba(34,197,94,0.2)', color: '#22c55e' }}>Active</span>
-              </p>
-            </div>
-            <div className="flex items-center gap-4">
-              <Link href="/logout">
-                <button className="text-sm px-4 py-2 rounded-lg" style={{ background: 'rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.8)' }}>
-                  Logout
-                </button>
-              </Link>
-            </div>
-          </div>
-        </div>
-
-        <div className="max-w-7xl mx-auto px-6 py-8">
+      <DashboardLayout activeTab="overview">
+        <div className="p-8">
           {/* Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-            <div className="rounded-lg p-6" style={{ background: 'rgba(255,255,255,0.05)' }}>
+            <div className="rounded-lg p-6" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }}>
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm" style={{ color: 'rgba(255,255,255,0.6)' }}>Total Conversations</span>
                 <Icon name="message" size={16} style={{ color: 'rgba(255,255,255,0.4)' }} />
@@ -172,7 +205,7 @@ export default function Dashboard() {
               <div className="text-2xl font-bold" style={{ color: '#fff' }}>{stats.conversations}</div>
             </div>
 
-            <div className="rounded-lg p-6" style={{ background: 'rgba(255,255,255,0.05)' }}>
+            <div className="rounded-lg p-6" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }}>
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm" style={{ color: 'rgba(255,255,255,0.6)' }}>Leads Captured</span>
                 <Icon name="target" size={16} style={{ color: 'rgba(255,255,255,0.4)' }} />
@@ -180,20 +213,43 @@ export default function Dashboard() {
               <div className="text-2xl font-bold" style={{ color: '#fff' }}>{stats.leads}</div>
             </div>
 
-            <div className="rounded-lg p-6" style={{ background: 'rgba(255,255,255,0.05)' }}>
+            <div className="rounded-lg p-6" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }}>
               <div className="flex items-center justify-between mb-2">
-                <span className="text-sm" style={{ color: 'rgba(255,255,255,0.6)' }}>Resolution Rate</span>
-                <Icon name="check" size={16} style={{ color: '#22c55e' }} />
+                <span className="text-sm" style={{ color: 'rgba(255,255,255,0.6)' }}>Messages Handled</span>
+                <Icon name="message" size={16} style={{ color: '#22c55e' }} />
               </div>
-              <div className="text-2xl font-bold" style={{ color: '#22c55e' }}>94%</div>
+              <div className="text-2xl font-bold" style={{ color: '#22c55e' }}>{stats.messages}</div>
             </div>
 
-            <div className="rounded-lg p-6" style={{ background: 'rgba(255,255,255,0.05)' }}>
+            <div className="rounded-lg p-6" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }}>
               <div className="flex items-center justify-between mb-2">
-                <span className="text-sm" style={{ color: 'rgba(255,255,255,0.6)' }}>Agent Uptime</span>
-                <Icon name="zap" size={16} style={{ color: 'rgba(255,255,255,0.4)' }} />
+                <span className="text-sm" style={{ color: 'rgba(255,255,255,0.6)' }}>Agent Status</span>
+                <Icon name="check" size={16} style={{ color: '#22c55e' }} />
               </div>
-              <div className="text-2xl font-bold" style={{ color: '#fff' }}>99.9%</div>
+              <div className="text-2xl font-bold" style={{ color: '#22c55e' }}>Active</div>
+            </div>
+          </div>
+
+          {/* Simple Chart */}
+          <div className="rounded-lg p-6 mb-8" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }}>
+            <h2 className="text-lg font-bold mb-4" style={{ color: '#fff', fontFamily: "'Playfair Display', serif" }}>
+              Last 7 Days Activity
+            </h2>
+            <div className="flex items-end justify-between h-32 px-4">
+              {stats.weeklyData.map((day, index) => (
+                <div key={index} className="flex flex-col items-center flex-1">
+                  <div className="w-full flex flex-col items-center">
+                    <div 
+                      className="w-8 bg-blue-500 rounded-t transition-all duration-300"
+                      style={{ 
+                        height: `${Math.max(4, (day.count / Math.max(...stats.weeklyData.map(d => d.count), 1)) * 100)}px` 
+                      }}
+                    ></div>
+                  </div>
+                  <div className="text-xs text-gray-400 mt-2">{day.day}</div>
+                  <div className="text-xs text-white">{day.count}</div>
+                </div>
+              ))}
             </div>
           </div>
 
@@ -241,10 +297,10 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* Quick Links */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Quick Actions */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             <Link href="/dashboard/conversations">
-              <div className="rounded-lg p-6 hover:bg-opacity-50 transition-all cursor-pointer" style={{ background: 'rgba(255,255,255,0.05)' }}>
+              <div className="rounded-lg p-6 hover:bg-opacity-50 transition-all cursor-pointer" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }}>
                 <Icon name="message" size={24} style={{ color: '#6366f1', marginBottom: '12px' }} />
                 <h3 className="font-semibold mb-2" style={{ color: '#fff' }}>Conversations</h3>
                 <p className="text-sm" style={{ color: 'rgba(255,255,255,0.6)' }}>
@@ -254,7 +310,7 @@ export default function Dashboard() {
             </Link>
 
             <Link href="/dashboard/leads">
-              <div className="rounded-lg p-6 hover:bg-opacity-50 transition-all cursor-pointer" style={{ background: 'rgba(255,255,255,0.05)' }}>
+              <div className="rounded-lg p-6 hover:bg-opacity-50 transition-all cursor-pointer" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }}>
                 <Icon name="target" size={24} style={{ color: '#6366f1', marginBottom: '12px' }} />
                 <h3 className="font-semibold mb-2" style={{ color: '#fff' }}>Leads</h3>
                 <p className="text-sm" style={{ color: 'rgba(255,255,255,0.6)' }}>
@@ -264,17 +320,27 @@ export default function Dashboard() {
             </Link>
 
             <Link href="/dashboard/agent">
-              <div className="rounded-lg p-6 hover:bg-opacity-50 transition-all cursor-pointer" style={{ background: 'rgba(255,255,255,0.05)' }}>
+              <div className="rounded-lg p-6 hover:bg-opacity-50 transition-all cursor-pointer" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }}>
                 <Icon name="robot" size={24} style={{ color: '#6366f1', marginBottom: '12px' }} />
-                <h3 className="font-semibold mb-2" style={{ color: '#fff' }}>Agent Settings</h3>
+                <h3 className="font-semibold mb-2" style={{ color: '#fff' }}>Edit Agent</h3>
                 <p className="text-sm" style={{ color: 'rgba(255,255,255,0.6)' }}>
-                  Configure your AI agent
+                  Customize your AI agent
+                </p>
+              </div>
+            </Link>
+
+            <Link href="/dashboard/install">
+              <div className="rounded-lg p-6 hover:bg-opacity-50 transition-all cursor-pointer" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }}>
+                <Icon name="zap" size={24} style={{ color: '#6366f1', marginBottom: '12px' }} />
+                <h3 className="font-semibold mb-2" style={{ color: '#fff' }}>Install Guide</h3>
+                <p className="text-sm" style={{ color: 'rgba(255,255,255,0.6)' }}>
+                  Get widget installation help
                 </p>
               </div>
             </Link>
           </div>
         </div>
-      </div>
+      </DashboardLayout>
     </>
   )
 }

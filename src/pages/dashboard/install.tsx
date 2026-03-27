@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import Head from 'next/head'
+import DashboardLayout from '@/components/DashboardLayout'
 import { supabaseAdmin } from '@/lib/supabase'
 
 interface Client {
@@ -106,8 +107,9 @@ export default function InstallPage() {
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       </Head>
 
-      <div className="min-h-screen bg-gray-50">
-        <div className="max-w-4xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
+      <DashboardLayout activeTab="install">
+        <div className="p-8">
+          <div className="max-w-4xl mx-auto">
           {/* Header */}
           <div className="text-center mb-12">
             <h1 className="text-3xl font-bold text-gray-900 mb-4">
@@ -232,7 +234,8 @@ export default function InstallPage() {
             )}
           </div>
         </div>
-      </div>
+        </div>
+      </DashboardLayout>
     </>
   )
 }
