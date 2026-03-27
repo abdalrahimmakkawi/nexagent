@@ -30,26 +30,26 @@ export async function generateSmartAgentConfig(onboardingData: SmartOnboardingDa
 
   // Create industry-specific prompts
   const industryPrompts: Record<string, string> = {
-    'Technology & Software': 'You are an AI customer support agent for a technology/SaaS company. You help with technical troubleshooting, bug reports, feature requests, and user onboarding. Use technical terminology but explain complex concepts simply.',
-    'Retail & E-commerce': 'You are an AI customer support agent for an e-commerce business. You help with order tracking, returns, product recommendations, shipping inquiries, and customer service. Be friendly, helpful, and focused on sales and customer satisfaction.',
-    'Healthcare & Medical': 'You are an AI assistant for a healthcare provider. You help with appointment scheduling, basic medical inquiries, insurance questions, and patient support. Be professional, empathetic, and prioritize patient privacy and care.',
-    'Finance & Insurance': 'You are an AI support agent for a financial services company. You help with account inquiries, transaction support, basic financial questions, and customer service. Be professional, secure, and compliant with financial regulations.',
-    'Education & Training': 'You are an AI educational assistant. You help with course information, enrollment, technical support, and student guidance. Be encouraging, supportive, and focused on learning outcomes.',
-    'Professional Services': 'You are an AI assistant for a professional services firm. You help with client inquiries, appointment scheduling, service information, and project coordination. Be professional, organized, and client-focused.',
-    'Manufacturing & Industrial': 'You are an AI support agent for a manufacturing company. You help with product inquiries, technical specifications, order support, and supply chain questions. Be technical, precise, and solution-oriented.',
-    'Hospitality & Tourism': 'You are an AI hospitality assistant. You help with reservations, customer inquiries, service information, and travel support. Be welcoming, helpful, and focused on customer experience.',
-    'Media & Entertainment': 'You are an AI assistant for a media/entertainment company. You help with content inquiries, customer support, and technical assistance. Be engaging, creative, and brand-aligned.',
-    'Government & Non-profit': 'You are an AI assistant for a government or non-profit organization. You help with public inquiries, service information, and administrative support. Be professional, respectful, and service-oriented.'
+    'Technology & Software': 'You are an AI customer support agent for a technology/SaaS company. Help with technical troubleshooting, bug reports, feature requests, and user onboarding.',
+    'Retail & E-commerce': 'You are an AI customer support agent for an e-commerce business. Help with order tracking, returns, product recommendations, shipping inquiries.',
+    'Healthcare & Medical': 'You are an AI assistant for a healthcare provider. Help with appointment scheduling, basic medical inquiries, insurance questions.',
+    'Finance & Insurance': 'You are an AI support agent for a financial services company. Help with account inquiries, transaction support, basic financial questions.',
+    'Education & Training': 'You are an AI educational assistant. Help with course information, enrollment, technical support, and student guidance.',
+    'Professional Services': 'You are an AI assistant for a professional services firm. Help with client inquiries, appointment scheduling, service information.',
+    'Manufacturing & Industrial': 'You are an AI support agent for a manufacturing company. Help with product inquiries, technical specifications, order support.',
+    'Hospitality & Tourism': 'You are an AI hospitality assistant. Help with reservations, customer inquiries, service information, travel support.',
+    'Media & Entertainment': 'You are an AI assistant for a media/entertainment company. Help with content inquiries, customer support, technical assistance.',
+    'Government & Non-profit': 'You are an AI assistant for a government or non-profit organization. Help with public inquiries, service information, administrative support.'
   }
 
   // Create tone-specific guidelines
   const toneGuidelines: Record<string, string> = {
-    'Professional and formal': 'Use formal language, proper grammar, and a respectful tone. Avoid slang and overly casual expressions.',
-    'Friendly and casual': 'Use conversational language, contractions where appropriate, and a warm, approachable tone. Be friendly but maintain professionalism.',
-    'Technical and precise': 'Use accurate technical terminology, be specific and detailed, and focus on precision and clarity.',
-    'Empathetic and supportive': 'Use understanding language, acknowledge customer concerns, and provide reassurance. Focus on emotional intelligence.',
-    'Enthusiastic and energetic': 'Use positive, energetic language, and an upbeat tone. Show excitement about helping customers.',
-    'Concise and direct': 'Use short, clear sentences. Get straight to the point. Avoid unnecessary words and be efficient.'
+    'Professional and formal': 'Use formal language, proper grammar, and a respectful tone.',
+    'Friendly and casual': 'Use conversational language, contractions where appropriate, and a warm, approachable tone.',
+    'Technical and precise': 'Use accurate technical terminology, be specific and detailed.',
+    'Empathetic and supportive': 'Use understanding language, acknowledge customer concerns, and provide reassurance.',
+    'Enthusiastic and energetic': 'Use positive, energetic language, and an upbeat tone.',
+    'Concise and direct': 'Use short, clear sentences. Get straight to the point.'
   }
 
   // Generate agent name based on business
@@ -61,7 +61,7 @@ export async function generateSmartAgentConfig(onboardingData: SmartOnboardingDa
       return businessName
     }
     
-    const nameSuggestions = {
+    const nameSuggestions: Record<string, string> = {
       'ecommerce': `${businessName} Assistant`,
       'saas': `${businessName} Support`,
       'professional': `${businessName} Agent`,
@@ -81,48 +81,21 @@ export async function generateSmartAgentConfig(onboardingData: SmartOnboardingDa
     return nameSuggestions.default
   }
 
-  // Generate system prompt
+  // Generate system prompt (optimized to reduce tokens)
   const generateSystemPrompt = (): string => {
     const industryPrompt = industryPrompts[onboardingData.industry] || industryPrompts['Professional Services']
     const toneGuideline = toneGuidelines[onboardingData.preferredTone] || toneGuidelines['Professional and formal']
     
-    const goalsContext = onboardingData.mainGoals.length > 0 
-      ? `The user's primary goals are: ${onboardingData.mainGoals.join(', ')}. `
-      : ''
-    
-    const challengesContext = onboardingData.currentChallenges.length > 0
-      ? `They currently face these challenges: ${onboardingData.currentChallenges.join(', ')}. `
-      : ''
-    
-    const audienceContext = onboardingData.targetAudience
-      ? `The target audience is: ${onboardingData.targetAudience}. `
-      : ''
+    return `${industryPrompt} ${toneGuideline}
 
-    return `${industryPrompt} ${toneGuideline} ${goalsContext}${challengesContext}${audienceContext}
+Company: ${onboardingData.businessName}
+Type: ${onboardingData.businessType}
+Industry: ${onboardingData.industry}
+Audience: ${onboardingData.targetAudience}
+Goals: ${onboardingData.mainGoals.join(', ')}
+Tone: ${onboardingData.preferredTone}
 
-Key Requirements:
-1. Always be helpful, accurate, and professional
-2. If you don't know something, admit it honestly
-3. If you can't help with a request, suggest appropriate alternatives
-4. Maintain the ${onboardingData.preferredTone.toLowerCase()} tone throughout the conversation
-5. Focus on solving the user's problems efficiently
-6. For ${onboardingData.businessName}, prioritize customer satisfaction and business goals
-
-Business Context:
-- Company: ${onboardingData.businessName}
-- Type: ${onboardingData.businessType}
-- Industry: ${onboardingData.industry}
-- Target Audience: ${onboardingData.targetAudience}
-- Main Goals: ${onboardingData.mainGoals.join(', ')}
-- Current Challenges: ${onboardingData.currentChallenges.join(', ')}
-
-Response Guidelines:
-- Be concise but thorough
-- Use appropriate industry terminology
-- Show empathy when dealing with customer issues
-- Proactively offer help and suggestions
-- When appropriate, guide customers to additional resources
-- Always maintain brand consistency with ${onboardingData.businessName}`
+Be helpful, accurate, and professional. If you don't know something, admit it honestly. Focus on solving problems efficiently.`
   }
 
   // Generate welcome message
@@ -144,22 +117,22 @@ Response Guidelines:
     const basePrompts = ['Track my order', 'Check availability', 'Speak to a human', 'Product information']
     
     if (onboardingData.mainGoals.includes('24/7 customer support')) {
-      basePrompts.push('I need urgent help', 'Check order status', 'Technical support')
+      basePrompts.push('I need urgent help', 'Check order status')
     }
     
     if (onboardingData.mainGoals.includes('Lead generation and qualification')) {
-      basePrompts.push('Get a quote', 'Schedule consultation', 'Product demo')
+      basePrompts.push('Get a quote', 'Schedule consultation')
     }
     
     if (onboardingData.mainGoals.includes('Appointment booking')) {
-      basePrompts.push('Book appointment', 'Check availability', 'Reschedule meeting')
+      basePrompts.push('Book appointment', 'Check availability')
     }
     
     if (onboardingData.mainGoals.includes('Product recommendations')) {
-      basePrompts.push('Product suggestions', 'Find similar items', 'Compare products')
+      basePrompts.push('Product suggestions', 'Find similar items')
     }
 
-    return basePrompts.slice(0, 6) // Limit to 6 prompts
+    return basePrompts.slice(0, 6)
   }
 
   // Generate lead capture message
@@ -223,45 +196,31 @@ Response Guidelines:
   }
 
   try {
+    // Use a much more concise prompt to save tokens
+    const concisePrompt = `Generate AI agent config for:
+Business: ${onboardingData.businessName}
+Type: ${onboardingData.businessType}
+Industry: ${onboardingData.industry}
+Audience: ${onboardingData.targetAudience}
+Goals: ${onboardingData.mainGoals.join(', ')}
+Tone: ${onboardingData.preferredTone}
+
+Return JSON with: name, systemPrompt, welcomeMessage, quickPrompts[6], leadMessage, escalationTriggers, widgetColor, capabilities`
+
     const completion = await openai.chat.completions.create({
       model: process.env.DEEPSEEK_MODEL || 'deepseek-chat',
       messages: [
         {
           role: 'system',
-          content: `You are an expert AI agent designer. Based on the following onboarding data, create a comprehensive AI agent configuration that perfectly matches the business needs and goals.
-
-Onboarding Data:
-${JSON.stringify(onboardingData, null, 2)}
-
-Generate a detailed agent configuration that includes:
-1. Agent name (creative and brand-aligned)
-2. System prompt (comprehensive and industry-specific)
-3. Welcome message (tone-appropriate and engaging)
-4. Quick prompts (relevant to business goals)
-5. Lead capture message (conversion-focused)
-6. Escalation triggers (business-appropriate)
-7. Widget color (brand-aligned)
-8. Capabilities list (comprehensive)
-
-Return ONLY a JSON object with these exact keys:
-{
-  "name": "agent name",
-  "systemPrompt": "detailed system prompt",
-  "welcomeMessage": "welcome message",
-  "quickPrompts": ["prompt1", "prompt2", ...],
-  "leadMessage": "lead capture message",
-  "escalationTriggers": ["trigger1", "trigger2", ...],
-  "widgetColor": "#hexcolor",
-  "capabilities": ["capability1", "capability2", ...]
-}`
+          content: 'You are an expert AI agent designer. Generate concise, practical configurations based on business needs. Return only valid JSON.'
         },
         {
           role: 'user',
-          content: 'Generate the AI agent configuration based on the provided onboarding data.'
+          content: concisePrompt
         }
       ],
-      temperature: 0.7,
-      max_tokens: 2000
+      temperature: 0.3, // Reduced for more consistent output
+      max_tokens: 800 // Reduced from 2000 to save costs
     })
 
     const aiResponse = completion.choices[0]?.message?.content

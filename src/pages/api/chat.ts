@@ -8,7 +8,15 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { chat, Message } from '@/lib/ai-router'
 import { getStoreConfig } from '@/lib/store-configs'
-import { chatRateLimiter, dailyRateLimiter, getClientIP } from '@/lib/rate-limiter'
+import { 
+  chatRateLimiter, 
+  dailyRateLimiter, 
+  globalRateLimiter, 
+  tokenRateLimiter,
+  getClientIP,
+  estimateTokens,
+  checkTokenLimit
+} from '@/lib/rate-limiter'
 
 export default async function handler(
   req: NextApiRequest,
@@ -26,17 +34,27 @@ export default async function handler(
 
   const ip = getClientIP(req)
 
-  // Check per-minute rate limit
+  // Check global rate limit first (protects against abuse from all users)
+  try {
+    await globalRateLimiter.consume(ip)
+  } catch {
+    return res.status(429).json({
+      error: 'Service temporarily busy. Please try again in a minute.',
+      retryAfter: 60
+    })
+  }
+
+  // Check per-minute rate limit (very strict now)
   try {
     await chatRateLimiter.consume(ip)
   } catch {
     return res.status(429).json({
-      error: 'Too many requests. Please wait a moment before trying again.',
-      retryAfter: 120
+      error: 'Too many requests. Please wait 5 minutes before trying again.',
+      retryAfter: 300
     })
   }
 
-  // Check daily rate limit
+  // Check daily rate limit (very strict now)
   try {
     await dailyRateLimiter.consume(ip)
   } catch {
@@ -57,14 +75,32 @@ export default async function handler(
   }
 
   // Limit conversation length to prevent abuse
-  if (messages.length > 50) {
-    return res.status(400).json({ error: 'Conversation too long' })
+  if (messages.length > 20) { // Reduced from 50
+    return res.status(400).json({ error: 'Conversation too long. Max 20 messages.' })
   }
 
-  // Validate message content length
+  // Validate message content length (more strict)
   const lastMessage = messages[messages.length - 1]
-  if (!lastMessage?.content || lastMessage.content.length > 400) {
-    return res.status(400).json({ error: 'Message too long. Max 400 characters.' })
+  if (!lastMessage?.content || lastMessage.content.length > 200) { // Reduced from 400
+    return res.status(400).json({ error: 'Message too long. Max 200 characters.' })
+  }
+
+  // Check token limits for cost control
+  const totalTokens = messages.reduce((sum, msg) => sum + estimateTokens(msg.content), 0)
+  if (totalTokens > 500) { // Max 500 tokens per conversation
+    return res.status(400).json({ 
+      error: 'Conversation too complex. Please start a new conversation.',
+      tokensUsed: totalTokens,
+      maxTokens: 500
+    })
+  }
+
+  // Check token rate limit
+  if (!await checkTokenLimit(ip, lastMessage.content)) {
+    return res.status(429).json({
+      error: 'Token limit exceeded. Please wait before sending more messages.',
+      retryAfter: 300
+    })
   }
 
   // Sanitize: strip any HTML or script tags from input
@@ -81,7 +117,7 @@ export default async function handler(
   try {
     const response = await chat(sanitized, {
       systemPrompt: store.systemPrompt,
-      maxTokens: 1024,
+      maxTokens: 256, // Reduced from 1024 to save costs
     })
     return res.status(200).json(response)
   } catch (err: unknown) {

@@ -2,6 +2,7 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 import { supabaseAdmin } from '@/lib/supabase'
 import { generateSmartAgentConfig } from '@/lib/smartAgentGenerator'
 import { fireWebhook } from '@/lib/webhooks'
+import { onboardingRateLimiter, getClientIP } from '@/lib/rate-limiter'
 
 interface SmartOnboardingData {
   businessName: string
@@ -22,6 +23,18 @@ export default async function handler(
     return res.status(405).json({ error: 'Method not allowed' })
   }
 
+  const ip = getClientIP(req)
+
+  // Check onboarding rate limit (very restrictive)
+  try {
+    await onboardingRateLimiter.consume(ip)
+  } catch {
+    return res.status(429).json({
+      error: 'Too many onboarding attempts. Please wait 30 minutes before trying again.',
+      retryAfter: 1800
+    })
+  }
+
   try {
     const onboardingData: SmartOnboardingData = req.body
 
@@ -33,7 +46,7 @@ export default async function handler(
     // Get user from session (you'll need to implement auth)
     const clientId = 'demo-user-id' // Replace with actual user ID from session
 
-    // Generate AI agent configuration
+    // Generate AI agent configuration with cost optimization
     const agentConfig = await generateSmartAgentConfig(onboardingData)
 
     // Save onboarding submission
