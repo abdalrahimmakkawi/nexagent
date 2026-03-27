@@ -16,6 +16,14 @@ export default function Dashboard() {
   })
   const router = useRouter()
 
+  const copyWidgetCode = () => {
+    const code = `<script 
+  src="https://nexagent-one.vercel.app/widget.js"
+  data-client="${user?.id}">
+</script>`
+    navigator.clipboard.writeText(code)
+  }
+
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (!session) {
@@ -71,12 +79,6 @@ export default function Dashboard() {
     } finally {
       setLoading(false)
     }
-  }
-
-  const copyWidgetCode = () => {
-    const widgetCode = `<script src="${process.env.NEXT_PUBLIC_SITE_URL}/widget/${user?.id}"></script>`
-    navigator.clipboard.writeText(widgetCode)
-    alert('Widget code copied to clipboard!')
   }
 
   if (loading) return <div>Loading...</div>
@@ -195,29 +197,46 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* Widget Code Section */}
+          {/* Your Agent is Live Widget Card */}
           <div className="rounded-lg p-6 mb-8" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }}>
-            <h2 className="text-lg font-bold mb-4" style={{ color: '#fff', fontFamily: "'Playfair Display', serif" }}>
-              Get Your Widget Code
-            </h2>
-            <p className="text-sm mb-4" style={{ color: 'rgba(255,255,255,0.6)' }}>
-              Add this script to your website to enable the AI agent:
-            </p>
-            <div className="flex gap-3">
-              <div className="flex-1 px-4 py-3 rounded-lg font-mono text-sm" style={{ background: 'rgba(0,0,0,0.3)', color: '#a5b4fc' }}>
-                &lt;script src="{process.env.NEXT_PUBLIC_SITE_URL}/widget/{user?.id}"&gt;&lt;/script&gt;
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h2 className="text-lg font-bold mb-2" style={{ color: '#fff', fontFamily: "'Playfair Display', serif" }}>
+                  Your agent is live
+                </h2>
+                <div className="flex items-center space-x-2">
+                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                  <span className="text-sm font-medium" style={{ color: '#22c55e' }}>Active</span>
+                </div>
               </div>
+              <div className="text-right">
+                <div className="text-sm text-gray-400 mb-2">Widget Code</div>
+                <div className="bg-gray-900 text-gray-100 px-3 py-2 rounded text-xs font-mono">
+                  {`<script src="https://nexagent-one.vercel.app/widget.js" data-client="${user?.id}">`}
+                </div>
+              </div>
+            </div>
+            
+            <div className="flex gap-3">
               <button
                 onClick={copyWidgetCode}
-                className="px-4 py-3 rounded-lg font-semibold transition-all"
+                className="px-4 py-2 rounded-lg font-semibold transition-all flex items-center space-x-2"
                 style={{ background: '#6366f1', color: '#fff' }}
               >
-                Copy
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                </svg>
+                <span>Copy Code</span>
               </button>
-            </div>
-            <div className="mt-4">
-              <Link href="/docs/installation" className="text-sm" style={{ color: '#a5b4fc' }}>
-                View installation guide →
+              <Link href="/dashboard/install">
+                <button className="px-4 py-2 rounded-lg font-semibold transition-all" style={{ background: 'rgba(255,255,255,0.1)', color: '#fff' }}>
+                  View install guide →
+                </button>
+              </Link>
+              <Link href={`/widget/${user?.id}`} target="_blank">
+                <button className="px-4 py-2 rounded-lg font-semibold transition-all" style={{ background: 'rgba(255,255,255,0.1)', color: '#fff' }}>
+                  Preview your agent →
+                </button>
               </Link>
             </div>
           </div>
