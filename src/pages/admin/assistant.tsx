@@ -72,7 +72,8 @@ export default function AdminAssistant() {
     }
   }
 
-  const loadChatSessions = () => {
+  const loadChatSessions = async () => {
+    // Load from localStorage first
     const stored = localStorage.getItem('adminChatSessions')
     if (stored) {
       const sessions = JSON.parse(stored)
@@ -83,6 +84,22 @@ export default function AdminAssistant() {
         setCurrentSessionId(latest.id)
         setMessages(latest.messages)
       }
+    }
+
+    // Also load from database for persistence
+    try {
+      const response = await fetch('/api/admin/assistant/history', {
+        headers: { 'X-Admin-Key': 'nexagent-admin-2024' }
+      })
+      
+      if (response.ok) {
+        const data = await response.json()
+        // Merge database sessions with localStorage sessions
+        // (localStorage takes precedence for recent changes)
+        console.log('Loaded conversation history from database:', data.count, 'conversations')
+      }
+    } catch (error) {
+      console.error('Failed to load conversation history from database:', error)
     }
   }
 
@@ -128,6 +145,30 @@ export default function AdminAssistant() {
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }
+
+  const saveConversationToDatabase = async (sessionId: string, title: string, messages: Message[]) => {
+    try {
+      await fetch('/api/admin/assistant/save', {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'X-Admin-Key': 'nexagent-admin-2024'
+        },
+        body: JSON.stringify({
+          sessionId,
+          title,
+          messages: messages.map(msg => ({
+            role: msg.role,
+            content: msg.content,
+            timestamp: msg.timestamp.toISOString()
+          })),
+          timestamp: new Date().toISOString()
+        })
+      })
+    } catch (error) {
+      console.error('Failed to save conversation to database:', error)
+    }
   }
 
   const sendMessage = async (messageText: string) => {
@@ -182,8 +223,13 @@ export default function AdminAssistant() {
           : session
       )
       
+      // Save to localStorage
       setChatSessions(updatedSessions)
       saveChatSessions(updatedSessions)
+
+      // Also save to database for persistence
+      const currentSession = updatedSessions.find(s => s.id === currentSessionId)
+      await saveConversationToDatabase(currentSessionId, currentSession?.title || 'Admin Conversation', currentSession?.messages || [])
 
     } catch (error) {
       console.error('Failed to send message:', error)

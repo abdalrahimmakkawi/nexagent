@@ -65,27 +65,38 @@ export default function WidgetPage() {
         }
 
         setConfig(data)
-        
-        // Add welcome message
-        setMessages([{
-          role: 'assistant',
-          content: data.welcomeMessage,
-          timestamp: new Date()
-        }])
 
-        // Create conversation
+        // Create conversation and load history
         const convResponse = await fetch(`/api/widget/${clientId}/conversation`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             agentId: data.agentId,
-            sessionId
+            sessionId,
+            loadHistory: true
           })
         })
         
         const convData = await convResponse.json()
         if (convResponse.ok) {
           setConversationId(convData.conversationId)
+          
+          // Load conversation history if exists
+          if (convData.messages && convData.messages.length > 0) {
+            const historyMessages = convData.messages.map((msg: any) => ({
+              role: msg.role,
+              content: msg.content,
+              timestamp: new Date(msg.created_at)
+            }))
+            setMessages(historyMessages)
+          } else {
+            // Add welcome message for new conversations
+            setMessages([{
+              role: 'assistant',
+              content: data.welcomeMessage,
+              timestamp: new Date()
+            }])
+          }
         }
 
       } catch (err) {
