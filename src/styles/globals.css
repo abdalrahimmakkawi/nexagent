@@ -4,21 +4,50 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --bg: #07070d;
-  --s1: #0d0d18;
-  --s2: #12121f;
-  --s3: #18182a;
-  --border: rgba(255, 255, 255, 0.06);
-  --border2: rgba(255, 255, 255, 0.1);
-  --accent: #6b5ce7;
-  --accent2: #8b7cf8;
-  --accent3: #c4baff;
-  --green: #3dffa0;
-  --amber: #ffb84d;
-  --text: #eeeeff;
-  --t2: #8888b8;
-  --t3: #3d3d60;
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 0 0% 3.74%;
+    --card: 0 0% 3.12%;
+    --card-foreground: 0 0% 3.74%;
+    --popover: 0 0% 3.12%;
+    --popover-foreground: 0 0% 3.74%;
+    --primary: 0 0% 3.74%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 0 0% 3.12%;
+    --secondary-foreground: 0 0% 3.74%;
+    --muted: 0 0% 3.12%;
+    --muted-foreground: 0 0% 3.74%;
+    --accent: 0 0% 3.74%;
+    --accent-foreground: 0 0% 9.64%;
+    --destructive: 0 0% 3.74%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 3.74%;
+    --input: 0 0% 3.12%;
+    --ring: 0 0% 3.74%;
+    --radius: 0.5rem;
+    
+    /* NexAgent variables */
+    --bg: #07070d;
+    --s1: #0d0d18;
+    --s2: #12121f;
+    --s3: #18182a;
+    --border: rgba(255, 255, 255, 0.06);
+    --border2: rgba(255, 255, 255, 0.1);
+    --accent: #6b5ce7;
+    --accent2: #8b7cf8;
+    --accent3: #c4baff;
+    --green: #3dffa0;
+    --amber: #ffb84d;
+    --text: #eeeeff;
+    --t2: #8888b8;
+    --t3: #3d3d60;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+  }
 }
 
 * {
