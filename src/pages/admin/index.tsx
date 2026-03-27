@@ -93,9 +93,28 @@ export default function AdminDashboard() {
         {/* Header */}
         <div className="border-b px-6 py-4" style={{ borderColor: 'rgba(255,255,255,0.1)' }}>
           <div className="max-w-7xl mx-auto flex items-center justify-between">
-            <h1 className="text-xl font-bold" style={{ color: '#fff', fontFamily: "'Playfair Display', serif" }}>
-              Admin Dashboard
-            </h1>
+            <div className="flex items-center space-x-6">
+              <h1 className="text-xl font-bold" style={{ color: '#fff', fontFamily: "'Playfair Display', serif" }}>
+                Admin Dashboard
+              </h1>
+              <nav className="flex space-x-4">
+                <a 
+                  href="/admin" 
+                  className="text-sm font-medium hover:text-white transition-all"
+                  style={{ color: 'rgba(255,255,255,0.7)' }}
+                >
+                  Overview
+                </a>
+                <a 
+                  href="/admin/assistant" 
+                  className="text-sm font-medium hover:text-white transition-all flex items-center space-x-1"
+                  style={{ color: '#f59e0b' }}
+                >
+                  <Icon name="sparkle" size={14} />
+                  <span>AI Assistant</span>
+                </a>
+              </nav>
+            </div>
             <div className="text-sm" style={{ color: 'rgba(255,255,255,0.6)' }}>
               {user?.email}
             </div>
