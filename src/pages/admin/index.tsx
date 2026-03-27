@@ -50,8 +50,8 @@ export default function AdminDashboard() {
         .from('leads')
         .select('*', { count: 'exact', head: true })
 
-      const pendingCount = agentsData?.filter(a => a.status === 'pending_review').length || 0
-      const activeCount = agentsData?.filter(a => a.status === 'active').length || 0
+      const pendingCount = (agentsData as any[])?.filter(a => a.status === 'pending_review').length || 0
+      const activeCount = (agentsData as any[])?.filter(a => a.status === 'active').length || 0
 
       setAgents(agentsData || [])
       setStats({

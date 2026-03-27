@@ -77,10 +77,20 @@ export default function AdminAssistant() {
     const stored = localStorage.getItem('adminChatSessions')
     if (stored) {
       const sessions = JSON.parse(stored)
-      setChatSessions(sessions)
+      // Convert timestamp strings back to Date objects
+      const sessionsWithDates = sessions.map((session: any) => ({
+        ...session,
+        messages: session.messages.map((msg: any) => ({
+          ...msg,
+          timestamp: new Date(msg.timestamp)
+        })),
+        createdAt: new Date(session.createdAt)
+      }))
       
-      if (sessions.length > 0) {
-        const latest = sessions[0]
+      setChatSessions(sessionsWithDates)
+      
+      if (sessionsWithDates.length > 0) {
+        const latest = sessionsWithDates[0]
         setCurrentSessionId(latest.id)
         setMessages(latest.messages)
       }
@@ -326,7 +336,10 @@ export default function AdminAssistant() {
                 >
                   <div className="truncate">{session.title}</div>
                   <div className="text-xs opacity-50">
-                    {new Date(session.createdAt).toLocaleDateString()}
+                    {session.createdAt instanceof Date 
+                      ? session.createdAt.toLocaleDateString()
+                      : new Date(session.createdAt).toLocaleDateString()
+                    }
                   </div>
                 </button>
               ))}
@@ -393,7 +406,10 @@ export default function AdminAssistant() {
                     >
                       <div className="whitespace-pre-wrap">{message.content}</div>
                       <div className="text-xs mt-2 opacity-70">
-                        {message.timestamp.toLocaleTimeString()}
+                        {message.timestamp instanceof Date 
+                          ? message.timestamp.toLocaleTimeString()
+                          : new Date(message.timestamp).toLocaleTimeString()
+                        }
                       </div>
                     </div>
                   </div>
