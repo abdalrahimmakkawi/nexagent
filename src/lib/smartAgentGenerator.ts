@@ -127,7 +127,7 @@ Response Guidelines:
 
   // Generate welcome message
   const generateWelcomeMessage = (): string => {
-    const greetings = {
+    const greetings: Record<string, string> = {
       'Professional and formal': `Welcome to ${onboardingData.businessName}. How may I assist you today?`,
       'Friendly and casual': `Hi there! Welcome to ${onboardingData.businessName}! I'm here to help. What can I do for you?`,
       'Technical and precise': `${onboardingData.businessName} Support. Please state your technical issue or inquiry.`,

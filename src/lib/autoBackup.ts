@@ -80,7 +80,11 @@ class AutoBackup {
     
     if (failed.length > 0) {
       console.log(`❌ Failed to backup: ${failed.length} files`)
-      failed.forEach(f => console.log(`   - ${f.file}: ${f.error}`))
+      failed.forEach(f => {
+        if (f.status === 'fulfilled') {
+          console.log(`   - ${f.value.file}: ${f.value.error}`)
+        }
+      })
     }
 
     // Clean up old backups (keep only last 10)
@@ -117,15 +121,16 @@ class AutoBackup {
 
       const validMetadatas = metadatas
         .filter(m => m.status === 'fulfilled' && m.value.metadata)
-        .map(m => m.value.metadata)
+        .map(m => m.status === 'fulfilled' ? m.value.metadata : null)
+        .filter((metadata): metadata is BackupMetadata => metadata !== null)
         .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
 
       // Keep only the most recent backups
       if (validMetadatas.length > this.config.maxBackups) {
         const toDelete = validMetadatas.slice(this.config.maxBackups)
         const dirsToDelete = toDelete.map(metadata => 
-          backupDirs.find(dir => path.basename(dir) === metadata.id)
-        ).filter(Boolean)
+          backupDirs.find(dir => dir && path.basename(dir) === metadata.id)
+        ).filter(Boolean) as string[]
 
         await Promise.allSettled(
           dirsToDelete.map(async (dir) => {
@@ -199,7 +204,8 @@ class AutoBackup {
 
       return metadatas
         .filter(m => m.status === 'fulfilled')
-        .map(m => m.value.metadata)
+        .map(m => m.status === 'fulfilled' ? m.value.metadata : null)
+        .filter((metadata): metadata is BackupMetadata => metadata !== null)
         .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
 
     } catch (error) {

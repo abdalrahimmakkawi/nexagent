@@ -104,17 +104,14 @@ export default async function handler(
     }
 
     // Fire webhook for admin notification
-    await fireWebhook('webhook/smart-agent-generated', {
-      event: 'smart.agent.generated',
-      clientEmail: 'client@example.com', // Replace with actual client email
-      clientName: onboardingData.businessName,
-      businessType: onboardingData.businessType,
-      industry: onboardingData.industry,
+    await fireWebhook('webhook/agent-generated', {
+      event: 'agent.generated',
+      clientId: clientId,
+      businessName: onboardingData.businessName,
       agentName: agentConfig.name,
       agentId: agent.id,
-      submissionId: submission.id,
-      onboardingData: onboardingData,
-      aiConfig: agentConfig,
+      businessType: onboardingData.businessType,
+      reviewUrl: `https://nexagent-one.vercel.app/admin/review/${agent.id}`,
       timestamp: new Date().toISOString()
     })
 

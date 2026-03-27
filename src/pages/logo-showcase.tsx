@@ -24,7 +24,7 @@ export default function LogoShowcase() {
             {['brain', 'minimal', 'wordmark', 'icon'].map((type) => (
               <button
                 key={type}
-                onClick={() => setSelectedLogo(type)}
+                onClick={() => setSelectedLogo(type as 'brain' | 'minimal' | 'wordmark' | 'icon')}
                 className={`px-4 py-2 rounded-lg capitalize transition-all ${
                   selectedLogo === type
                     ? 'bg-blue-600 text-white'
