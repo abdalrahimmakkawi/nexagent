@@ -42,51 +42,34 @@ export default function AdminAssistant() {
   ]
 
   useEffect(() => {
-    // Add a small delay to let Supabase restore session
-    const checkAuth = async () => {
-      // First try to get existing session
+  const checkAdmin = async () => {
+    try {
       const { data: { session } } = await supabase.auth.getSession()
       
       if (!session) {
-        // Wait for auth state to be determined
-        const { data: { subscription } } = supabase.auth.onAuthStateChange(
-          (event, session) => {
-            subscription.unsubscribe()
-            if (!session) {
-              window.location.href = '/login'
-              return
-            }
-            // Check admin email
-            const adminEmail = process.env.NEXT_PUBLIC_ADMIN_EMAIL
-            if (session.user.email !== adminEmail) {
-              window.location.href = '/'
-              return
-            }
-            setIsAdmin(true)
-            setLoading(false)
-          }
-        )
-        // Timeout fallback — if no auth event in 3 seconds, redirect to login
-        setTimeout(() => {
-          subscription.unsubscribe()
-          window.location.href = '/login'
-        }, 3000)
+        window.location.href = '/login'
         return
       }
       
-      // Session exists — check admin email
-      const adminEmail = process.env.NEXT_PUBLIC_ADMIN_EMAIL
+      const adminEmail = 'abdalrahimmakkawi@gmail.com'
       if (session.user.email !== adminEmail) {
-        window.location.href = '/'
+        window.location.href = '/login'
         return
       }
+      
+      // User is admin — allow access
       setIsAdmin(true)
       setLoading(false)
+      loadChatSessions()
+      
+    } catch (error) {
+      console.error('Auth error:', error)
+      window.location.href = '/login'
     }
+  }
   
-    checkAuth()
-    loadChatSessions()
-  }, [])
+  checkAdmin()
+}, [])
 
   useEffect(() => {
     scrollToBottom()
