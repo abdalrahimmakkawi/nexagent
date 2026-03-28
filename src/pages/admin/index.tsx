@@ -114,6 +114,14 @@ export default function AdminDashboard() {
                   <Icon name="sparkle" size={14} />
                   <span>AI Assistant</span>
                 </a>
+                <a 
+                  href="/admin/data" 
+                  className="text-sm font-medium hover:text-white transition-all flex items-center space-x-1"
+                  style={{ color: 'rgba(255,255,255,0.7)' }}
+                >
+                  <Icon name="robot" size={14} />
+                  <span>Data Explorer</span>
+                </a>
               </nav>
             </div>
             <div className="text-sm" style={{ color: 'rgba(255,255,255,0.6)' }}>
