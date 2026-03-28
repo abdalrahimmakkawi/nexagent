@@ -16,9 +16,11 @@ export default function Login() {
   const router = useRouter()
 
   useEffect(() => {
+    // Check if user is already logged in and redirect to dashboard
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
-        window.location.href = '/dashboard'
+        router.push('/dashboard')
+        return
       }
       setPageLoading(false)
     })

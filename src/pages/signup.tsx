@@ -16,9 +16,11 @@ export default function Signup() {
   const [success, setSuccess] = useState(false)
 
   useEffect(() => {
+    // Check if user is already logged in and redirect to dashboard
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
         window.location.href = '/dashboard'
+        return
       }
       setPageLoading(false)
     })
