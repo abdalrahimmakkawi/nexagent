@@ -62,10 +62,19 @@
   }
 }
 
-* {
+* { 
+  -webkit-tap-highlight-color: transparent; 
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+}
+
+button, a { 
+  min-height: 44px; 
+}
+
+@media (max-width: 768px) {
+  html { font-size: 15px; }
 }
 
 html {

@@ -127,6 +127,16 @@ export default function UnifiedApp() {
   const [demoEmail, setDemoEmail] = useState('')
   const [demoSubmitted, setDemoSubmitted] = useState(false)
   const [showBanner, setShowBanner] = useState(true)
+  const [isMobile, setIsMobile] = useState(false)
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768)
+    }
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
 
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId)
@@ -274,48 +284,49 @@ export default function UnifiedApp() {
             </Link>
             
             <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 32
+            display: 'flex',
+            alignItems: 'center',
+            gap: 32
+          }}>
+            {/* Desktop Navigation */}
+            {!isMobile && [
+              { id: 'home', label: 'Home' },
+              { id: 'services', label: 'Services' },
+              { id: 'pricing', label: 'Pricing' },
+              { id: 'demo', label: 'Demo' },
+              { id: 'waitlist', label: 'Join Waitlist' }
+            ].map(item => (
+              <button
+                key={item.id}
+                onClick={() => scrollToSection(item.id)}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: activeSection === item.id ? '#6366f1' : 'var(--t2)',
+                  fontSize: 14,
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  transition: 'color 0.2s'
+                }}
+                onMouseOver={(e) => e.currentTarget.style.color = '#6366f1'}
+                onMouseOut={(e) => e.currentTarget.style.color = activeSection === item.id ? '#6366f1' : 'var(--t2)'}
+              >
+                {item.label}
+              </button>
+            ))}
+            
+            <Link href="/admin" style={{
+              padding: '8px 16px',
+              background: '#6366f1',
+              color: '#fff',
+              borderRadius: 8,
+              fontSize: 14,
+              fontWeight: 600,
+              textDecoration: 'none'
             }}>
-              {[
-                { id: 'home', label: 'Home' },
-                { id: 'services', label: 'Services' },
-                { id: 'pricing', label: 'Pricing' },
-                { id: 'demo', label: 'Demo' },
-                { id: 'waitlist', label: 'Join Waitlist' }
-              ].map(item => (
-                <button
-                  key={item.id}
-                  onClick={() => scrollToSection(item.id)}
-                  style={{
-                    background: 'none',
-                    border: 'none',
-                    color: activeSection === item.id ? '#6366f1' : 'var(--t2)',
-                    fontSize: 14,
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                    transition: 'color 0.2s'
-                  }}
-                  onMouseOver={(e) => e.currentTarget.style.color = '#6366f1'}
-                  onMouseOut={(e) => e.currentTarget.style.color = activeSection === item.id ? '#6366f1' : 'var(--t2)'}
-                >
-                  {item.label}
-                </button>
-              ))}
-              
-              <Link href="/admin" style={{
-                padding: '8px 16px',
-                background: '#6366f1',
-                color: '#fff',
-                borderRadius: 8,
-                fontSize: 14,
-                fontWeight: 600,
-                textDecoration: 'none'
-              }}>
-                Admin
-              </Link>
-            </div>
+              Admin
+            </Link>
+          </div>
           </div>
         </nav>
 
@@ -325,7 +336,7 @@ export default function UnifiedApp() {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          padding: '80px 24px 40px',
+          padding: isMobile ? '80px 16px 40px' : '80px 24px 40px',
           position: 'relative'
         }}>
           <ParticleField />
@@ -369,7 +380,9 @@ export default function UnifiedApp() {
               gap: 16,
               justifyContent: 'center',
               flexWrap: 'wrap',
-              marginBottom: 48
+              marginBottom: 48,
+              flexDirection: isMobile ? 'column' : 'row',
+              alignItems: isMobile ? 'center' : 'stretch'
             }}>
               <button
                 onClick={() => scrollToSection('demo')}
@@ -381,7 +394,8 @@ export default function UnifiedApp() {
                   fontSize: 16,
                   fontWeight: 700,
                   border: 'none',
-                  cursor: 'pointer'
+                  cursor: 'pointer',
+                  width: isMobile ? '100%' : 'auto'
                 }}
               >
                 Try live demo →
@@ -397,7 +411,8 @@ export default function UnifiedApp() {
                   fontSize: 16,
                   fontWeight: 600,
                   border: '1px solid var(--border)',
-                  cursor: 'pointer'
+                  cursor: 'pointer',
+                  width: isMobile ? '100%' : 'auto'
                 }}
               >
                 View pricing
@@ -433,7 +448,7 @@ export default function UnifiedApp() {
 
         {/* Services Section */}
         <section id="services" style={{
-          padding: '80px 24px',
+          padding: isMobile ? '80px 16px' : '80px 24px',
           maxWidth: 1200,
           margin: '0 auto'
         }}>
@@ -525,7 +540,7 @@ export default function UnifiedApp() {
 
         {/* Pricing Section */}
         <section id="pricing" style={{
-          padding: '80px 24px',
+          padding: isMobile ? '80px 16px' : '80px 24px',
           maxWidth: 1200,
           margin: '0 auto'
         }}>
