@@ -3,6 +3,7 @@ import Head from 'next/head'
 import DashboardLayout from '@/components/DashboardLayout'
 import { supabase } from '@/lib/supabase'
 import Icon from '@/components/Icon'
+import { SkeletonTable } from '@/components/Skeleton'
 
 interface Conversation {
   id: string
@@ -101,11 +102,7 @@ export default function ConversationsPage() {
     return (
       <DashboardLayout activeTab="conversations">
         <div className="p-8">
-          <div className="animate-pulse space-y-4">
-            {[...Array(5)].map((_, i) => (
-              <div key={i} className="h-20 bg-gray-800 rounded-lg"></div>
-            ))}
-          </div>
+          <SkeletonTable rows={5} />
         </div>
       </DashboardLayout>
     )

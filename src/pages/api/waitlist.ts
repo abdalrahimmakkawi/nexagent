@@ -27,7 +27,7 @@ export default async function handler(
   }
 
   try {
-    const { data, error } = await (supabaseAdmin
+    const { data, error } = await ((supabaseAdmin
       .from('waitlist') as any)
       .insert({
         email: email.toLowerCase().trim(),
@@ -37,7 +37,7 @@ export default async function handler(
         source: source || 'website'
       })
       .select('position')
-      .single()
+      .single())
 
     if (error) {
       // Handle duplicate email gracefully

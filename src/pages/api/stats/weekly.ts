@@ -17,26 +17,26 @@ export default async function handler(
     const weekStr = oneWeekAgo.toISOString()
 
     // Leads this week
-    const { count: leadsThisWeek } = await supabaseAdmin
+    const { count: leadsThisWeek } = await (supabaseAdmin
       .from('leads')
       .select('*', { count: 'exact', head: true })
-      .gte('created_at', weekStr)
+      .gte('created_at', weekStr) as any)
 
     // Waitlist this week
-    const { count: waitlistThisWeek } = await supabaseAdmin
+    const { count: waitlistThisWeek } = await (supabaseAdmin
       .from('waitlist')
       .select('*', { count: 'exact', head: true })
-      .gte('created_at', weekStr)
+      .gte('created_at', weekStr) as any)
 
     // Total waitlist
-    const { count: totalWaitlist } = await supabaseAdmin
+    const { count: totalWaitlist } = await (supabaseAdmin
       .from('waitlist')
-      .select('*', { count: 'exact', head: true })
+      .select('*', { count: 'exact', head: true }) as any)
 
     // Total leads all time
-    const { count: totalLeads } = await supabaseAdmin
+    const { count: totalLeads } = await (supabaseAdmin
       .from('leads')
-      .select('*', { count: 'exact', head: true })
+      .select('*', { count: 'exact', head: true }) as any)
 
     return res.status(200).json({
       week: {

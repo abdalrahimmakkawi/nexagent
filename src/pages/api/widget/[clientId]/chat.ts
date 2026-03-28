@@ -143,30 +143,24 @@ Adapt successful response patterns while maintaining your unique personality and
         .find((m: any) => m.role === 'user')
       
       if (lastUserMsg) {
-        await (supabaseAdmin.from('messages') as any).insert([
+        await ((supabaseAdmin.from('messages') as any).insert([
           {
             conversation_id: conversationId,
             role: 'user',
             content: lastUserMsg.content,
-          },
-          {
-            conversation_id: conversationId,
-            role: 'assistant',
-            content,
-            provider: 'deepseek',
-            latency_ms: latencyMs,
+            created_at: new Date().toISOString()
           }
-        ])
+        ]))
+      }
 
-        // Update message count
-        await (supabaseAdmin
+      // Update message count
+      await ((supabaseAdmin
           .from('conversations') as any)
           .update({ 
             message_count: messages.length + 1 
-          })
+          }))
           .eq('id', conversationId)
       }
-    }
 
     return res.status(200).json({
       content,

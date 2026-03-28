@@ -87,13 +87,13 @@ export default async function handler(
       recentWaitlist,
       weeklyStats
     ] = await Promise.all([
-      supabaseAdmin.from('clients').select('*', { count: 'exact', head: true }),
-      supabaseAdmin.from('agents').select('*', { count: 'exact', head: true }).eq('status', 'active'),
-      supabaseAdmin.from('agents').select('*', { count: 'exact', head: true }).eq('status', 'pending_review'),
-      supabaseAdmin.from('leads').select('*', { count: 'exact', head: true }),
-      supabaseAdmin.from('waitlist').select('*', { count: 'exact', head: true }),
-      supabaseAdmin.from('clients').select('industry'),
-      supabaseAdmin.from('waitlist').select('email, created_at').order('created_at', { ascending: false }).limit(5),
+      (supabaseAdmin.from('clients').select('*', { count: 'exact', head: true }) as any),
+      (supabaseAdmin.from('agents').select('*', { count: 'exact', head: true }).eq('status', 'active') as any),
+      (supabaseAdmin.from('agents').select('*', { count: 'exact', head: true }).eq('status', 'pending_review') as any),
+      (supabaseAdmin.from('leads').select('*', { count: 'exact', head: true }) as any),
+      (supabaseAdmin.from('waitlist').select('*', { count: 'exact', head: true }) as any),
+      (supabaseAdmin.from('clients').select('industry') as any),
+      (supabaseAdmin.from('waitlist').select('email, created_at').order('created_at', { ascending: false }).limit(5) as any),
       // Get weekly stats
       Promise.resolve({
         leadsThisWeek: 12, // Mock for now, would calculate from actual data

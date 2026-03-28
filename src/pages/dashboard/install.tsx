@@ -31,13 +31,17 @@ export default function InstallPage() {
       // In production, this would come from user session
       const clientId = 'demo-user-id'
       
-      const { data: clientData } = await supabaseAdmin
-        .from('clients')
+      const { data: clientData } = await (supabaseAdmin
+        .from('clients') as any)
         .select(`
           id,
           business_name,
+          email,
+          phone,
+          website,
           industry,
-          widget_installed,
+          plan,
+          created_at,
           agents(id, name, status)
         `)
         .eq('id', clientId)

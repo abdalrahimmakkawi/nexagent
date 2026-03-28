@@ -21,9 +21,8 @@ export default async function handler(
       .select(`
         id, name, system_prompt, welcome_message,
         quick_prompts, lead_field, lead_message,
-        escalation_triggers, widget_color, 
-        widget_position, status,
-        clients(business_name, industry)
+        widget_color, widget_position, status,
+        clients(id, email)
       `)
       .eq('client_id', clientId)
       .eq('status', 'active')

@@ -3,6 +3,7 @@ import { useRouter } from 'next/router'
 import Head from 'next/head'
 import { supabase } from '@/lib/supabase'
 import Icon from '@/components/Icon'
+import { SkeletonTable } from '@/components/Skeleton'
 
 export default function AdminDashboard() {
   const router = useRouter()
@@ -84,7 +85,7 @@ export default function AdminDashboard() {
     )
   }
 
-  if (loading) return <div>Loading...</div>
+  if (loading) return <SkeletonTable rows={5} />
 
   return (
     <>

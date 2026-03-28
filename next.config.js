@@ -8,7 +8,18 @@ const nextConfig = {
       'rate-limiter-flexible',
     ]
   },
-
+  
+  images: {
+    domains: ['nexagent-one.vercel.app'],
+    formats: ['image/avif', 'image/webp'],
+  },
+  
+  compiler: {
+    removeConsole: process.env.NODE_ENV === 'production' 
+      ? { exclude: ['error', 'warn'] } 
+      : false,
+  },
+  
   // Security headers for all pages
   async headers() {
     return [
@@ -69,9 +80,18 @@ const nextConfig = {
           },
         ],
       },
+      {
+        source: '/_next/static/(.*)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
     ]
   },
-
+  
   // Redirect HTTP to HTTPS in production
   async redirects() {
     return process.env.NODE_ENV === 'production'

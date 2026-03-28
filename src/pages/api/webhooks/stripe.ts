@@ -46,14 +46,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
         if (customerId && customerEmail) {
           // Update client plan to active and store Stripe customer ID
-          const { error } = await (supabaseAdmin
+          const { error } = await ((supabaseAdmin
             .from('clients') as any)
             .update({ 
               plan: 'active',
               stripe_customer_id: customerId,
               status: 'active'
             })
-            .eq('email', customerEmail)
+            .eq('email', customerEmail))
 
           if (error) {
             console.error('Error updating client plan:', error)
@@ -80,12 +80,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         const customerId = subscription.customer as string
 
         // Update client plan to cancelled
-        const { error } = await (supabaseAdmin
+        const { error } = await ((supabaseAdmin
           .from('clients') as any)
           .update({ 
             plan: 'cancelled',
             status: 'cancelled'
-          })
+          }))
           .eq('stripe_customer_id', customerId)
 
         if (error) {

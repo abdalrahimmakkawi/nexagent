@@ -18,25 +18,25 @@ export default async function handler(
 
   try {
     // Check if conversation already exists for this session
-    const { data: existing } = await supabaseAdmin
-      .from('conversations')
+    const { data: existing } = await (supabaseAdmin
+      .from('conversations') as any)
       .select('*')
       .eq('session_id', sessionId)
       .single()
 
+    const messages: any[] = []
+    if (loadHistory) {
+      const { data: messageHistory } = await (supabaseAdmin
+        .from('messages') as any)
+        .select('role, content, created_at, provider')
+        .eq('conversation_id', (existing as any).id)
+        .order('created_at', { ascending: true })
+        .limit(50)
+
+      messages.push(...(messageHistory || []))
+    }
+
     if (existing) {
-      // If requested, load message history
-      const messages: any[] = []
-      if (loadHistory) {
-        const { data: messageHistory } = await (supabaseAdmin
-          .from('messages') as any)
-          .select('role, content, created_at, provider')
-          .eq('conversation_id', (existing as any).id)
-          .order('created_at', { ascending: true })
-
-        messages.push(...(messageHistory || []))
-      }
-
       return res.status(200).json({ 
         conversationId: (existing as any).id,
         messages: messages,

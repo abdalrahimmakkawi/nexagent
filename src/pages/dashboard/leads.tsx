@@ -3,6 +3,7 @@ import Head from 'next/head'
 import DashboardLayout from '@/components/DashboardLayout'
 import { supabase } from '@/lib/supabase'
 import Icon from '@/components/Icon'
+import { SkeletonTable } from '@/components/Skeleton'
 
 interface Lead {
   id: string
@@ -106,14 +107,7 @@ export default function LeadsPage() {
     return (
       <DashboardLayout activeTab="leads">
         <div className="p-8">
-          <div className="animate-pulse space-y-4">
-            <div className="grid grid-cols-4 gap-6">
-              {[...Array(4)].map((_, i) => (
-                <div key={i} className="h-24 bg-gray-800 rounded-lg"></div>
-              ))}
-            </div>
-            <div className="h-96 bg-gray-800 rounded-lg"></div>
-          </div>
+          <SkeletonTable rows={5} />
         </div>
       </DashboardLayout>
     )

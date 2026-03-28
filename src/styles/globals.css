@@ -4,6 +4,11 @@
 @tailwind components;
 @tailwind utilities;
 
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -33,6 +38,13 @@
     --s2: #12121f;
     --s3: #18182a;
     --border: rgba(255, 255, 255, 0.06);
+  }
+
+  @media (max-width: 768px) {
+    html { font-size: 15px; }
+  }
+
+  :root {
     --border2: rgba(255, 255, 255, 0.1);
     --accent: #6b5ce7;
     --accent2: #8b7cf8;

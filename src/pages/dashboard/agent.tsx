@@ -4,6 +4,7 @@ import DashboardLayout from '@/components/DashboardLayout'
 import { supabase } from '@/lib/supabase'
 import { fireWebhook } from '@/lib/webhooks'
 import Icon from '@/components/Icon'
+import { SkeletonCard } from '@/components/Skeleton'
 
 interface Agent {
   id: string
@@ -149,16 +150,10 @@ export default function AgentPage() {
     return (
       <DashboardLayout activeTab="agent">
         <div className="p-8">
-          <div className="animate-pulse space-y-4">
-            <div className="h-12 bg-gray-800 rounded-lg w-1/2"></div>
-            <div className="grid grid-cols-2 gap-8">
-              <div className="space-y-4">
-                {[...Array(6)].map((_, i) => (
-                  <div key={i} className="h-20 bg-gray-800 rounded-lg"></div>
-                ))}
-              </div>
-              <div className="h-96 bg-gray-800 rounded-lg"></div>
-            </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <SkeletonCard />
+            <SkeletonCard />
+            <SkeletonCard />
           </div>
         </div>
       </DashboardLayout>
