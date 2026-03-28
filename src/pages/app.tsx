@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
 import dynamic from 'next/dynamic'
 import Icon from '@/components/Icon'
+import DemoComponent from './demo'
 
 const ParticleField = dynamic(
   () => import('@/components/ParticleField'),
@@ -653,85 +654,7 @@ export default function UnifiedApp() {
           maxWidth: 1200,
           margin: '0 auto'
         }}>
-          <div style={{
-            background: 'var(--s1)',
-            border: '1px solid var(--border)',
-            borderRadius: 16,
-            padding: 48,
-            textAlign: 'center'
-          }}>
-            <h2 style={{
-              fontSize: 'clamp(32px, 4vw, 40px)',
-              fontWeight: 800,
-              marginBottom: 24
-            }}>
-              Try the AI Agent Demo
-            </h2>
-            
-            <p style={{
-              fontSize: 18,
-              color: 'var(--t2)',
-              marginBottom: 32,
-              maxWidth: 600,
-              margin: '0 auto 32px'
-            }}>
-              Experience how our AI agents handle real customer interactions. No signup required.
-            </p>
-
-            <div style={{
-              background: 'var(--bg)',
-              border: '1px solid var(--border)',
-              borderRadius: 12,
-              padding: 24,
-              marginBottom: 32,
-              minHeight: 400,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}>
-              <div style={{ textAlign: 'center' }}>
-                <Icon name="message" size={48} style={{ color: '#6366f1', marginBottom: 16 }} />
-                <p style={{ color: 'var(--t2)', marginBottom: 16 }}>
-                  Interactive Demo Coming Soon
-                </p>
-                <button style={{
-                  padding: '12px 24px',
-                  background: '#6366f1',
-                  color: '#fff',
-                  border: 'none',
-                  borderRadius: 8,
-                  fontSize: 16,
-                  fontWeight: 600,
-                  cursor: 'pointer'
-                }}>
-                  Request Early Access
-                </button>
-              </div>
-            </div>
-
-            <div style={{
-              fontSize: 14,
-              color: 'var(--t2)',
-              textAlign: 'center'
-            }}>
-              Want this agent for your business?<br />
-              Setup in 3 days from $99/month.<br />
-              <button
-                onClick={() => scrollToSection('waitlist')}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  color: '#6366f1',
-                  fontSize: 16,
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  textDecoration: 'underline'
-                }}
-              >
-                Join the waitlist →
-              </button>
-            </div>
-          </div>
+          <DemoComponent />
         </section>
 
         {/* Waitlist Section */}

@@ -59,7 +59,7 @@ export default function AdminAssistant() {
       }
 
       if (user.email !== ADMIN_EMAIL) {
-        window.location.href = '/admin'
+        window.location.href = '/login'
         return
       }
 
