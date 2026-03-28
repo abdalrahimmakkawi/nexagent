@@ -1,8 +1,13 @@
 import Head from 'next/head'
 import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
+import dynamic from 'next/dynamic'
 import Icon from '@/components/Icon'
-import ParticleField from '@/components/ParticleField'
+
+const ParticleField = dynamic(
+  () => import('@/components/ParticleField'),
+  { ssr: false }
+)
 
 const TICKER_ITEMS = [
   'E-commerce Support', 'Legal Intake', 'EdTech Onboarding',
