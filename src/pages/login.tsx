@@ -16,14 +16,9 @@ export default function Login() {
   const router = useRouter()
 
   useEffect(() => {
-    // Check if user is already logged in and redirect to dashboard
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) {
-        router.push('/dashboard')
-        return
-      }
-      setPageLoading(false)
-    })
+    // Only redirect to dashboard if user is already logged in AND they're not trying to access login page directly
+    // This allows users to access login page if they want to sign out
+    setPageLoading(false)
   }, [])
 
   async function handleLogin(e: React.FormEvent) {
