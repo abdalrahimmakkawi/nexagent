@@ -314,18 +314,6 @@ export default function UnifiedApp() {
                 {item.label}
               </button>
             ))}
-            
-            <Link href="/admin" style={{
-              padding: '8px 16px',
-              background: '#6366f1',
-              color: '#fff',
-              borderRadius: 8,
-              fontSize: 14,
-              fontWeight: 600,
-              textDecoration: 'none'
-            }}>
-              Admin
-            </Link>
           </div>
           </div>
         </nav>
