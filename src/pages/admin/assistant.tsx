@@ -42,35 +42,55 @@ export default function AdminAssistant() {
   ]
 
   useEffect(() => {
-    checkAdminAccess()
+    // Add a small delay to let Supabase restore session
+    const checkAuth = async () => {
+      // First try to get existing session
+      const { data: { session } } = await supabase.auth.getSession()
+      
+      if (!session) {
+        // Wait for auth state to be determined
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(
+          (event, session) => {
+            subscription.unsubscribe()
+            if (!session) {
+              window.location.href = '/login'
+              return
+            }
+            // Check admin email
+            const adminEmail = process.env.NEXT_PUBLIC_ADMIN_EMAIL
+            if (session.user.email !== adminEmail) {
+              window.location.href = '/'
+              return
+            }
+            setIsAdmin(true)
+            setLoading(false)
+          }
+        )
+        // Timeout fallback — if no auth event in 3 seconds, redirect to login
+        setTimeout(() => {
+          subscription.unsubscribe()
+          window.location.href = '/login'
+        }, 3000)
+        return
+      }
+      
+      // Session exists — check admin email
+      const adminEmail = process.env.NEXT_PUBLIC_ADMIN_EMAIL
+      if (session.user.email !== adminEmail) {
+        window.location.href = '/'
+        return
+      }
+      setIsAdmin(true)
+      setLoading(false)
+    }
+  
+    checkAuth()
     loadChatSessions()
   }, [])
 
   useEffect(() => {
     scrollToBottom()
   }, [messages])
-
-  const checkAdminAccess = async () => {
-    try {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) {
-        window.location.href = '/admin/login'
-        return
-      }
-
-      if (user.email !== ADMIN_EMAIL) {
-        window.location.href = '/login'
-        return
-      }
-
-      setIsAdmin(true)
-    } catch (error) {
-      console.error('Admin check failed:', error)
-      window.location.href = '/admin/login'
-    } finally {
-      setLoading(false)
-    }
-  }
 
   const loadChatSessions = async () => {
     // Load from localStorage first

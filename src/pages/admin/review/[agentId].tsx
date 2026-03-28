@@ -17,14 +17,49 @@ export default function AdminReview() {
   const [moreInfoText, setMoreInfoText] = useState('')
 
   useEffect(() => {
-    // Check admin access
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!session || session.user.email !== process.env.NEXT_PUBLIC_ADMIN_EMAIL) {
-        router.push('/login')
+    // Add a small delay to let Supabase restore session
+    const checkAuth = async () => {
+      // First try to get existing session
+      const { data: { session } } = await supabase.auth.getSession()
+      
+      if (!session) {
+        // Wait for auth state to be determined
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(
+          (event, session) => {
+            subscription.unsubscribe()
+            if (!session) {
+              router.push('/login')
+              return
+            }
+            // Check admin email
+            const adminEmail = process.env.NEXT_PUBLIC_ADMIN_EMAIL
+            if (session.user.email !== adminEmail) {
+              router.push('/')
+              return
+            }
+            setUser(session.user)
+            setLoading(false)
+          }
+        )
+        // Timeout fallback — if no auth event in 3 seconds, redirect to login
+        setTimeout(() => {
+          subscription.unsubscribe()
+          router.push('/login')
+        }, 3000)
+        return
+      }
+      
+      // Session exists — check admin email
+      const adminEmail = process.env.NEXT_PUBLIC_ADMIN_EMAIL
+      if (session.user.email !== adminEmail) {
+        router.push('/')
         return
       }
       setUser(session.user)
-    })
+      setLoading(false)
+    }
+  
+    checkAuth()
   }, [router])
 
   useEffect(() => {

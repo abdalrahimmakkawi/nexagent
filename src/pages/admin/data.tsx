@@ -22,14 +22,49 @@ export default function DataExplorer() {
   const [user, setUser] = useState<any>(null)
 
   useEffect(() => {
-    // Check admin access
-    supabaseAdmin.auth.getSession().then(({ data: { session } }) => {
-      if (!session || session.user.email !== process.env.NEXT_PUBLIC_ADMIN_EMAIL) {
-        router.push('/login')
+    // Add a small delay to let Supabase restore session
+    const checkAuth = async () => {
+      // First try to get existing session
+      const { data: { session } } = await supabaseAdmin.auth.getSession()
+      
+      if (!session) {
+        // Wait for auth state to be determined
+        const { data: { subscription } } = supabaseAdmin.auth.onAuthStateChange(
+          (event, session) => {
+            subscription.unsubscribe()
+            if (!session) {
+              router.push('/login')
+              return
+            }
+            // Check admin email
+            const adminEmail = process.env.NEXT_PUBLIC_ADMIN_EMAIL
+            if (session.user.email !== adminEmail) {
+              router.push('/')
+              return
+            }
+            setUser(session.user)
+            setLoading(false)
+          }
+        )
+        // Timeout fallback — if no auth event in 3 seconds, redirect to login
+        setTimeout(() => {
+          subscription.unsubscribe()
+          router.push('/login')
+        }, 3000)
+        return
+      }
+      
+      // Session exists — check admin email
+      const adminEmail = process.env.NEXT_PUBLIC_ADMIN_EMAIL
+      if (session.user.email !== adminEmail) {
+        router.push('/')
         return
       }
       setUser(session.user)
-    })
+      setLoading(false)
+    }
+  
+    checkAuth()
   }, [router])
 
   useEffect(() => {
