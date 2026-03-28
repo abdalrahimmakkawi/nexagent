@@ -121,6 +121,7 @@ export default function UnifiedApp() {
   const [demoBusiness, setDemoBusiness] = useState('')
   const [demoEmail, setDemoEmail] = useState('')
   const [demoSubmitted, setDemoSubmitted] = useState(false)
+  const [showBanner, setShowBanner] = useState(true)
 
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId)
@@ -177,6 +178,59 @@ export default function UnifiedApp() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
+      {/* Announcement Banner */}
+      {showBanner && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          background: '#4338ca',
+          color: 'white',
+          fontSize: '13px',
+          height: '40px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 2000,
+          padding: '0 16px'
+        }}>
+          <span style={{ textAlign: 'center' }}>
+            🎯 Founding Client Program — 5 spots at $99/month forever.{' '}
+            <button
+              onClick={() => scrollToSection('pricing')}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: 'white',
+                textDecoration: 'underline',
+                cursor: 'pointer',
+                fontSize: '13px',
+                padding: 0
+              }}
+            >
+              Claim your spot →
+            </button>
+          </span>
+          <button
+            onClick={() => setShowBanner(false)}
+            style={{
+              position: 'absolute',
+              right: '16px',
+              background: 'none',
+              border: 'none',
+              color: 'white',
+              cursor: 'pointer',
+              fontSize: '16px',
+              padding: '4px',
+              lineHeight: 1
+            }}
+          >
+            ×
+          </button>
+        </div>
+      )}
+
       <div style={{ 
         background: 'var(--bg)', 
         color: 'var(--text)', 
@@ -186,7 +240,7 @@ export default function UnifiedApp() {
         {/* Navigation */}
         <nav style={{
           position: 'fixed',
-          top: 0,
+          top: showBanner ? 40 : 0,
           left: 0,
           right: 0,
           background: 'rgba(10, 10, 18, 0.95)',
