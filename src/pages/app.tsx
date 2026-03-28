@@ -423,7 +423,7 @@ export default function UnifiedApp() {
                   justifyContent: 'center',
                   marginBottom: 20
                 }}>
-                  <Icon name={service.icon} size={24} style={{ color: '#6366f1' }} />
+                  <Icon name={service.icon as any} size={24} style={{ color: '#6366f1' }} />
                 </div>
                 
                 <h3 style={{

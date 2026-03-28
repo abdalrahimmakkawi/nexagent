@@ -28,25 +28,25 @@ export default async function handler(
       // If requested, load message history
       const messages: any[] = []
       if (loadHistory) {
-        const { data: messageHistory } = await supabaseAdmin
-          .from('messages')
+        const { data: messageHistory } = await (supabaseAdmin
+          .from('messages') as any)
           .select('role, content, created_at, provider')
-          .eq('conversation_id', existing.id)
+          .eq('conversation_id', (existing as any).id)
           .order('created_at', { ascending: true })
 
         messages.push(...(messageHistory || []))
       }
 
       return res.status(200).json({ 
-        conversationId: existing.id,
+        conversationId: (existing as any).id,
         messages: messages,
         isNew: false
       })
     }
 
     // Get client's agent to find client_id
-    const { data: agent } = await supabaseAdmin
-      .from('agents')
+    const { data: agent } = await (supabaseAdmin
+      .from('agents') as any)
       .select('client_id')
       .eq('id', agentId)
       .single()
@@ -56,11 +56,11 @@ export default async function handler(
     }
 
     // Create new conversation
-    const { data: conversation } = await supabaseAdmin
-      .from('conversations')
+    const { data: conversation } = await (supabaseAdmin
+      .from('conversations') as any)
       .insert({
         agent_id: agentId,
-        client_id: agent.client_id,
+        client_id: (agent as any).client_id,
         session_id: sessionId,
         source: 'widget',
       })
@@ -68,7 +68,7 @@ export default async function handler(
       .single()
 
     return res.status(200).json({ 
-      conversationId: conversation?.id,
+      conversationId: (conversation as any)?.id,
       messages: [],
       isNew: true
     })

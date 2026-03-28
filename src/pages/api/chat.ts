@@ -11,11 +11,7 @@ import { getStoreConfig } from '@/lib/store-configs'
 import { 
   chatRateLimiter, 
   dailyRateLimiter, 
-  globalRateLimiter, 
-  tokenRateLimiter,
-  getClientIP,
-  estimateTokens,
-  checkTokenLimit
+  getClientIP
 } from '@/lib/rate-limiter'
 
 export default async function handler(
@@ -33,16 +29,6 @@ export default async function handler(
   res.setHeader('X-XSS-Protection', '1; mode=block')
 
   const ip = getClientIP(req)
-
-  // Check global rate limit first (protects against abuse from all users)
-  try {
-    await globalRateLimiter.consume(ip)
-  } catch {
-    return res.status(429).json({
-      error: 'Service temporarily busy. Please try again in a minute.',
-      retryAfter: 60
-    })
-  }
 
   // Check per-minute rate limit (very strict now)
   try {
@@ -79,28 +65,10 @@ export default async function handler(
     return res.status(400).json({ error: 'Conversation too long. Max 20 messages.' })
   }
 
-  // Validate message content length (more strict)
+  // Validate last message length
   const lastMessage = messages[messages.length - 1]
-  if (!lastMessage?.content || lastMessage.content.length > 200) { // Reduced from 400
-    return res.status(400).json({ error: 'Message too long. Max 200 characters.' })
-  }
-
-  // Check token limits for cost control
-  const totalTokens = messages.reduce((sum, msg) => sum + estimateTokens(msg.content), 0)
-  if (totalTokens > 500) { // Max 500 tokens per conversation
-    return res.status(400).json({ 
-      error: 'Conversation too complex. Please start a new conversation.',
-      tokensUsed: totalTokens,
-      maxTokens: 500
-    })
-  }
-
-  // Check token rate limit
-  if (!await checkTokenLimit(ip, lastMessage.content)) {
-    return res.status(429).json({
-      error: 'Token limit exceeded. Please wait before sending more messages.',
-      retryAfter: 300
-    })
+  if (!lastMessage?.content || lastMessage.content.length > 400) {
+    return res.status(400).json({ error: 'Message too long. Max 400 characters.' })
   }
 
   // Sanitize: strip any HTML or script tags from input

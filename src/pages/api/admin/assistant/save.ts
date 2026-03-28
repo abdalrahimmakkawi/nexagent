@@ -41,10 +41,10 @@ export default async function handler(
     let result
     if (existing) {
       // Update existing conversation
-      const { data, error } = await supabaseAdmin
-        .from('admin_conversations')
+      const { data, error } = await (supabaseAdmin
+        .from('admin_conversations') as any)
         .update(conversationData)
-        .eq('id', existing.id)
+        .eq('id', (existing as any).id)
         .select()
         .single()
 
@@ -52,8 +52,8 @@ export default async function handler(
       result = data
     } else {
       // Create new conversation
-      const { data, error } = await supabaseAdmin
-        .from('admin_conversations')
+      const { data, error } = await (supabaseAdmin
+        .from('admin_conversations') as any)
         .insert(conversationData)
         .select()
         .single()

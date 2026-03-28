@@ -66,13 +66,13 @@ export default function AgentPage() {
       if (data) {
         setAgent(data)
         setFormData({
-          name: data.name || '',
-          welcome_message: data.welcome_message || '',
-          quick_prompts: data.quick_prompts || ['', '', '', '', ''],
-          lead_field: data.lead_field || 'email',
-          lead_message: data.lead_message || '',
-          widget_color: data.widget_color || '#6366f1',
-          widget_position: data.widget_position || 'bottom-right'
+          name: (data as any).name || '',
+          welcome_message: (data as any).welcome_message || '',
+          quick_prompts: (data as any).quick_prompts || ['', '', '', '', ''],
+          lead_field: (data as any).lead_field || 'email',
+          lead_message: (data as any).lead_message || '',
+          widget_color: (data as any).widget_color || '#6366f1',
+          widget_position: (data as any).widget_position || 'bottom-right'
         })
       }
     } catch (error) {
@@ -93,8 +93,8 @@ export default function AgentPage() {
       if (!user) throw new Error('Not authenticated')
 
       // Update agent with changes
-      const { error } = await supabase
-        .from('agents')
+      const { error } = await (supabase
+        .from('agents') as any)
         .update({
           name: formData.name,
           welcome_message: formData.welcome_message,
@@ -106,7 +106,7 @@ export default function AgentPage() {
           status: 'pending_review', // Changes require review
           updated_at: new Date().toISOString()
         })
-        .eq('id', agent.id)
+        .eq('id', (agent as any).id)
 
       if (error) throw error
 
@@ -116,9 +116,9 @@ export default function AgentPage() {
         clientId: user.id,
         businessName: formData.name,
         agentName: formData.name,
-        agentId: agent.id,
+        agentId: (agent as any).id,
         businessType: 'AI Agent',
-        reviewUrl: `https://nexagent-one.vercel.app/admin/review/${agent.id}`,
+        reviewUrl: `https://nexagent-one.vercel.app/admin/review/${(agent as any).id}`,
         timestamp: new Date().toISOString()
       })
 

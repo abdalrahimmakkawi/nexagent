@@ -27,8 +27,8 @@ export default async function handler(
   }
 
   try {
-    const { data, error } = await supabaseAdmin
-      .from('waitlist')
+    const { data, error } = await (supabaseAdmin
+      .from('waitlist') as any)
       .insert({
         email: email.toLowerCase().trim(),
         business_name: businessName || null,

@@ -38,7 +38,7 @@ export default function AdminReview() {
       const { data } = await supabase
         .from('agents')
         .select('*, clients(*)')
-        .eq('id', agentId)
+        .eq('id', agentId as string)
         .single()
 
       setAgent(data)
@@ -52,8 +52,8 @@ export default function AdminReview() {
   const saveAgent = async () => {
     setSaving(true)
     try {
-      await supabase
-        .from('agents')
+      await (supabase
+        .from('agents') as any)
         .update({
           name: agent.name,
           system_prompt: agent.system_prompt,
@@ -63,7 +63,7 @@ export default function AdminReview() {
           widget_color: agent.widget_color,
           escalation_triggers: agent.escalation_triggers,
         })
-        .eq('id', agentId)
+        .eq('id', agentId as string)
 
       alert('Changes saved!')
     } catch (err) {

@@ -26,7 +26,7 @@ export default async function handler(
 
   try {
     // Save to Supabase leads table
-    await supabaseAdmin.from('leads').insert({
+    await (supabaseAdmin.from('leads') as any).insert({
       value: value.trim().toLowerCase(),
       field_type: fieldType || 'email',
       agent_id: null,

@@ -31,8 +31,8 @@ export default async function handler(
     }
 
     // Update agent status to active
-    await supabaseAdmin
-      .from('agents')
+    await (supabaseAdmin
+      .from('agents') as any)
       .update({
         status: 'active',
         approved_by: 'admin',
@@ -40,22 +40,22 @@ export default async function handler(
       .eq('id', agentId)
 
     // Update client approved status
-    await supabaseAdmin
-      .from('clients')
+    await (supabaseAdmin
+      .from('clients') as any)
       .update({
         agent_approved: true,
         approved_at: new Date().toISOString(),
       })
-      .eq('id', agent.client_id)
+      .eq('id', (agent as any).client_id)
 
     // Notify client via n8n
     fireWebhook('webhook/agent-approved', {
       event: 'agent.approved',
-      clientEmail: agent.clients.email,
-      clientName: agent.clients.business_name,
-      agentName: agent.name,
-      agentId: agent.id,
-      widgetUrl: `${process.env.NEXT_PUBLIC_SITE_URL}/widget/${agent.client_id}`,
+      clientEmail: (agent as any).clients.email,
+      clientName: (agent as any).clients.business_name,
+      agentName: (agent as any).name,
+      agentId: (agent as any).id,
+      widgetUrl: `${process.env.NEXT_PUBLIC_SITE_URL}/widget/${(agent as any).client_id}`,
       dashboardUrl: `${process.env.NEXT_PUBLIC_SITE_URL}/dashboard`,
       timestamp: new Date().toISOString(),
     })

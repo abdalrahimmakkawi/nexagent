@@ -83,14 +83,14 @@ export default async function handler(
 
   try {
     // Fetch agent system prompt server-side
-    const { data: agent } = await supabaseAdmin
-      .from('agents')
+    const { data: agent } = await (supabaseAdmin
+      .from('agents') as any)
       .select('system_prompt, status, clients(industry)')
       .eq('id', agentId)
       .eq('client_id', clientId)
       .single()
 
-    if (!agent || agent.status !== 'active') {
+    if (!agent || (agent as any).status !== 'active') {
       return res.status(403).json({ error: 'Agent not active' })
     }
 
@@ -109,7 +109,7 @@ export default async function handler(
     }
 
     // Enhanced system prompt with collective brain
-    const enhancedSystemPrompt = `${agent.system_prompt}
+    const enhancedSystemPrompt = `${(agent as any).system_prompt}
 
 ${collectiveBrainInsights}
 
@@ -143,7 +143,7 @@ Adapt successful response patterns while maintaining your unique personality and
         .find((m: any) => m.role === 'user')
       
       if (lastUserMsg) {
-        await supabaseAdmin.from('messages').insert([
+        await (supabaseAdmin.from('messages') as any).insert([
           {
             conversation_id: conversationId,
             role: 'user',
@@ -159,8 +159,8 @@ Adapt successful response patterns while maintaining your unique personality and
         ])
 
         // Update message count
-        await supabaseAdmin
-          .from('conversations')
+        await (supabaseAdmin
+          .from('conversations') as any)
           .update({ 
             message_count: messages.length + 1 
           })

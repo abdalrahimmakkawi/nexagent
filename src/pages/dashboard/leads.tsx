@@ -54,10 +54,10 @@ export default function LeadsPage() {
       
       const stats = {
         total: leadsData?.length || 0,
-        thisWeek: leadsData?.filter(lead => new Date(lead.created_at) > weekAgo).length || 0,
-        thisMonth: leadsData?.filter(lead => new Date(lead.created_at) > monthAgo).length || 0,
-        emailCount: leadsData?.filter(lead => lead.type === 'email').length || 0,
-        phoneCount: leadsData?.filter(lead => lead.type === 'phone').length || 0
+        thisWeek: leadsData?.filter((lead: any) => new Date(lead.created_at) > weekAgo).length || 0,
+        thisMonth: leadsData?.filter((lead: any) => new Date(lead.created_at) > monthAgo).length || 0,
+        emailCount: leadsData?.filter((lead: any) => lead.type === 'email').length || 0,
+        phoneCount: leadsData?.filter((lead: any) => lead.type === 'phone').length || 0
       }
       
       setStats(stats)

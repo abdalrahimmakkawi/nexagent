@@ -16,8 +16,8 @@ export default async function handler(
   }
 
   try {
-    const { data: agent } = await supabaseAdmin
-      .from('agents')
+    const { data: agent } = await (supabaseAdmin
+      .from('agents') as any)
       .select(`
         id, name, system_prompt, welcome_message,
         quick_prompts, lead_field, lead_message,
@@ -38,15 +38,15 @@ export default async function handler(
     // Return only what the widget needs
     // Never expose system_prompt to client side
     return res.status(200).json({
-      agentId: agent.id,
-      name: agent.name,
-      welcomeMessage: agent.welcome_message,
-      quickPrompts: agent.quick_prompts || [],
-      leadField: agent.lead_field,
-      leadMessage: agent.lead_message,
-      escalationTriggers: agent.escalation_triggers || [],
-      widgetColor: agent.widget_color || '#6366f1',
-      widgetPosition: agent.widget_position || 'bottom-right',
+      agentId: (agent as any).id,
+      name: (agent as any).name,
+      welcomeMessage: (agent as any).welcome_message,
+      quickPrompts: (agent as any).quick_prompts || [],
+      leadField: (agent as any).lead_field,
+      leadMessage: (agent as any).lead_message,
+      escalationTriggers: (agent as any).escalation_triggers || [],
+      widgetColor: (agent as any).widget_color || '#6366f1',
+      widgetPosition: (agent as any).widget_position || 'bottom-right',
       industry: (agent.clients as any)?.industry || '',
       businessName: (agent.clients as any)?.business_name || '',
     })

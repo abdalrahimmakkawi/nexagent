@@ -46,8 +46,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
         if (customerId && customerEmail) {
           // Update client plan to active and store Stripe customer ID
-          const { error } = await supabaseAdmin
-            .from('clients')
+          const { error } = await (supabaseAdmin
+            .from('clients') as any)
             .update({ 
               plan: 'active',
               stripe_customer_id: customerId,
@@ -80,8 +80,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         const customerId = subscription.customer as string
 
         // Update client plan to cancelled
-        const { error } = await supabaseAdmin
-          .from('clients')
+        const { error } = await (supabaseAdmin
+          .from('clients') as any)
           .update({ 
             plan: 'cancelled',
             status: 'cancelled'

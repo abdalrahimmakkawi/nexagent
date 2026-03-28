@@ -50,8 +50,8 @@ export default async function handler(
     const agentConfig = await generateSmartAgentConfig(onboardingData)
 
     // Save onboarding submission
-    const { data: submission, error: submissionError } = await supabaseAdmin
-      .from('onboarding_submissions')
+    const { data: submission, error: submissionError } = await (supabaseAdmin
+      .from('onboarding_submissions') as any)
       .insert({
         client_id: clientId,
         business_name: onboardingData.businessName,
@@ -73,8 +73,8 @@ export default async function handler(
     }
 
     // Save agent with generated config
-    const { data: agent, error: agentError } = await supabaseAdmin
-      .from('agents')
+    const { data: agent, error: agentError } = await (supabaseAdmin
+      .from('agents') as any)
       .insert({
         client_id: clientId,
         name: agentConfig.name,
@@ -100,8 +100,8 @@ export default async function handler(
     }
 
     // Update client onboarding status
-    const { error: clientError } = await supabaseAdmin
-      .from('clients')
+    const { error: clientError } = await (supabaseAdmin
+      .from('clients') as any)
       .update({
         onboarding_completed: true,
         business_name: onboardingData.businessName,
@@ -122,9 +122,9 @@ export default async function handler(
       clientId: clientId,
       businessName: onboardingData.businessName,
       agentName: agentConfig.name,
-      agentId: agent.id,
+      agentId: (agent as any).id,
       businessType: onboardingData.businessType,
-      reviewUrl: `https://nexagent-one.vercel.app/admin/review/${agent.id}`,
+      reviewUrl: `https://nexagent-one.vercel.app/admin/review/${(agent as any).id}`,
       timestamp: new Date().toISOString()
     })
 
@@ -132,8 +132,8 @@ export default async function handler(
       success: true,
       message: 'Smart onboarding completed successfully!',
       data: {
-        submissionId: submission.id,
-        agentId: agent.id,
+        submissionId: (submission as any).id,
+        agentId: (agent as any).id,
         agentName: agentConfig.name,
         nextSteps: [
           'Your AI agent is now being reviewed by our team',

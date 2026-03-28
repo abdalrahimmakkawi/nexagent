@@ -32,7 +32,7 @@ export async function logSecurityEvent(
   
   // Also persist to database
   try {
-    await supabaseAdmin.from('security_logs').insert({
+    await (supabaseAdmin.from('security_logs') as any).insert({
       event: log.event,
       ip: log.ip,
       path: log.path,
@@ -46,8 +46,10 @@ export async function logSecurityEvent(
 
 // Helper function to get IP from request
 export function getIPFromRequest(req: NextApiRequest): string {
+  const forwarded = req.headers['x-forwarded-for'] as string | undefined
+  const forwardedStr = Array.isArray(forwarded) ? forwarded[0] : forwarded
   return (
-    req.headers['x-forwarded-for']?.split(',')[0]?.trim() ||
+    forwardedStr?.split(',')[0]?.trim() ||
     req.headers['x-real-ip'] ||
     req.connection?.remoteAddress ||
     'unknown'

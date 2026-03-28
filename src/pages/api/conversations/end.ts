@@ -17,8 +17,8 @@ export default async function handler(
 
   try {
     // Update conversation with end time and summary
-    const { data: conversation } = await supabaseAdmin
-      .from('conversations')
+    const { data: conversation } = await (supabaseAdmin
+      .from('conversations') as any)
       .update({
         ended_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
@@ -58,8 +58,8 @@ export default async function handler(
       .map(([word]) => word)
 
     // Store conversation analytics
-    await supabaseAdmin
-      .from('conversation_analytics')
+    await (supabaseAdmin
+      .from('conversation_analytics') as any)
       .insert({
         conversation_id: conversationId,
         agent_id: (conversation as any).agent_id,

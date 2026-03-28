@@ -27,8 +27,8 @@ export default async function handler(
 
   try {
     // 1. Save onboarding submission
-    await supabaseAdmin
-      .from('onboarding_submissions')
+    await (supabaseAdmin
+      .from('onboarding_submissions') as any)
       .insert({
         client_id: clientId,
         business_name: businessName,
@@ -55,8 +55,8 @@ export default async function handler(
     const agentConfig = await generateAgentConfig(onboardingData)
 
     // 3. Save generated agent to database (status: pending review)
-    const { data: agent, error: agentError } = await supabaseAdmin
-      .from('agents')
+    const { data: agent, error: agentError } = await (supabaseAdmin
+      .from('agents') as any)
       .insert({
         client_id: clientId,
         name: agentConfig.agentName,
@@ -77,8 +77,8 @@ export default async function handler(
     if (agentError) throw agentError
 
     // 4. Mark client onboarding as completed
-    await supabaseAdmin
-      .from('clients')
+    await (supabaseAdmin
+      .from('clients') as any)
       .update({
         business_url: businessUrl,
         business_type: businessType,
@@ -92,15 +92,15 @@ export default async function handler(
       clientId,
       businessName,
       agentName: agentConfig.agentName,
-      agentId: agent.id,
+      agentId: (agent as any).id,
       businessType,
-      reviewUrl: `${process.env.NEXT_PUBLIC_SITE_URL}/admin/review/${agent.id}`,
+      reviewUrl: `${process.env.NEXT_PUBLIC_SITE_URL}/admin/review/${(agent as any).id}`,
       timestamp: new Date().toISOString(),
     })
 
     return res.status(200).json({
       success: true,
-      agentId: agent.id,
+      agentId: (agent as any).id,
       agentName: agentConfig.agentName,
       message: 'Agent generated successfully — pending review',
     })
