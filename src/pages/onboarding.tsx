@@ -4,7 +4,7 @@ import Head from 'next/head'
 import { supabase } from '@/lib/supabase'
 import Icon from '@/components/Icon'
 
-type Step = 1 | 2 | 3 | 4
+type Step = 1 | 2 | 3 | 4 | 5
 
 interface FormData {
   businessName: string
@@ -17,6 +17,7 @@ interface FormData {
   tone: string
   goals: string
   extraInfo: string
+  selectedPlan: string
 }
 
 export default function Onboarding() {
@@ -39,7 +40,8 @@ export default function Onboarding() {
     tone: 'friendly',
     goals: '',
     extraInfo: '',
-  })
+    selectedPlan: '',
+  } as FormData)
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -85,10 +87,33 @@ export default function Onboarding() {
 
   const handleSubmit = async () => {
     if (!validateStep(4)) return
+    if (!formData.selectedPlan) {
+      setErrors({ submit: 'Please select a plan' })
+      return
+    }
 
     setSubmitting(true)
     
     try {
+      // First set the plan
+      const planResponse = await fetch('/api/onboarding/set-plan', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          clientId: user?.id,
+          plan: formData.selectedPlan,
+        }),
+      })
+
+      const planResult = await planResponse.json()
+      
+      if (!planResult.ok) {
+        setErrors({ submit: planResult.error || 'Failed to set plan' })
+        setSubmitting(false)
+        return
+      }
+
+      // Then submit the onboarding
       const response = await fetch('/api/onboarding/submit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -334,60 +359,132 @@ export default function Onboarding() {
               {step === 3 && (
                 <div className="space-y-6">
                   <h2 className="text-2xl font-bold mb-6" style={{ color: '#fff', fontFamily: "'Playfair Display', serif" }}>
-                    Personality & Goals
+                    Choose Your Agent Team
                   </h2>
                   
-                  <div>
-                    <label className="block text-sm font-medium mb-3" style={{ color: 'rgba(255,255,255,0.8)' }}>
-                      Agent tone *
-                    </label>
-                    <div className="grid grid-cols-2 gap-3">
-                      {[
-                        { value: 'friendly', label: 'Friendly & Casual' },
-                        { value: 'professional', label: 'Professional & Formal' },
-                        { value: 'enthusiastic', label: 'Enthusiastic & Energetic' },
-                        { value: 'calm', label: 'Calm & Reassuring' },
-                      ].map((tone) => (
-                        <button
-                          key={tone.value}
-                          onClick={() => setFormData({ ...formData, tone: tone.value })}
-                          className="p-4 rounded-lg border text-left transition-all"
-                          style={{
-                            background: formData.tone === tone.value ? 'rgba(99,102,241,0.2)' : 'rgba(255,255,255,0.05)',
-                            borderColor: formData.tone === tone.value ? '#6366f1' : 'rgba(255,255,255,0.1)',
-                            color: '#fff'
-                          }}
-                        >
-                          {tone.label}
-                        </button>
-                      ))}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    {/* Support Plan */}
+                    <div 
+                      className={`p-6 rounded-xl border-2 transition-all cursor-pointer ${
+                        formData.selectedPlan === 'starter' 
+                          ? 'border-blue-500 bg-blue-500/10' 
+                          : 'border-gray-600 bg-gray-800'
+                      }`}
+                      onClick={() => setFormData({ ...formData, selectedPlan: 'starter' })}
+                    >
+                      <div className="text-center mb-4">
+                        <div className="text-4xl mb-2">🛡️</div>
+                        <h3 className="text-xl font-bold mb-2">Support</h3>
+                        <div className="text-2xl font-bold mb-3">$199<span className="text-sm font-normal">/month</span></div>
+                      </div>
+                      <ul className="space-y-2 text-sm">
+                        <li className="flex items-center"><span className="mr-2">✅</span> 1 AI support agent</li>
+                        <li className="flex items-center"><span className="mr-2">✅</span> Unlimited conversations</li>
+                        <li className="flex items-center"><span className="mr-2">✅</span> Lead capture (email & SMS)</li>
+                        <li className="flex items-center"><span className="mr-2">✅</span> Conversation history</li>
+                        <li className="flex items-center"><span className="mr-2">✅</span> Weekly analytics</li>
+                        <li className="flex items-center"><span className="mr-2">✅</span> Setup in 3 days</li>
+                        <li className="flex items-center"><span className="mr-2">✅</span> Cancel anytime</li>
+                      </ul>
+                      <div className="text-sm text-gray-400 mt-4">
+                        Best for: Small businesses just starting out
+                      </div>
+                      <button
+                        className="w-full py-3 rounded-lg font-semibold transition-all"
+                        style={{
+                          background: formData.selectedPlan === 'starter' ? '#fff' : 'transparent',
+                          color: formData.selectedPlan === 'starter' ? '#000' : '#fff',
+                          border: '1px solid #fff'
+                        }}
+                        onClick={() => setFormData({ ...formData, selectedPlan: 'starter' })}
+                      >
+                        Choose Support
+                      </button>
                     </div>
-                  </div>
 
-                  <div>
-                    <label className="block text-sm font-medium mb-2" style={{ color: 'rgba(255,255,255,0.8)' }}>
-                      Business goals for the agent
-                    </label>
-                    <textarea
-                      value={formData.goals}
-                      onChange={(e) => setFormData({ ...formData, goals: e.target.value })}
-                      className="w-full px-4 py-3 rounded-lg border"
-                      style={{ background: 'rgba(255,255,255,0.05)', borderColor: 'rgba(255,255,255,0.1)', color: '#fff' }}
-                      placeholder="e.g. Reduce support tickets, capture more leads, qualify buyers"
-                    />
-                  </div>
+                    {/* Operations Plan - RECOMMENDED */}
+                    <div 
+                      className={`p-6 rounded-xl border-2 transition-all cursor-pointer relative ${
+                        formData.selectedPlan === 'team' 
+                          ? 'border-blue-500 bg-blue-500/10' 
+                          : 'border-gray-600 bg-gray-800'
+                      }`}
+                      onClick={() => setFormData({ ...formData, selectedPlan: 'team' })}
+                    >
+                      {formData.selectedPlan !== 'team' && (
+                        <div className="absolute -top-3 -right-3 bg-orange-500 text-white text-xs px-2 py-1 rounded-full font-bold">
+                          RECOMMENDED
+                        </div>
+                      )}
+                      <div className="text-center mb-4">
+                        <div className="text-4xl mb-2">🔀 🛡️ 💰 ⚡ 🚨</div>
+                        <h3 className="text-xl font-bold mb-2">Operations</h3>
+                        <div className="text-2xl font-bold mb-3">$599<span className="text-sm font-normal">/month</span></div>
+                      </div>
+                      <ul className="space-y-2 text-sm">
+                        <li className="flex items-center"><span className="mr-2">✅</span> Everything in Support</li>
+                        <li className="flex items-center"><span className="mr-2">✅</span> 5 specialized AI agents</li>
+                        <li className="flex items-center"><span className="mr-2">✅</span> Smart routing between agents</li>
+                        <li className="flex items-center"><span className="mr-2">✅</span> Appointment booking</li>
+                        <li className="flex items-center"><span className="mr-2">✅</span> CRM updates</li>
+                        <li className="flex items-center"><span className="mr-2">✅</span> Email follow-ups</li>
+                        <li className="flex items-center"><span className="mr-2">✅</span> Lead qualification</li>
+                      </ul>
+                      <div className="text-sm text-gray-400 mt-4">
+                        Best for: Growing businesses
+                      </div>
+                      <button
+                        className="w-full py-3 rounded-lg font-semibold transition-all"
+                        style={{
+                          background: formData.selectedPlan === 'team' ? '#fff' : 'transparent',
+                          color: formData.selectedPlan === 'team' ? '#000' : '#fff',
+                          border: '1px solid #fff'
+                        }}
+                        onClick={() => setFormData({ ...formData, selectedPlan: 'team' })}
+                      >
+                        Choose Operations
+                      </button>
+                    </div>
 
-                  <div>
-                    <label className="block text-sm font-medium mb-2" style={{ color: 'rgba(255,255,255,0.8)' }}>
-                      Extra information
-                    </label>
-                    <textarea
-                      value={formData.extraInfo}
-                      onChange={(e) => setFormData({ ...formData, extraInfo: e.target.value })}
-                      className="w-full px-4 py-3 rounded-lg border"
-                      style={{ background: 'rgba(255,255,255,0.05)', borderColor: 'rgba(255,255,255,0.1)', color: '#fff' }}
-                      placeholder="Anything else the agent should know — return policies, shipping info, special offers, business hours, etc."
-                    />
+                    {/* Business Plan */}
+                    <div 
+                      className={`p-6 rounded-xl border-2 transition-all cursor-pointer ${
+                        formData.selectedPlan === 'squad' 
+                          ? 'border-blue-500 bg-blue-500/10' 
+                          : 'border-gray-600 bg-gray-800'
+                      }`}
+                      onClick={() => setFormData({ ...formData, selectedPlan: 'squad' })}
+                    >
+                      <div className="text-center mb-4">
+                        <div className="text-4xl mb-2">🔀 🛡️ 💰 ⚡ 🚨 🔄 📊 👋</div>
+                        <h3 className="text-xl font-bold mb-2">Business</h3>
+                        <div className="text-2xl font-bold mb-3">$1,199<span className="text-sm font-normal">/month</span></div>
+                      </div>
+                      <ul className="space-y-2 text-sm">
+                        <li className="flex items-center"><span className="mr-2">✅</span> Everything in Operations</li>
+                        <li className="flex items-center"><span className="mr-2">✅</span> All 8 AI agents</li>
+                        <li className="flex items-center"><span className="mr-2">✅</span> WhatsApp + email + website</li>
+                        <li className="flex items-center"><span className="mr-2">✅</span> Revenue operations</li>
+                        <li className="flex items-center"><span className="mr-2">✅</span> Custom workflows</li>
+                        <li className="flex items-center"><span className="mr-2">✅</span> Dedicated account manager</li>
+                        <li className="flex items-center"><span className="mr-2">✅</span> SLA guarantee</li>
+                        <li className="flex items-center"><span className="mr-2">✅</span> White-label option</li>
+                      </ul>
+                      <div className="text-sm text-gray-400 mt-4">
+                        Best for: Established businesses
+                      </div>
+                      <button
+                        className="w-full py-3 rounded-lg font-semibold transition-all"
+                        style={{
+                          background: formData.selectedPlan === 'squad' ? '#fff' : 'transparent',
+                          color: formData.selectedPlan === 'squad' ? '#000' : '#fff',
+                          border: '1px solid #fff'
+                        }}
+                        onClick={() => setFormData({ ...formData, selectedPlan: 'squad' })}
+                      >
+                        Choose Business
+                      </button>
+                    </div>
                   </div>
                 </div>
               )}
