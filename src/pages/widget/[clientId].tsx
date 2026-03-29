@@ -19,6 +19,30 @@ interface Message {
   role: 'user' | 'assistant'
   content: string
   timestamp: Date
+  agentUsed?: string
+  sentiment?: number
+}
+
+const AGENT_LABELS: Record<string, string> = {
+  support: '🛡️ Support',
+  sales: '💰 Sales',
+  faq: '⚡ FAQ',
+  escalation: '🚨 Priority',
+  onboarding: '👋 Welcome',
+  followup: '🔄 Follow-up',
+  analytics: '📊 Analytics',
+}
+
+function getAgentLabel(agentType?: string): string {
+  if (!agentType) return '🤖 Assistant'
+  return AGENT_LABELS[agentType] || '🤖 Assistant'
+}
+
+function getSentimentColor(sentiment?: number): string {
+  if (!sentiment) return 'transparent'
+  if (sentiment > 0.6) return 'rgba(34,197,94,0.5)' // green
+  if (sentiment >= 0.3 && sentiment <= 0.6) return 'rgba(251,191,36,0.5)' // amber
+  return 'rgba(239,68,68,0.5)' // red (escalation mode)
 }
 
 export default function WidgetPage() {
@@ -289,6 +313,32 @@ export default function WidgetPage() {
                 style={message.role === 'user' ? { backgroundColor: config.widgetColor } : {}}
               >
                 {message.content}
+                {/* Show agent badge for AI messages */}
+                {message.role === 'assistant' && (message as any).agentUsed && (
+                  <div style={{ 
+                    fontSize: 10, 
+                    color: 'rgba(255,255,255,0.3)',
+                    marginTop: 4,
+                    paddingLeft: 4,
+                  }}>
+                    {getAgentLabel((message as any).agentUsed)}
+                  </div>
+                )}
+                {/* Show sentiment as border color */}
+                {message.role === 'assistant' && (message as any).sentiment && (
+                  <div style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    borderRadius: '0.5rem',
+                    borderWidth: '2px',
+                    borderStyle: 'solid',
+                    borderColor: getSentimentColor((message as any).sentiment),
+                    pointerEvents: 'none'
+                  }} />
+                )}
               </div>
             </div>
           ))}
