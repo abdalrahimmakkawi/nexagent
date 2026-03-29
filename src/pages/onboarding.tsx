@@ -17,7 +17,7 @@ interface FormData {
   tone: string
   goals: string
   extraInfo: string
-  selectedPlan: string
+  // Note: selectedPlan removed - auto-assigning squad plan for free school agents
 }
 
 export default function Onboarding() {
@@ -40,7 +40,7 @@ export default function Onboarding() {
     tone: 'friendly',
     goals: '',
     extraInfo: '',
-    selectedPlan: '',
+    // Note: selectedPlan removed - auto-assigning squad plan
   } as FormData)
 
   useEffect(() => {
@@ -54,21 +54,39 @@ export default function Onboarding() {
   }, [router])
 
   const validateStep = (currentStep: Step): boolean => {
+    const validateStep = (stepNum: Step): boolean => {
+      switch (stepNum) {
+        case 1:
+          return !!(formData.businessName && formData.businessUrl && 
+                  formData.businessType && formData.industry && 
+                  formData.productsServices && formData.priceRange)
+        case 2:
+          return !!(formData.topFaqs && formData.tone && formData.goals)
+        case 3:
+          return true // Plan step removed - always valid
+        default:
+          return false
+      }
+    }
+
     const newErrors: Record<string, string> = {}
 
-    switch (currentStep) {
-      case 1:
-        if (!formData.businessName.trim()) newErrors.businessName = 'Required'
-        if (!formData.businessType) newErrors.businessType = 'Required'
-        if (!formData.industry.trim()) newErrors.industry = 'Required'
-        break
-      case 2:
-        if (!formData.productsServices.trim()) newErrors.productsServices = 'Required'
-        if (!formData.topFaqs.trim()) newErrors.topFaqs = 'Required'
-        break
-      case 3:
-        if (!formData.tone) newErrors.tone = 'Required'
-        break
+    if (!validateStep(currentStep)) {
+      switch (currentStep) {
+        case 1:
+          if (!formData.businessName.trim()) newErrors.businessName = 'Required'
+          if (!formData.businessUrl.trim()) newErrors.businessUrl = 'Required'
+          if (!formData.businessType) newErrors.businessType = 'Required'
+          if (!formData.industry.trim()) newErrors.industry = 'Required'
+          if (!formData.productsServices.trim()) newErrors.productsServices = 'Required'
+          if (!formData.priceRange) newErrors.priceRange = 'Required'
+          break
+        case 2:
+          if (!formData.topFaqs.trim()) newErrors.topFaqs = 'Required'
+          if (!formData.tone) newErrors.tone = 'Required'
+          if (!formData.goals.trim()) newErrors.goals = 'Required'
+          break
+      }
     }
 
     setErrors(newErrors)
@@ -86,22 +104,21 @@ export default function Onboarding() {
   }
 
   const handleSubmit = async () => {
-    if (!validateStep(4)) return
-    if (!formData.selectedPlan) {
-      setErrors({ submit: 'Please select a plan' })
-      return
-    }
-
+    if (!validateStep(3)) return // Changed from 4 to 3 steps
+    
+    // Auto-assign squad plan for free school agents (full multi-agent capabilities)
+    const autoPlan = 'squad'
+    
     setSubmitting(true)
     
     try {
-      // First set the plan
+      // First set the auto-assigned plan
       const planResponse = await fetch('/api/onboarding/set-plan', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           clientId: user?.id,
-          plan: formData.selectedPlan,
+          plan: autoPlan,
         }),
       })
 
@@ -113,13 +130,14 @@ export default function Onboarding() {
         return
       }
 
-      // Then submit the onboarding
+      // Then submit onboarding with auto-assigned plan
       const response = await fetch('/api/onboarding/submit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           clientId: user?.id,
           ...formData,
+          selectedPlan: autoPlan,
         }),
       })
 
@@ -356,140 +374,8 @@ export default function Onboarding() {
                 </div>
               )}
 
+              {/* Step 3 - Review & Submit (was step 4) */}
               {step === 3 && (
-                <div className="space-y-6">
-                  <h2 className="text-2xl font-bold mb-6" style={{ color: '#fff', fontFamily: "'Playfair Display', serif" }}>
-                    Choose Your Agent Team
-                  </h2>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    {/* Support Plan */}
-                    <div 
-                      className={`p-6 rounded-xl border-2 transition-all cursor-pointer ${
-                        formData.selectedPlan === 'starter' 
-                          ? 'border-blue-500 bg-blue-500/10' 
-                          : 'border-gray-600 bg-gray-800'
-                      }`}
-                      onClick={() => setFormData({ ...formData, selectedPlan: 'starter' })}
-                    >
-                      <div className="text-center mb-4">
-                        <div className="text-4xl mb-2">🛡️</div>
-                        <h3 className="text-xl font-bold mb-2">Support</h3>
-                        <div className="text-2xl font-bold mb-3">$199<span className="text-sm font-normal">/month</span></div>
-                      </div>
-                      <ul className="space-y-2 text-sm">
-                        <li className="flex items-center"><span className="mr-2">✅</span> 1 AI support agent</li>
-                        <li className="flex items-center"><span className="mr-2">✅</span> Unlimited conversations</li>
-                        <li className="flex items-center"><span className="mr-2">✅</span> Lead capture (email & SMS)</li>
-                        <li className="flex items-center"><span className="mr-2">✅</span> Conversation history</li>
-                        <li className="flex items-center"><span className="mr-2">✅</span> Weekly analytics</li>
-                        <li className="flex items-center"><span className="mr-2">✅</span> Setup in 3 days</li>
-                        <li className="flex items-center"><span className="mr-2">✅</span> Cancel anytime</li>
-                      </ul>
-                      <div className="text-sm text-gray-400 mt-4">
-                        Best for: Small businesses just starting out
-                      </div>
-                      <button
-                        className="w-full py-3 rounded-lg font-semibold transition-all"
-                        style={{
-                          background: formData.selectedPlan === 'starter' ? '#fff' : 'transparent',
-                          color: formData.selectedPlan === 'starter' ? '#000' : '#fff',
-                          border: '1px solid #fff'
-                        }}
-                        onClick={() => setFormData({ ...formData, selectedPlan: 'starter' })}
-                      >
-                        Choose Support
-                      </button>
-                    </div>
-
-                    {/* Operations Plan - RECOMMENDED */}
-                    <div 
-                      className={`p-6 rounded-xl border-2 transition-all cursor-pointer relative ${
-                        formData.selectedPlan === 'team' 
-                          ? 'border-blue-500 bg-blue-500/10' 
-                          : 'border-gray-600 bg-gray-800'
-                      }`}
-                      onClick={() => setFormData({ ...formData, selectedPlan: 'team' })}
-                    >
-                      {formData.selectedPlan !== 'team' && (
-                        <div className="absolute -top-3 -right-3 bg-orange-500 text-white text-xs px-2 py-1 rounded-full font-bold">
-                          RECOMMENDED
-                        </div>
-                      )}
-                      <div className="text-center mb-4">
-                        <div className="text-4xl mb-2">🔀 🛡️ 💰 ⚡ 🚨</div>
-                        <h3 className="text-xl font-bold mb-2">Operations</h3>
-                        <div className="text-2xl font-bold mb-3">$599<span className="text-sm font-normal">/month</span></div>
-                      </div>
-                      <ul className="space-y-2 text-sm">
-                        <li className="flex items-center"><span className="mr-2">✅</span> Everything in Support</li>
-                        <li className="flex items-center"><span className="mr-2">✅</span> 5 specialized AI agents</li>
-                        <li className="flex items-center"><span className="mr-2">✅</span> Smart routing between agents</li>
-                        <li className="flex items-center"><span className="mr-2">✅</span> Appointment booking</li>
-                        <li className="flex items-center"><span className="mr-2">✅</span> CRM updates</li>
-                        <li className="flex items-center"><span className="mr-2">✅</span> Email follow-ups</li>
-                        <li className="flex items-center"><span className="mr-2">✅</span> Lead qualification</li>
-                      </ul>
-                      <div className="text-sm text-gray-400 mt-4">
-                        Best for: Growing businesses
-                      </div>
-                      <button
-                        className="w-full py-3 rounded-lg font-semibold transition-all"
-                        style={{
-                          background: formData.selectedPlan === 'team' ? '#fff' : 'transparent',
-                          color: formData.selectedPlan === 'team' ? '#000' : '#fff',
-                          border: '1px solid #fff'
-                        }}
-                        onClick={() => setFormData({ ...formData, selectedPlan: 'team' })}
-                      >
-                        Choose Operations
-                      </button>
-                    </div>
-
-                    {/* Business Plan */}
-                    <div 
-                      className={`p-6 rounded-xl border-2 transition-all cursor-pointer ${
-                        formData.selectedPlan === 'squad' 
-                          ? 'border-blue-500 bg-blue-500/10' 
-                          : 'border-gray-600 bg-gray-800'
-                      }`}
-                      onClick={() => setFormData({ ...formData, selectedPlan: 'squad' })}
-                    >
-                      <div className="text-center mb-4">
-                        <div className="text-4xl mb-2">🔀 🛡️ 💰 ⚡ 🚨 🔄 📊 👋</div>
-                        <h3 className="text-xl font-bold mb-2">Business</h3>
-                        <div className="text-2xl font-bold mb-3">$1,199<span className="text-sm font-normal">/month</span></div>
-                      </div>
-                      <ul className="space-y-2 text-sm">
-                        <li className="flex items-center"><span className="mr-2">✅</span> Everything in Operations</li>
-                        <li className="flex items-center"><span className="mr-2">✅</span> All 8 AI agents</li>
-                        <li className="flex items-center"><span className="mr-2">✅</span> WhatsApp + email + website</li>
-                        <li className="flex items-center"><span className="mr-2">✅</span> Revenue operations</li>
-                        <li className="flex items-center"><span className="mr-2">✅</span> Custom workflows</li>
-                        <li className="flex items-center"><span className="mr-2">✅</span> Dedicated account manager</li>
-                        <li className="flex items-center"><span className="mr-2">✅</span> SLA guarantee</li>
-                        <li className="flex items-center"><span className="mr-2">✅</span> White-label option</li>
-                      </ul>
-                      <div className="text-sm text-gray-400 mt-4">
-                        Best for: Established businesses
-                      </div>
-                      <button
-                        className="w-full py-3 rounded-lg font-semibold transition-all"
-                        style={{
-                          background: formData.selectedPlan === 'squad' ? '#fff' : 'transparent',
-                          color: formData.selectedPlan === 'squad' ? '#000' : '#fff',
-                          border: '1px solid #fff'
-                        }}
-                        onClick={() => setFormData({ ...formData, selectedPlan: 'squad' })}
-                      >
-                        Choose Business
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {step === 4 && (
                 <div className="space-y-6">
                   <h2 className="text-2xl font-bold mb-6" style={{ color: '#fff', fontFamily: "'Playfair Display', serif" }}>
                     Review & Submit
@@ -539,7 +425,7 @@ export default function Onboarding() {
                   ← Back
                 </button>
                 
-                {step < 4 ? (
+                {step < 3 ? (
                   <button
                     onClick={nextStep}
                     className="px-6 py-3 rounded-lg font-semibold transition-all"
