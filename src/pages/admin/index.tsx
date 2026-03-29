@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/router'
 import Head from 'next/head'
-import { supabase } from '@/lib/supabase'
+import { supabase, supabaseAdmin } from '@/lib/supabase'
 import Icon from '@/components/Icon'
 import { SkeletonTable } from '@/components/Skeleton'
 
@@ -9,7 +9,12 @@ export default function AdminDashboard() {
   const router = useRouter()
   const [loading, setLoading] = useState(true)
   const [agents, setAgents] = useState<any[]>([])
-  const [stats, setStats] = useState({
+  const [stats, setStats] = useState<{
+    totalClients: number
+    pendingReview: number
+    activeAgents: number
+    totalLeads: number
+  }>({
     totalClients: 0,
     pendingReview: 0,
     activeAgents: 0,
@@ -266,16 +271,16 @@ export default function AdminDashboard() {
                 </tbody>
               </table>
 
-              {agents.length === 0 && (
-                <div className="text-center py-12">
-                  <Icon name="robot" size={48} style={{ color: 'rgba(255,255,255,0.2)' }} />
-                  <p className="mt-4" style={{ color: 'rgba(255,255,255,0.6)' }}>No agents yet</p>
-                </div>
-              )}
-            </div>
+            {agents.length === 0 && (
+              <div className="text-center py-12">
+                <Icon name="robot" size={48} style={{ color: 'rgba(255,255,255,0.2)' }} />
+                <p className="mt-4" style={{ color: 'rgba(255,255,255,0.6)' }}>No agents yet</p>
+              </div>
+            )}
           </div>
         </div>
       </div>
-    </>
-  )
-}
+    </div>
+  </div>
+</>
+)
