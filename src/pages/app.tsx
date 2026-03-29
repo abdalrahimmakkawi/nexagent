@@ -26,69 +26,52 @@ const SERVICES = [
 
 const PRICING = [
   {
-    name: 'Founders Program',
+    name: 'Support',
     price: '$199',
-    billing: '/month · 6-month commitment',
-    pop: true,
-    desc: '🚀 Limited to first 10 clients only. Get all Growth features with $0 setup fee.',
-    features: [
-      '$0 setup fee (save $299)',
-      'All Growth features included',
-      'Early access to new features',
-      'Case study participation',
-      'Priority support',
-      '3-day deployment guarantee',
-      'Money-back if not live in 3 days',
-      'Limited to first 10 clients',
-    ],
-  },
-  {
-    name: 'Starter',
-    price: '$99',
-    billing: '/month · cancel anytime',
+    billing: '/month',
     pop: false,
-    desc: 'Perfect for businesses wanting to test AI with no setup risk.',
+    desc: 'AI agent that handles customer support, answers questions, and captures leads 24/7 automatically.',
     features: [
-      'No setup fee',
-      '1 custom AI agent',
-      'Up to 500 conversations/month',
-      'Email support',
-      'Standard analytics',
-      '3-day deployment guarantee',
-    ],
-  },
-  {
-    name: 'Growth',
-    price: '$199',
-    billing: '/month · cancel anytime',
-    pop: false,
-    desc: 'For businesses ready to scale with AI operations.',
-    features: [
-      '$299 setup fee',
-      '1–2 custom AI agents',
-      'Up to 2,000 conversations/month',
-      'Priority support (<4hr response)',
-      'Advanced analytics',
-      'Lead capture included',
-      'Custom branding',
-      '3-day deployment guarantee',
-    ],
-  },
-  {
-    name: 'Scale',
-    price: '$499',
-    billing: '/month · cancel anytime',
-    pop: false,
-    desc: 'Full AI operations suite for aggressive automation.',
-    features: [
-      '$499 setup fee',
-      'Up to 5 custom agents',
+      '1 AI support agent',
       'Unlimited conversations',
-      '24/7 phone support',
-      'Custom integrations',
+      'Lead capture (email & SMS)',
+      'Conversation history',
+      'Weekly analytics report',
+      'Setup in 3 days',
+      'Cancel anytime',
+    ],
+  },
+  {
+    name: 'Operations',
+    price: '$599',
+    billing: '/month',
+    pop: true,
+    desc: 'Everything in Support plus automated workflows that book appointments, update your CRM, and handle follow-ups.',
+    features: [
+      'Everything in Support',
+      '5 specialized AI agents',
+      'Appointment booking automation',
+      'CRM updates (HubSpot, Notion)',
+      'Email drafting & follow-ups',
+      'Lead qualification workflows',
+      'Priority support',
+    ],
+  },
+  {
+    name: 'Business',
+    price: '$1,199',
+    billing: '/month',
+    pop: false,
+    desc: 'Full AI operations suite. Your AI handles support, operations, analytics, and revenue generation.',
+    features: [
+      'Everything in Operations',
+      '8 specialized AI agents',
+      'WhatsApp + email + website channels',
+      'Revenue operations (upsells, churn prevention)',
+      'Custom workflow builder',
       'Dedicated account manager',
       'SLA guarantee',
-      '3-day deployment guarantee',
+      'White-label option',
     ],
   },
 ]
@@ -212,7 +195,7 @@ export default function UnifiedApp() {
           padding: '0 16px'
         }}>
           <span style={{ textAlign: 'center' }}>
-            🎯 Founding Client Program — 5 spots at $99/month forever.{' '}
+            🎯 Founding Client Program — $199/month, locked forever. 5 spots left.{' '}
             <button
               onClick={() => scrollToSection('pricing')}
               style={{
@@ -550,7 +533,7 @@ export default function UnifiedApp() {
             }}>
               Start with a project. <em style={{ fontStyle: 'italic', color: '#c4baff' }}>Grow</em> on retainer.
             </h2>
-            <p style={{ fontSize: 18, color: 'var(--t2)' }}>No surprise fees. Cancel anytime.</p>
+            <p style={{ fontSize: 18, color: 'var(--t2)' }}>from $199/month. No surprise fees. Cancel anytime.</p>
           </div>
 
           <div style={{
@@ -767,6 +750,12 @@ export default function UnifiedApp() {
             ))}
           </div>
         </section>
+
+        <div style={{ textAlign: 'center', marginTop: 32, marginBottom: 64 }}>
+          <p style={{ fontSize: 14, color: 'var(--t2)' }}>
+            All plans include a free 14-day trial · No setup fees · Cancel anytime · Deployed in 3 days guaranteed
+          </p>
+        </div>
 
         {/* FAQ Section */}
         <section style={{
