@@ -3,14 +3,14 @@ import Head from 'next/head'
 
 export default function DashboardRedirect() {
   useEffect(() => {
-    window.location.href = '/app#pricing'
+    window.location.href = '/onboarding'
   }, [])
 
   return (
     <>
       <Head>
         <title>Redirecting to NexAgent</title>
-        <meta httpEquiv="refresh" content="0; url=/app#pricing" />
+        <meta httpEquiv="refresh" content="0; url=/onboarding" />
       </Head>
       <div style={{
         display: 'flex',
@@ -22,8 +22,8 @@ export default function DashboardRedirect() {
         fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
       }}>
         <div style={{ textAlign: 'center' }}>
-          <h1>Redirecting to NexAgent...</h1>
-          <p>If you're not redirected, <a href="/app#pricing" style={{ color: '#6366f1' }}>click here</a>.</p>
+          <h1>Redirecting to create your AI agent...</h1>
+          <p>If you're not redirected, <a href="/onboarding" style={{ color: '#6366f1' }}>click here</a>.</p>
         </div>
       </div>
     </>
