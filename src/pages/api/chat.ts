@@ -1,12 +1,12 @@
 // src/pages/api/chat.ts
-// ─────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────
 // POST /api/chat
 // Body: { messages, storeId }
-// Returns: { content, provider, latencyMs }
+// Returns: { content, provider, latencyMs, agentUsed, sentiment, intent }
 // ─────────────────────────────────────────────────────────────
 
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { chat, Message } from '@/lib/ai-router'
+import { multiAgentChat, PLAN_AGENTS, AgentContext } from '@/lib/multi-agent'
 import { getStoreConfig } from '@/lib/store-configs'
 import { 
   chatRateLimiter, 
@@ -51,7 +51,7 @@ export default async function handler(
   }
 
   const { messages, storeId } = req.body as {
-    messages: Message[]
+    messages: any[]
     storeId: string
   }
 
@@ -61,8 +61,8 @@ export default async function handler(
   }
 
   // Limit conversation length to prevent abuse
-  if (messages.length > 20) { // Reduced from 50
-    return res.status(400).json({ error: 'Conversation too long. Max 20 messages.' })
+  if (messages.length > 50) {
+    return res.status(400).json({ error: 'Conversation too long. Max 50 messages.' })
   }
 
   // Validate last message length
@@ -83,11 +83,28 @@ export default async function handler(
   const store = getStoreConfig(storeId || 'fashion')
 
   try {
-    const response = await chat(sanitized, {
+    // Use multi-agent system
+    const agentContext: AgentContext = {
+      businessName: store.name,
+      industry: store.industry,
       systemPrompt: store.systemPrompt,
-      maxTokens: 256, // Reduced from 1024 to save costs
+      activeAgents: PLAN_AGENTS['team'], // demo uses team plan
+      conversationHistory: sanitized,
+    }
+
+    const result = await multiAgentChat(
+      lastMessage.content,
+      agentContext,
+    )
+
+    return res.status(200).json({
+      content: result.content,
+      provider: 'deepseek',
+      agentUsed: result.agentUsed,
+      sentiment: result.decision.sentiment,
+      intent: result.decision.intent,
+      latencyMs: result.latencyMs,
     })
-    return res.status(200).json(response)
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'Unknown error'
     console.error('[/api/chat] Error:', message)

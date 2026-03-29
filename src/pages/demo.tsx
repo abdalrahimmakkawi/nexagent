@@ -2,13 +2,35 @@ import { useState } from 'react'
 import Head from 'next/head'
 import Icon from '@/components/Icon'
 
+interface Message {
+  id: number
+  role: 'user' | 'assistant'
+  content: string
+  timestamp: Date
+  agentUsed?: string
+  sentiment?: number
+  intent?: string
+}
+
+const AGENT_LABELS: Record<string, string> = {
+  support: '🛡️ Support',
+  sales: '💰 Sales',
+  faq: '⚡ FAQ',
+  escalation: '🚨 Priority',
+  onboarding: '👋 Welcome',
+  followup: '🔄 Follow-up',
+  analytics: '📊 Analytics',
+  router: '🔀 Router',
+}
+
 export default function DemoPage() {
-  const [messages, setMessages] = useState([
+  const [messages, setMessages] = useState<Message[]>([
     {
       id: 1,
       role: 'assistant',
       content: "Hello! I'm your AI assistant. I can help you with orders, returns, product questions, and more. How can I assist you today?",
-      timestamp: new Date()
+      timestamp: new Date(),
+      agentUsed: 'router'
     }
   ])
   const [inputValue, setInputValue] = useState('')
@@ -17,28 +39,64 @@ export default function DemoPage() {
   const handleSend = async () => {
     if (!inputValue.trim()) return
 
-    const userMessage = {
+    const userMessage: Message = {
       id: Date.now(),
-      role: 'user',
+      role: 'user' as 'user' | 'assistant',
       content: inputValue,
       timestamp: new Date()
     }
 
-    setMessages(prev => [...prev, userMessage])
+    setMessages(prev => [...prev, userMessage] as Message[])
     setInputValue('')
     setIsTyping(true)
 
-    // Simulate AI response
-    setTimeout(() => {
-      const aiResponse = {
-        id: Date.now() + 1,
-        role: 'assistant',
-        content: "Thanks for your message! This is a demo of the NexAgent AI assistant. In a real implementation, I would be connected to your business data and provide personalized responses about your products, services, and policies. I can handle customer inquiries, process orders, track shipments, and even capture leads automatically.",
-        timestamp: new Date()
+    try {
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'x-nexagent-request': 'true',
+        },
+        body: JSON.stringify({
+          messages: [...messages, userMessage],
+          storeId: 'fashion',
+        }),
+      })
+
+      const result = await res.json()
+      
+      if (res.ok) {
+        const aiResponse: Message = {
+          id: Date.now() + 1,
+          role: 'assistant' as 'user' | 'assistant',
+          content: result.content,
+          timestamp: new Date(),
+          agentUsed: result.agentUsed,
+          sentiment: result.sentiment,
+          intent: result.intent,
+        }
+        setMessages(prev => [...prev, aiResponse] as Message[])
+      } else {
+        const errorResponse: Message = {
+          id: Date.now() + 1,
+          role: 'assistant' as 'user' | 'assistant',
+          content: 'Sorry, I encountered an error. Please try again.',
+          timestamp: new Date(),
+        }
+        setMessages(prev => [...prev, errorResponse] as Message[])
       }
-      setMessages(prev => [...prev, aiResponse])
+    } catch (err) {
+      console.error('Demo error:', err)
+      const errorResponse: Message = {
+        id: Date.now() + 1,
+        role: 'assistant' as 'user' | 'assistant',
+        content: 'Connection error. Please check your internet and try again.',
+        timestamp: new Date(),
+      }
+      setMessages(prev => [...prev, errorResponse])
+    } finally {
       setIsTyping(false)
-    }, 1500)
+    }
   }
 
   return (
@@ -124,6 +182,17 @@ export default function DemoPage() {
                 }}>
                   {message.content}
                 </div>
+                {message.role === 'assistant' && message.agentUsed && (
+                  <div style={{ 
+                    fontSize: 10, 
+                    color: 'rgba(255,255,255,0.35)',
+                    marginTop: 4,
+                    paddingLeft: 4,
+                    fontFamily: 'monospace',
+                  }}>
+                    {AGENT_LABELS[message.agentUsed] || '🤖 Assistant'}
+                  </div>
+                )}
               </div>
             ))}
             
