@@ -64,12 +64,30 @@ export default async function handler(
 
     // 2.5. Ensure client exists before creating agent (fixes foreign key constraint)
     try {
-      await supabaseAdmin
+      // First check if client already exists
+      const { data: existingClient } = await supabaseAdmin
         .from('clients')
-        .upsert({ id: clientId } as any, { onConflict: 'id', ignoreDuplicates: true } as any)
+        .select('id, email')
+        .eq('id', clientId)
+        .single()
+
+      if (!existingClient) {
+        // Client doesn't exist - get email from auth
+        const { data: { user } } = await supabaseAdmin.auth.admin.getUserById(clientId)
+        const userEmail = user?.email || `client-${clientId}@placeholder.com` 
+        
+        await supabaseAdmin
+          .from('clients')
+            .insert({
+              id: clientId,
+              email: userEmail,
+              business_name: businessName,
+              business_type: businessType,
+              industry: industry,
+            } as any)
+      }
     } catch (clientErr) {
-      console.warn('Client upsert failed:', clientErr)
-      // Non-blocking — continue
+      console.error('Client ensure failed:', clientErr)
     }
 
     // 3. Generate agent config with DeepSeek (with fallback)
