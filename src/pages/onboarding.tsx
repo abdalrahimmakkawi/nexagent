@@ -117,6 +117,7 @@ export default function Onboarding() {
     
     try {
       // First set the auto-assigned plan
+      console.log('Setting plan for user:', user?.id, 'plan:', autoPlan)
       const planResponse = await fetch('/api/onboarding/set-plan', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -139,6 +140,7 @@ export default function Onboarding() {
 
     try {
       // Then submit onboarding with auto-assigned plan
+      console.log('Submitting onboarding for user:', user?.id, 'with plan:', autoPlan)
       const response = await fetch('/api/onboarding/submit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
