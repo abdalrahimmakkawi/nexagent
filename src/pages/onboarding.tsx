@@ -129,7 +129,7 @@ export default function Onboarding() {
 
       const planResult = await planResponse.json()
       
-      if (!planResult.ok) {
+      if (!planResult.success) {
         console.warn('Plan assignment failed, continuing with default:', planResult.error)
         // Non-blocking — continue even if plan assignment fails
       }
