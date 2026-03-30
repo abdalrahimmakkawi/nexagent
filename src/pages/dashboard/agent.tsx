@@ -94,7 +94,7 @@ export default function AgentPage() {
       if (!user) throw new Error('Not authenticated')
 
       // Update agent with changes
-      const { error } = await (supabase
+      const response = await (supabase
         .from('agents') as any)
         .update({
           name: formData.name,
@@ -109,7 +109,9 @@ export default function AgentPage() {
         })
         .eq('id', (agent as any).id)
 
-      if (error) throw error
+      console.log('Agent update response:', response)
+
+      if (response.error) throw response.error
 
       // Fire webhook to notify admin
       await fireWebhook('webhook/agent-generated', {
@@ -125,12 +127,8 @@ export default function AgentPage() {
 
       setSaveMessage('Changes saved — pending review. We\'ll notify you within 24 hours.')
       
-      // Update local agent state
-      setAgent({
-        ...agent,
-        ...formData,
-        status: 'pending_review'
-      })
+      // Re-fetch agent data from database to ensure fresh state
+      await fetchAgent()
 
     } catch (error) {
       console.error('Failed to save agent:', error)
