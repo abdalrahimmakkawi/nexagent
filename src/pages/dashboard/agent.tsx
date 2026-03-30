@@ -54,8 +54,10 @@ export default function AgentPage() {
   ]
 
   useEffect(() => {
-    fetchAgent()
-  }, [])
+    if (router.isReady) {
+      fetchAgent()
+    }
+  }, [router.isReady])
 
   const fetchAgent = async () => {
     try {

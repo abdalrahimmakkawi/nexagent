@@ -30,11 +30,9 @@ export default async function handler(
         agents!inner(
           id,
           name,
-          industry,
           clients!inner(
             id,
-            business_name,
-            industry
+            business_name
           )
         )
       `)
