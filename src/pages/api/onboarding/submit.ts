@@ -62,6 +62,16 @@ export default async function handler(
       // Non-blocking — continue
     }
 
+    // 2.5. Ensure client exists before creating agent (fixes foreign key constraint)
+    try {
+      await supabaseAdmin
+        .from('clients')
+        .upsert({ id: clientId } as any, { onConflict: 'id', ignoreDuplicates: true } as any)
+    } catch (clientErr) {
+      console.warn('Client upsert failed:', clientErr)
+      // Non-blocking — continue
+    }
+
     // 3. Generate agent config with DeepSeek (with fallback)
     let agentConfig
     try {
