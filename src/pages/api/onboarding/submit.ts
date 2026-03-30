@@ -44,6 +44,24 @@ export default async function handler(
         extra_info: extraInfo,
       })
 
+    // Auto-assign squad plan for all clients
+    try {
+      await supabaseAdmin
+        .from('agent_teams')
+        .upsert({
+          client_id: clientId,
+          plan: 'squad',
+          active_agents: [
+            'router', 'support', 'sales', 'faq',
+            'escalation', 'followup', 'analytics', 'onboarding'
+          ],
+          updated_at: new Date().toISOString(),
+        } as any)
+    } catch (planErr) {
+      console.warn('Plan upsert failed:', planErr)
+      // Non-blocking — continue
+    }
+
     // 2. Generate agent config with DeepSeek
     const onboardingData: OnboardingData = {
       businessName, businessUrl, businessType,
