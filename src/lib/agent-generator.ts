@@ -1,10 +1,3 @@
-import OpenAI from 'openai'
-
-const deepseek = new OpenAI({
-  baseURL: process.env.DEEPSEEK_BASE_URL,
-  apiKey: process.env.DEEPSEEK_API_KEY,
-})
-
 export interface OnboardingData {
   businessName: string
   businessUrl?: string
@@ -67,17 +60,28 @@ The JSON must have exactly these fields:
   "suggestedName": "The agent name again"
 }`
 
-  const response = await deepseek.chat.completions.create({
-    model: process.env.DEEPSEEK_MODEL || 'deepseek-chat',
-    max_tokens: 2000,
-    temperature: 0.7,
-    messages: [{ role: 'user', content: prompt }],
+  const response = await fetch('https://integrate.api.nvidia.com/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${process.env.NVIDIA_API_KEY}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: 'nvidia/nemotron-3-super-120b-a12b',
+      messages: [
+        { role: 'system', content: 'You are an AI agent configuration expert.' },
+        { role: 'user', content: prompt }
+      ],
+      temperature: 0.7,
+      max_tokens: 4000,
+    }),
   })
 
-  const raw = response.choices[0]?.message?.content || ''
+  const responseData = await response.json()
+  const content = responseData.choices[0].message.content
   
   // Strip markdown fences if present
-  const clean = raw
+  const clean = content
     .replace(/```json\n?/g, '')
     .replace(/```\n?/g, '')
     .trim()
@@ -86,6 +90,6 @@ The JSON must have exactly these fields:
     const config = JSON.parse(clean) as GeneratedAgentConfig
     return config
   } catch {
-    throw new Error(`Failed to parse agent config: ${raw}`)
+    throw new Error(`Failed to parse agent config: ${clean}`)
   }
 }
