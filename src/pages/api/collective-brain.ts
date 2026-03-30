@@ -21,6 +21,7 @@ export default async function handler(
 
   try {
     // Fetch all conversations for learning analysis
+    console.log('Fetching conversations for collective brain analysis...')
     const { data: conversations, error } = await supabaseAdmin
       .from('conversations')
       .select(`
@@ -42,9 +43,22 @@ export default async function handler(
       .limit(1000) // Analyze last 1000 successful conversations
 
     if (error) {
-      console.error('[/api/collective-brain]', error)
-      return res.status(500).json({ error: 'Failed to fetch learning data' })
+      console.error('[/api/collective-brain] Database error:', error)
+      console.error('[/api/collective-brain] Error details:', {
+        message: error.message,
+        code: error.code,
+        details: error.details,
+        hint: error.hint
+      })
+      return res.status(500).json({ 
+        error: 'Failed to fetch learning data',
+        detail: error.message,
+        code: error.code,
+        hint: error.hint
+      })
     }
+
+    console.log('Conversations fetched:', conversations?.length || 0)
 
     // Process learning data
     const learningData = await processLearningData(conversations || [])
