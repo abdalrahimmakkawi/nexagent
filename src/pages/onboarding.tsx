@@ -53,58 +53,62 @@ export default function Onboarding() {
     })
   }, [router])
 
-  const validateStep = (currentStep: Step): boolean => {
-    const validateStep = (stepNum: Step): boolean => {
-      switch (stepNum) {
-        case 1:
-          return !!(formData.businessName && formData.businessUrl && 
-                  formData.businessType && formData.industry && 
-                  formData.productsServices && formData.priceRange)
-        case 2:
-          return !!(formData.topFaqs && formData.tone && formData.goals)
-        case 3:
-          return true // Plan step removed - always valid
-        default:
-          return false
-      }
+  const validateStep = (stepNum: Step): boolean => {
+    switch (stepNum) {
+      case 1:
+        return !!(formData.businessName && formData.businessUrl && 
+                formData.businessType && formData.industry && 
+                formData.productsServices && formData.priceRange)
+      case 2:
+        return !!(formData.topFaqs && formData.tone && formData.goals)
+      case 3:
+        return true // Plan step removed - always valid
+      default:
+        return false
     }
-
-    const newErrors: Record<string, string> = {}
-
-    if (!validateStep(currentStep)) {
-      switch (currentStep) {
-        case 1:
-          if (!formData.businessName.trim()) newErrors.businessName = 'Required'
-          if (!formData.businessUrl.trim()) newErrors.businessUrl = 'Required'
-          if (!formData.businessType) newErrors.businessType = 'Required'
-          if (!formData.industry.trim()) newErrors.industry = 'Required'
-          if (!formData.productsServices.trim()) newErrors.productsServices = 'Required'
-          if (!formData.priceRange) newErrors.priceRange = 'Required'
-          break
-        case 2:
-          if (!formData.topFaqs.trim()) newErrors.topFaqs = 'Required'
-          if (!formData.tone) newErrors.tone = 'Required'
-          if (!formData.goals.trim()) newErrors.goals = 'Required'
-          break
-      }
-    }
-
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
   }
+
+  const checkValidation = (currentStep: number): boolean => {
+  const newErrors: Record<string, string> = {}
+  
+  if (currentStep === 1) {
+    if (!formData.businessName?.trim()) {
+      newErrors.businessName = 'Business name is required'
+    }
+    if (!formData.businessType?.trim()) {
+      newErrors.businessType = 'Business type is required'
+    }
+    if (!formData.industry?.trim()) {
+      newErrors.industry = 'Industry is required'
+    }
+  }
+  
+  if (currentStep === 2) {
+    if (!formData.productsServices?.trim()) {
+      newErrors.productsServices = 'Please describe your services'
+    }
+    if (!formData.topFaqs?.trim()) {
+      newErrors.topFaqs = 'Please add at least one FAQ'
+    }
+  }
+  
+  setErrors(newErrors)
+  return Object.keys(newErrors).length === 0
+}
 
   const nextStep = () => {
-    if (validateStep(step)) {
-      if (step < 4) setStep((step + 1) as Step)
-    }
+  if (checkValidation(step)) {
+    setStep((prev) => (prev < 3 ? prev + 1 : prev) as Step)
+    window.scrollTo(0, 0)
   }
+}
 
   const prevStep = () => {
     if (step > 1) setStep((step - 1) as Step)
   }
 
   const handleSubmit = async () => {
-    if (!validateStep(3)) return // Changed from 4 to 3 steps
+    if (!checkValidation(3)) return // Changed from 4 to 3 steps
     
     // Auto-assign squad plan for free school agents (full multi-agent capabilities)
     const autoPlan = 'squad'
