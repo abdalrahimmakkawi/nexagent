@@ -97,15 +97,15 @@ export default async function handler(
       .from('agents') as any)
       .insert({
         client_id: clientId,
-        name: agentConfig.agentName,
-        store_id: businessType.toLowerCase().replace(/\s+/g, '-'),
+        name: agentConfig.agentName || `${businessName} AI Assistant`,
+        store_id: businessType?.toLowerCase().replace(/\s+/g, '-') || 'default',
         system_prompt: agentConfig.systemPrompt,
         welcome_message: agentConfig.welcomeMessage,
-        quick_prompts: agentConfig.quickPrompts,
-        lead_field: agentConfig.leadField,
-        lead_message: agentConfig.leadMessage,
-        escalation_triggers: agentConfig.escalationTriggers,
-        widget_color: agentConfig.widgetColor,
+        quick_prompts: agentConfig.quickPrompts || [],
+        lead_field: agentConfig.leadField || 'email',
+        lead_message: agentConfig.leadMessage || 'Thank you for your interest!',
+        escalation_triggers: agentConfig.escalationTriggers || [],
+        widget_color: agentConfig.widgetColor || '#6366f1',
         status: 'pending_review',
         generation_raw: agentConfig,
       })
