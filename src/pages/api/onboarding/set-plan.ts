@@ -33,8 +33,13 @@ export default async function handler(
       plan,
       activeAgents 
     })
-  } catch (err) {
-    console.error('[/api/onboarding/set-plan]', err)
-    return res.status(500).json({ error: 'Failed to set plan' })
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : String(err)
+    console.error('[/api/onboarding/set-plan] Full error:', message)
+    console.error('[/api/onboarding/set-plan] Request body:', { clientId, plan })
+    return res.status(500).json({ 
+      error: 'Failed to set plan',
+      detail: message
+    })
   }
 }

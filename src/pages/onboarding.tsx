@@ -129,11 +129,15 @@ export default function Onboarding() {
       const planResult = await planResponse.json()
       
       if (!planResult.ok) {
-        setErrors({ submit: planResult.error || 'Failed to set plan' })
-        setSubmitting(false)
-        return
+        console.warn('Plan assignment failed, continuing with default:', planResult.error)
+        // Non-blocking — continue even if plan assignment fails
       }
+    } catch {
+      // Non-blocking — continue even if plan assignment fails
+      console.warn('Plan assignment failed, continuing with default')
+    }
 
+    try {
       // Then submit onboarding with auto-assigned plan
       const response = await fetch('/api/onboarding/submit', {
         method: 'POST',
