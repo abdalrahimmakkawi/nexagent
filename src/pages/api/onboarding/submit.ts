@@ -112,7 +112,10 @@ export default async function handler(
       .select()
       .single()
 
-    if (agentError) throw agentError
+    if (agentError) {
+      console.error('Agent insert FULL error:', JSON.stringify(agentError, null, 2))
+      return res.status(500).json({ error: 'Agent insert failed', detail: agentError.message, code: agentError.code, hint: agentError.hint })
+    }
 
     // 5. Mark client onboarding as completed (with fallback)
     try {
