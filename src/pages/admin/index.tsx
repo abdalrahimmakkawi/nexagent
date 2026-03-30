@@ -23,31 +23,39 @@ export default function AdminDashboard() {
   const [user, setUser] = useState<any>(null)
 
   useEffect(() => {
-  const checkAdmin = async () => {
-    try {
-      const { data: { session } } = await supabase.auth.getSession()
-      
-      if (!session) {
+    const checkAdmin = async () => {
+      try {
+        console.log('Checking admin authentication...')
+        const { data: { session } } = await supabase.auth.getSession()
+        
+        if (!session) {
+          console.log('No session found, redirecting to login')
+          window.location.href = '/login'
+          return
+        }
+        
+        const adminEmail = 'abdalrahimmakkawi@gmail.com'
+        console.log('Session email:', session.user.email)
+        console.log('Required admin email:', adminEmail)
+        
+        if (session.user.email !== adminEmail) {
+          console.log('Email mismatch, redirecting to login')
+          window.location.href = '/login'
+          return
+        }
+        
+        // User is admin — allow access
+        console.log('Admin access granted')
+        setUser(session.user)
+        setLoading(false)
+        fetchData()
+        
+      } catch (error) {
+        console.error('Auth error:', error)
+        console.log('Redirecting to login due to auth error')
         window.location.href = '/login'
-        return
       }
-      
-      const adminEmail = 'abdalrahimmakkawi@gmail.com'
-      if (session.user.email !== adminEmail) {
-        window.location.href = '/login'
-        return
-      }
-      
-      // User is admin — allow access
-      setUser(session.user)
-      setLoading(false)
-      fetchData()
-      
-    } catch (error) {
-      console.error('Auth error:', error)
-      window.location.href = '/login'
     }
-  }
   
   checkAdmin()
 }, [router])
