@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/router'
 import Head from 'next/head'
 import DashboardLayout from '@/components/DashboardLayout'
 import { supabase } from '@/lib/supabase'
@@ -19,10 +20,12 @@ interface Agent {
 }
 
 export default function AgentPage() {
+  const router = useRouter()
   const [agent, setAgent] = useState<Agent | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [saveMessage, setSaveMessage] = useState('')
+  const [user, setUser] = useState<any>(null)
   const [formData, setFormData] = useState({
     name: '',
     welcome_message: '',
@@ -32,6 +35,9 @@ export default function AgentPage() {
     widget_color: '#6366f1',
     widget_position: 'bottom-right'
   })
+
+  // Get agent ID from URL on component mount
+  const urlAgentId = router.query.id as string
 
   const toneOptions = [
     { value: 'Professional and formal', label: 'Professional and Formal' },
@@ -53,18 +59,43 @@ export default function AgentPage() {
 
   const fetchAgent = async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) throw new Error('Not authenticated')
-
-      const { data, error } = await supabase
-        .from('agents')
-        .select('*')
-        .eq('client_id', user.id)
-        .single()
-
-      if (error) throw error
+      console.log('Fetching agent data...')
+      console.log('URL Agent ID:', urlAgentId)
+      
+      // Get current user session
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) {
+        console.warn('No session found')
+        setAgent(null)
+        setLoading(false)
+        return
+      }
+      
+      const currentUser = session.user
+      console.log('User ID:', currentUser?.id)
+      
+      // If we have a URL agent ID, use it. Otherwise fetch by user ID
+      const agentQuery = urlAgentId 
+        ? supabase
+            .from('agents')
+            .select('*')
+            .eq('id', urlAgentId)
+            .single()
+        : supabase
+            .from('agents')
+            .select('*')
+            .eq('client_id', currentUser?.id)
+            .single()
+      
+      const { data, error } = await agentQuery
+      
+      if (error) {
+        console.error('Agent fetch error:', error)
+        throw error
+      }
       
       if (data) {
+        console.log('Agent data fetched:', data)
         setAgent(data)
         setFormData({
           name: (data as any).name || '',
@@ -75,6 +106,9 @@ export default function AgentPage() {
           widget_color: (data as any).widget_color || '#6366f1',
           widget_position: (data as any).widget_position || 'bottom-right'
         })
+      } else {
+        console.warn('No agent data found')
+        setAgent(null)
       }
     } catch (error) {
       console.error('Failed to fetch agent:', error)
