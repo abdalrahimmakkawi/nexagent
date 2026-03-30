@@ -44,7 +44,7 @@ export default async function handler(
         extra_info: extraInfo,
       })
 
-    // Auto-assign squad plan for all clients
+    // 2. Auto-assign squad plan for all clients (with fallback)
     try {
       await supabaseAdmin
         .from('agent_teams')
@@ -62,17 +62,37 @@ export default async function handler(
       // Non-blocking — continue
     }
 
-    // 2. Generate agent config with DeepSeek
-    const onboardingData: OnboardingData = {
-      businessName, businessUrl, businessType,
-      industry, productsServices, priceRange,
-      topFaqs, tone: tone || 'friendly',
-      competitors, goals, extraInfo,
+    // 3. Generate agent config with DeepSeek (with fallback)
+    let agentConfig
+    try {
+      const onboardingData: OnboardingData = {
+        businessName, businessUrl, businessType,
+        industry, productsServices, priceRange,
+        topFaqs, tone: tone || 'friendly',
+        competitors, goals, extraInfo,
+      }
+
+      agentConfig = await generateAgentConfig(onboardingData)
+    } catch (configErr) {
+      console.warn('Agent config generation failed:', configErr)
+      // Fallback to basic config
+      agentConfig = {
+        agentName: `${businessName} AI Assistant`,
+        systemPrompt: `You are a helpful AI assistant for ${businessName}. You help with customer inquiries, provide information about services, and assist with common questions.`,
+        welcomeMessage: `Welcome to ${businessName}! How can I help you today?`,
+        quickPrompts: [
+          "What services do you offer?",
+          "What are your hours?",
+          "How can I contact you?"
+        ],
+        leadField: 'email',
+        leadMessage: 'Thank you for your interest! Please provide your email and we\'ll get back to you soon.',
+        escalationTriggers: ['human agent', 'complaint'],
+        widgetColor: '#6366f1',
+      }
     }
 
-    const agentConfig = await generateAgentConfig(onboardingData)
-
-    // 3. Save generated agent to database (status: pending review)
+    // 4. Save generated agent to database (status: pending review)
     const { data: agent, error: agentError } = await (supabaseAdmin
       .from('agents') as any)
       .insert({
@@ -94,15 +114,20 @@ export default async function handler(
 
     if (agentError) throw agentError
 
-    // 4. Mark client onboarding as completed
-    await (supabaseAdmin
-      .from('clients') as any)
-      .update({
-        business_url: businessUrl,
-        business_type: businessType,
-        onboarding_completed: true,
-      })
-      .eq('id', clientId)
+    // 5. Mark client onboarding as completed (with fallback)
+    try {
+      await (supabaseAdmin
+        .from('clients') as any)
+        .update({
+          business_url: businessUrl,
+          business_type: businessType,
+          onboarding_completed: true,
+        })
+        .eq('id', clientId)
+    } catch (updateErr) {
+      console.warn('Client update failed:', updateErr)
+      // Non-blocking — continue
+    }
 
     // 5. Notify you via n8n webhook
     fireWebhook('webhook/agent-ready-for-review', {
