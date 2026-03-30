@@ -125,7 +125,19 @@ export default async function handler(
 
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'Unknown error'
-    console.error('[/api/onboarding/submit]', message)
+    console.error('[/api/onboarding/submit] Full error:', message)
+    console.error('[/api/onboarding/submit] Request body:', JSON.stringify({
+      clientId,
+      businessName,
+      businessType,
+      industry,
+      productsServices,
+      topFaqs,
+      tone,
+      selectedPlan: 'squad'
+    }))
+    console.error('[/api/onboarding/submit] Stack trace:', err instanceof Error ? err.stack : 'No stack trace available')
+    
     return res.status(500).json({ 
       error: 'Failed to generate agent',
       detail: message 
