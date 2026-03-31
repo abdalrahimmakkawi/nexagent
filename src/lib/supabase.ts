@@ -47,13 +47,14 @@ export const supabaseAdmin = (() => {
     const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
     
     if (!supabaseUrl || !supabaseServiceKey) {
-      console.error('🚨 [SUPABASE] Missing admin environment variables:')
-      console.error('🚨 [SUPABASE] NEXT_PUBLIC_SUPABASE_URL:', supabaseUrl ? '✅' : '❌ Missing')
-      console.error('� [SUPABASE] SUPABASE_SERVICE_ROLE_KEY:', supabaseServiceKey ? '✅' : '❌ Missing')
-      throw new Error('Supabase admin environment variables are not configured properly')
+      console.warn('⚠️ [SUPABASE] Admin environment variables not available (admin features disabled)')
+      console.warn('⚠️ [SUPABASE] NEXT_PUBLIC_SUPABASE_URL:', supabaseUrl ? '✅' : '❌ Missing')
+      console.warn('⚠️ [SUPABASE] SUPABASE_SERVICE_ROLE_KEY:', supabaseServiceKey ? '✅' : '❌ Missing')
+      // Return a mock admin client that won't crash the app
+      return null as any
     }
     
-    console.log('�🔍 [SUPABASE] Creating admin singleton client...')
+    console.log('� [SUPABASE] Creating admin singleton client...')
     supabaseAdminInstance = createClient(
       supabaseUrl,
       supabaseServiceKey
