@@ -1,3 +1,28 @@
+import OpenAI from 'openai'
+
+const nvidia = new OpenAI({
+  baseURL: process.env.NVIDIA_BASE_URL || 
+    'https://integrate.api.nvidia.com/v1',
+  apiKey: process.env.NVIDIA_API_KEY || '',
+})
+
+const deepseek = new OpenAI({
+  baseURL: process.env.DEEPSEEK_BASE_URL || 
+    'https://api.deepseek.com',
+  apiKey: process.env.DEEPSEEK_API_KEY!,
+})
+
+// Use NVIDIA for agent generation (better quality)
+// Use DeepSeek for live chat (faster, cheaper)
+const generationClient = process.env.NVIDIA_API_KEY 
+  ? nvidia 
+  : deepseek
+
+const generationModel = process.env.NVIDIA_API_KEY
+  ? (process.env.NVIDIA_MODEL || 
+     'nvidia/llama-3.1-nemotron-ultra-253b-v1')
+  : (process.env.DEEPSEEK_MODEL || 'deepseek-chat')
+
 export interface OnboardingData {
   businessName: string
   businessUrl?: string
@@ -60,26 +85,14 @@ The JSON must have exactly these fields:
   "suggestedName": "The agent name again"
 }`
 
-  const response = await fetch('https://integrate.api.nvidia.com/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${process.env.NVIDIA_API_KEY}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      model: 'nvidia/nemotron-3-super-120b-a12b',
-      messages: [
-        { role: 'system', content: 'You are an AI agent configuration expert.' },
-        { role: 'user', content: prompt }
-      ],
-      temperature: 0.7,
-      max_tokens: 4000,
-    }),
+  const response = await generationClient.chat.completions.create({
+    model: generationModel,
+    max_tokens: 2000,
+    temperature: 0.7,
+    messages: [{ role: 'user', content: prompt }],
   })
-
-  const responseData = await response.json()
-  const content = responseData.choices[0].message.content
   
+  const content = response.choices[0].message.content || ''
   // Strip markdown fences if present
   const clean = content
     .replace(/```json\n?/g, '')
