@@ -99,7 +99,7 @@ export default async function handler(
 
     return res.status(200).json({
       content: result.content,
-      provider: 'deepseek',
+      provider: 'nvidia',
       agentUsed: result.agentUsed,
       sentiment: result.decision.sentiment,
       intent: result.decision.intent,

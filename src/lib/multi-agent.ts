@@ -1,12 +1,9 @@
-import OpenAI from 'openai'
+import { getNVIDIAClient } from './nvidia'
 import { supabaseAdmin } from './supabase'
 
-const deepseek = new OpenAI({
-  baseURL: process.env.DEEPSEEK_BASE_URL,
-  apiKey: process.env.DEEPSEEK_API_KEY,
-})
+const nvidia = getNVIDIAClient()
 
-const MODEL = process.env.DEEPSEEK_MODEL || 'deepseek-chat'
+const MODEL = process.env.NVIDIA_MODEL || 'nvidia/nemotron-4-340b-instruct'
 
 // ── TYPES ────────────────────────────────────────
 export type AgentType = 
@@ -66,15 +63,16 @@ Routing rules:
 - shouldCaptureLead: true when customer shows buying intent
 - shouldEscalate: true when sentiment < 0.2 or intent is legal`
 
-  const response = await deepseek.chat.completions.create({
-    model: MODEL,
-    max_tokens: 200,
-    temperature: 0.1,
-    messages: [
-      { role: 'system', content: routerPrompt },
-      { role: 'user', content: message }
-    ],
-  })
+  const response = await nvidia.chat([
+    {
+      role: 'system',
+      content: routerPrompt
+    },
+    {
+      role: 'user', 
+      content: `Customer message: "${message}"`
+    }
+  ], MODEL)
 
   const raw = response.choices[0]?.message?.content || '{}'
   const clean = raw.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()
@@ -235,19 +233,14 @@ export async function multiAgentChat(
     decision
   )
 
-  const response = await deepseek.chat.completions.create({
-    model: MODEL,
-    max_tokens: 512,
-    temperature: 0.7,
-    messages: [
-      { role: 'system', content: specialistPrompt },
-      ...context.conversationHistory.slice(-10).map(m => ({
-        role: m.role as 'user' | 'assistant',
-        content: m.content,
-      })),
-      { role: 'user', content: message },
-    ],
-  })
+  const response = await nvidia.chat([
+    { role: 'system', content: specialistPrompt },
+    ...context.conversationHistory.slice(-10).map(m => ({
+      role: m.role as 'user' | 'assistant',
+      content: m.content,
+    })),
+    { role: 'user', content: message },
+  ], MODEL)
 
   const content = response.choices[0]?.message?.content 
     || "I'm here to help. Could you tell me more?"
