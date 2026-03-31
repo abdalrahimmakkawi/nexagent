@@ -1,6 +1,6 @@
 // Admin configuration and utilities
 
-export const ADMIN_EMAIL = 'abdalrahimmakkawi@gmail.com'
+export const ADMIN_EMAIL = 'makkawiabdalrahim9@gmail.com'
 
 export function isAdmin(email: string): boolean {
   return email === ADMIN_EMAIL
