@@ -34,7 +34,11 @@ export default async function handler(
     })
 
   } catch (err) {
-    console.error('[/api/admin/assistant/history]', err)
+    console.error('[/api/admin/assistant/history] Full error details:', {
+      error: err instanceof Error ? err.message : 'Unknown error',
+      stack: err instanceof Error ? err.stack : 'No stack available',
+      timestamp: new Date().toISOString()
+    })
     return res.status(500).json({ error: 'Service temporarily unavailable' })
   }
 }

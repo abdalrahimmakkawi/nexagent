@@ -261,7 +261,13 @@ Never be generic — always tie advice to NexAgent's specific situation and real
 
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'Unknown'
-    console.error('[/api/admin/assistant]', message)
+    console.error('[/api/admin/assistant] Full error details:', {
+      error: message,
+      stack: err instanceof Error ? err.stack : 'No stack available',
+      timestamp: new Date().toISOString(),
+      apiEndpoint: 'nvidia',
+      model: process.env.NVIDIA_MODEL || 'nvidia/nemotron-4-340b-instruct'
+    })
     return res.status(500).json({ 
       error: 'Service temporarily unavailable' 
     })
