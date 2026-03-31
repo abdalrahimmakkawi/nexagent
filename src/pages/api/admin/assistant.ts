@@ -1,11 +1,8 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { supabaseAdmin } from '@/lib/supabase'
-import OpenAI from 'openai'
+import { getNVIDIAClient } from '@/lib/nvidia'
 
-const deepseek = new OpenAI({
-  baseURL: process.env.DEEPSEEK_BASE_URL,
-  apiKey: process.env.DEEPSEEK_API_KEY,
-})
+const nvidia = getNVIDIAClient()
 
 // Admin secret key for protection
 const ADMIN_SECRET_KEY = process.env.ADMIN_SECRET_KEY || 'nexagent-admin-2024'
@@ -73,6 +70,17 @@ export default async function handler(
 
   if (!message) {
     return res.status(400).json({ error: 'Message required' })
+  }
+
+  // Fetch conversation history if sessionId provided
+  let conversationHistory = []
+  if (sessionId) {
+    const { data: history } = await supabaseAdmin
+      .from('admin_conversations')
+        .select('messages')
+        .eq('id', sessionId)
+        .single()
+    conversationHistory = history?.messages || []
   }
 
   try {
@@ -226,15 +234,15 @@ Never be generic — always tie advice to NexAgent's specific situation and real
 
     const start = Date.now()
 
-    // Call DeepSeek with enhanced system prompt
-    const response = await deepseek.chat.completions.create({
-      model: process.env.DEEPSEEK_MODEL || 'deepseek-chat',
-      max_tokens: 1500,
-      messages: [
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: message }
-      ],
-    })
+    // Call NVIDIA with enhanced system prompt
+    const response = await nvidia.chat([
+      { role: 'system', content: systemPrompt },
+      ...conversationHistory.map((msg: any) => ({
+        role: msg.role,
+        content: msg.content,
+      })),
+      { role: 'user', content: message },
+    ], process.env.NVIDIA_MODEL || 'nvidia/nemotron-4-340b-instruct')
 
     const content = response.choices[0]?.message?.content || 
       "I'm having trouble right now. Please try again!"
@@ -242,7 +250,7 @@ Never be generic — always tie advice to NexAgent's specific situation and real
 
     return res.status(200).json({
       content,
-      provider: 'deepseek',
+      provider: 'nvidia',
       latencyMs,
       metrics: {
         clients: metrics.totalClients,

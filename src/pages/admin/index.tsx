@@ -165,7 +165,7 @@ export default function AdminDashboard() {
 
         <div className="max-w-7xl mx-auto px-6 py-8">
           {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-6 mb-8">
             <div className="rounded-lg p-6" style={{ background: 'rgba(255,255,255,0.05)' }}>
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm" style={{ color: 'rgba(255,255,255,0.6)' }}>Total Clients</span>
@@ -196,6 +196,17 @@ export default function AdminDashboard() {
                 <Icon name="target" size={16} style={{ color: 'rgba(255,255,255,0.4)' }} />
               </div>
               <div className="text-2xl font-bold" style={{ color: '#fff' }}>{stats.totalLeads}</div>
+            </div>
+
+            <div className="rounded-lg p-6" style={{ background: 'rgba(34,197,94,0.1)' }}>
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm" style={{ color: 'rgba(255,255,255,0.6)' }}>AI Engine</span>
+                <Icon name="robot" size={16} style={{ color: '#22c55e' }} />
+              </div>
+              <div className="text-2xl font-bold" style={{ color: '#22c55e' }}>NVIDIA</div>
+              <div className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.4)' }}>
+                nemotron-4-340b-instruct
+              </div>
             </div>
           </div>
 
