@@ -35,7 +35,7 @@ export default function Login() {
       if (error) throw error
 
       // Simple hardcoded admin detection with comprehensive debugging
-      const ADMIN_EMAIL = 'abdalrahimmakawi@gmail.com'
+      const ADMIN_EMAIL = 'abdalrahimmakkawi@gmail.com'
       const isAdminUser = email === ADMIN_EMAIL
       const redirectUrl = isAdminUser ? '/admin' : '/dashboard'
       
@@ -124,7 +124,7 @@ export default function Login() {
                 }}
                 placeholder="you@company.com"
               />
-              {email && email === 'abdalrahimmakawi@gmail.com' && (
+              {email && email === 'abdalrahimmakkawi@gmail.com' && (
                 <p className="mt-2 text-xs" style={{ color: '#fbbf24' }}>
                   🔑 Admin access detected - you'll be redirected to admin dashboard
                 </p>

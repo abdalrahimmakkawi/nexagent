@@ -15,12 +15,17 @@ let supabaseAdminInstance: ReturnType<typeof createClient> | null = null
 export const supabase = (() => {
   if (!supabaseInstance) {
     console.log('🔍 [SUPABASE] Creating singleton client...')
-    supabaseInstance = createClient(supabaseUrl, supabaseAnonKey, {
-      auth: {
-        persistSession: true,
-        autoRefreshToken: true,
+    supabaseInstance = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        auth: {
+          persistSession: true,
+          autoRefreshToken: true,
+          detectSessionInUrl: true,
+        }
       }
-    })
+    )
     console.log('✅ [SUPABASE] Singleton client created successfully')
   }
   return supabaseInstance
@@ -30,14 +35,8 @@ export const supabaseAdmin = (() => {
   if (!supabaseAdminInstance) {
     console.log('🔍 [SUPABASE] Creating admin singleton client...')
     supabaseAdminInstance = createClient(
-      supabaseUrl,
-      supabaseServiceKey || supabaseAnonKey,
-      {
-        auth: {
-          persistSession: false,
-          autoRefreshToken: false,
-        }
-      }
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
     )
     console.log('✅ [SUPABASE] Admin singleton client created successfully')
   }
