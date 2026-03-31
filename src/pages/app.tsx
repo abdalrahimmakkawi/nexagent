@@ -314,6 +314,29 @@ export default function UnifiedApp() {
             onMouseOut={(e) => e.currentTarget.style.background = '#6366f1'}>
               Sign In
             </Link>
+            
+            {/* Sign Up Button */}
+            <Link href="/signup" style={{
+              background: 'transparent',
+              color: '#fff',
+              padding: '8px 16px',
+              borderRadius: 6,
+              textDecoration: 'none',
+              fontSize: 14,
+              fontWeight: 600,
+              border: '1px solid #6366f1',
+              transition: 'all 0.2s'
+            }}
+            onMouseOver={(e) => {
+              e.currentTarget.style.background = '#6366f1'
+              e.currentTarget.style.color = '#fff'
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.background = 'transparent'
+              e.currentTarget.style.color = '#fff'
+            }}>
+              Sign Up
+            </Link>
           </div>
           </div>
         </nav>
@@ -405,6 +428,54 @@ export default function UnifiedApp() {
               >
                 View pricing
               </button>
+              
+              <Link href="/login" style={{
+                padding: '14px 32px',
+                background: 'transparent',
+                color: 'var(--text)',
+                borderRadius: 10,
+                fontSize: 16,
+                fontWeight: 600,
+                border: '1px solid #6366f1',
+                cursor: 'pointer',
+                width: isMobile ? '100%' : 'auto',
+                textDecoration: 'none',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                transition: 'all 0.2s'
+              }}
+              onMouseOver={(e) => {
+                e.currentTarget.style.background = '#6366f1'
+                e.currentTarget.style.color = '#fff'
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.background = 'transparent'
+                e.currentTarget.style.color = 'var(--text)'
+              }}>
+                Sign In
+              </Link>
+              
+              <Link href="/signup" style={{
+                padding: '14px 32px',
+                background: '#6366f1',
+                color: '#fff',
+                borderRadius: 10,
+                fontSize: 16,
+                fontWeight: 600,
+                border: 'none',
+                cursor: 'pointer',
+                width: isMobile ? '100%' : 'auto',
+                textDecoration: 'none',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                transition: 'background 0.2s'
+              }}
+              onMouseOver={(e) => e.currentTarget.style.background = '#4f46e5'}
+              onMouseOut={(e) => e.currentTarget.style.background = '#6366f1'}>
+                Get Started
+              </Link>
             </div>
 
             <div style={{
