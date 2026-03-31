@@ -8,6 +8,7 @@ import { SkeletonTable } from '@/components/Skeleton'
 export default function AdminDashboard() {
   const router = useRouter()
   const [loading, setLoading] = useState(true)
+  const [isAuthorized, setIsAuthorized] = useState(false)
   const [agents, setAgents] = useState<any[]>([])
   const [stats, setStats] = useState<{
     totalClients: number
@@ -23,14 +24,16 @@ export default function AdminDashboard() {
   const [user, setUser] = useState<any>(null)
 
   useEffect(() => {
-    const checkAdmin = async () => {
+    if (!router.isReady) return
+    
+    const checkAuth = async () => {
       try {
         console.log('Checking admin authentication...')
         const { data: { session } } = await supabase.auth.getSession()
         
         if (!session) {
           console.log('No session found, redirecting to login')
-          window.location.href = '/login'
+          router.push('/login')
           return
         }
         
@@ -40,25 +43,29 @@ export default function AdminDashboard() {
         
         if (session.user.email !== adminEmail) {
           console.log('Email mismatch, redirecting to login')
-          window.location.href = '/login'
+          router.push('/login')
           return
         }
         
         // User is admin — allow access
         console.log('Admin access granted')
         setUser(session.user)
+        setIsAuthorized(true)
         setLoading(false)
         fetchData()
         
       } catch (error) {
         console.error('Auth error:', error)
         console.log('Redirecting to login due to auth error')
-        window.location.href = '/login'
+        router.push('/login')
       }
     }
   
-  checkAdmin()
-}, [router])
+  checkAuth()
+}, [router.isReady])
+
+  // Don't render anything until auth is confirmed
+  if (!isAuthorized) return null
 
   useEffect(() => {
     if (user) {

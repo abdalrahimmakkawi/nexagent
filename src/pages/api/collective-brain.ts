@@ -32,7 +32,8 @@ export default async function handler(
           name,
           clients!inner(
             id,
-            business_name
+            business_name,
+            industry
           )
         )
       `)
