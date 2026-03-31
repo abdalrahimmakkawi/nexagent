@@ -3,6 +3,7 @@ import { useRouter } from 'next/router'
 import Head from 'next/head'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
+import { safeSupabase, isSupabaseReady } from '@/lib/supabase-safe'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -27,7 +28,12 @@ export default function Login() {
     setError('')
 
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
+      // Use safe Supabase with fallback
+      const supabaseClient = isSupabaseReady() ? supabase : safeSupabase
+      
+      console.log('🔍 [LOGIN] Supabase client ready:', isSupabaseReady())
+      
+      const { data, error } = await supabaseClient.auth.signInWithPassword({
         email,
         password,
       })
