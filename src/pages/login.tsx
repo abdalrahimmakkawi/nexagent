@@ -27,14 +27,28 @@ export default function Login() {
     setError('')
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       })
 
       if (error) throw error
 
-      router.push('/dashboard')
+      // Simple hardcoded admin detection with comprehensive debugging
+      const ADMIN_EMAIL = 'abdalrahimmakkawi@gmail.com'
+      const isAdminUser = email === ADMIN_EMAIL
+      const redirectUrl = isAdminUser ? '/admin' : '/dashboard'
+      
+      console.log('🔍 [LOGIN] ===== LOGIN ATTEMPT START =====')
+      console.log('🔍 [LOGIN] Email input:', email)
+      console.log('🔍 [LOGIN] Admin email check:', email === ADMIN_EMAIL)
+      console.log('🔍 [LOGIN] Is admin user:', isAdminUser)
+      console.log('🔍 [LOGIN] Redirect URL:', redirectUrl)
+      console.log('🔍 [LOGIN] About to call router.push...')
+      
+      router.push(redirectUrl)
+      
+      console.log('🔍 [LOGIN] ===== LOGIN ATTEMPT END =====')
     } catch (err: any) {
       setError(err.message || 'Failed to sign in')
     } finally {
@@ -110,6 +124,11 @@ export default function Login() {
                 }}
                 placeholder="you@company.com"
               />
+              {email && email === 'abdalrahimmakkawi@gmail.com' && (
+                <p className="mt-2 text-xs" style={{ color: '#fbbf24' }}>
+                  🔑 Admin access detected - you'll be redirected to admin dashboard
+                </p>
+              )}
             </div>
 
             <div>

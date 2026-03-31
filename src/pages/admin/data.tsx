@@ -3,6 +3,7 @@ import { useRouter } from 'next/router'
 import Head from 'next/head'
 import { supabaseAdmin } from '@/lib/supabase'
 import Icon from '@/components/Icon'
+import { ADMIN_EMAIL } from '@/lib/admin'
 
 export default function DataExplorer() {
   const router = useRouter()
@@ -31,7 +32,7 @@ export default function DataExplorer() {
         return
       }
       
-      const adminEmail = 'abdalrahimmakkawi@gmail.com'
+      const adminEmail = ADMIN_EMAIL
       if (session.user.email !== adminEmail) {
         router.push('/login')
         return

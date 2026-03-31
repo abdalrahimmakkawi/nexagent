@@ -4,6 +4,7 @@ import Head from 'next/head'
 import { supabase, supabaseAdmin } from '@/lib/supabase'
 import Icon from '@/components/Icon'
 import { SkeletonTable } from '@/components/Skeleton'
+import { ADMIN_EMAIL } from '@/lib/admin'
 
 export default function AdminDashboard() {
   const router = useRouter()
@@ -81,7 +82,7 @@ export default function AdminDashboard() {
           return
         }
         
-        const adminEmail = 'abdalrahimmakkawi@gmail.com'
+        const adminEmail = ADMIN_EMAIL
         const userEmail = session.user.email
         const authDuration = Date.now() - startTime
         

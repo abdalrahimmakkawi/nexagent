@@ -1,4 +1,6 @@
+import Head from 'next/head'
 import Link from 'next/link'
+import { getAdminContactEmail } from '@/lib/admin'
 
 export default function ServerError() {
   return (
@@ -51,7 +53,7 @@ export default function ServerError() {
       <p style={{ marginTop: 24, fontSize: 13, 
         color: '#3d3d60' }}>
         If this keeps happening, email 
-        abdalrahimmakkawi@gmail.com
+        {getAdminContactEmail()}
       </p>
     </div>
   )

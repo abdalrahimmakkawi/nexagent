@@ -3,6 +3,7 @@ import Head from 'next/head'
 import DashboardLayout from '@/components/DashboardLayout'
 import { supabase } from '@/lib/supabase'
 import Icon from '@/components/Icon'
+import { getAdminContactEmail } from '@/lib/admin'
 
 interface PaymentHistory {
   id: string
@@ -132,7 +133,7 @@ export default function BillingPage() {
 
   const handleUpgrade = (planName: string) => {
     // Placeholder for Stripe checkout
-    const email = 'abdalrahimmakkawi@gmail.com'
+    const email = getAdminContactEmail()
     const subject = 'Plan Upgrade Request'
     const body = `I would like to upgrade to the ${planName} plan.`
     
@@ -273,7 +274,7 @@ export default function BillingPage() {
             
             <div className="mt-4 text-center">
               <p className="text-gray-400 text-sm">
-                Want to upgrade? <a href="mailto:abdalrahimmakkawi@gmail.com" className="text-blue-400 hover:text-blue-300">Contact us</a> for custom plans
+                Want to upgrade? <a href={`mailto:${getAdminContactEmail()}`} className="text-blue-400 hover:text-blue-300">Contact us</a> for custom plans
               </p>
             </div>
           </div>
@@ -323,7 +324,7 @@ export default function BillingPage() {
               We're sorry to see you go. No lock-in — cancel anytime.
             </p>
             <a
-              href="mailto:abdalrahimmakkawi@gmail.com?subject=Subscription Cancellation Request"
+              href={`mailto:${getAdminContactEmail()}?subject=Subscription Cancellation Request`}
               className="inline-flex items-center px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600"
             >
               Contact us

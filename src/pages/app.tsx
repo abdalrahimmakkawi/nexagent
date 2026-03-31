@@ -298,6 +298,22 @@ export default function UnifiedApp() {
                 {item.label}
               </button>
             ))}
+            
+            {/* Login Button */}
+            <Link href="/login" style={{
+              background: '#6366f1',
+              color: '#fff',
+              padding: '8px 16px',
+              borderRadius: 6,
+              textDecoration: 'none',
+              fontSize: 14,
+              fontWeight: 600,
+              transition: 'background 0.2s'
+            }}
+            onMouseOver={(e) => e.currentTarget.style.background = '#4f46e5'}
+            onMouseOut={(e) => e.currentTarget.style.background = '#6366f1'}>
+              Sign In
+            </Link>
           </div>
           </div>
         </nav>

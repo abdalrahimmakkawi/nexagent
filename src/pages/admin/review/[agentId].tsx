@@ -3,6 +3,7 @@ import { useRouter } from 'next/router'
 import Head from 'next/head'
 import { supabase } from '@/lib/supabase'
 import Icon from '@/components/Icon'
+import { ADMIN_EMAIL } from '@/lib/admin'
 
 export default function AdminReview() {
   const router = useRouter()
@@ -26,7 +27,7 @@ export default function AdminReview() {
         return
       }
       
-      const adminEmail = 'abdalrahimmakkawi@gmail.com'
+      const adminEmail = ADMIN_EMAIL
       if (session.user.email !== adminEmail) {
         router.push('/login')
         return

@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import Head from 'next/head'
 import { supabase } from '@/lib/supabase'
 import Icon from '@/components/Icon'
+import { ADMIN_EMAIL } from '@/lib/admin'
 
 interface Message {
   role: 'user' | 'assistant'
@@ -28,9 +29,6 @@ export default function AdminAssistant() {
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
 
-  // Admin email from environment
-  const ADMIN_EMAIL = process.env.NEXT_PUBLIC_ADMIN_EMAIL || 'abdalrahimmakkawi@gmail.com'
-
   const conversationStarters = [
     "Analyze this week's metrics",
     "Write a LinkedIn post",
@@ -51,7 +49,7 @@ export default function AdminAssistant() {
         return
       }
       
-      const adminEmail = 'abdalrahimmakkawi@gmail.com'
+      const adminEmail = ADMIN_EMAIL
       if (session.user.email !== adminEmail) {
         window.location.href = '/login'
         return
