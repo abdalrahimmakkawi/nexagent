@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/router'
 import Head from 'next/head'
-import { supabase, supabaseAdmin } from '@/lib/supabase'
+import { supabase } from '@/lib/supabase'
 import Icon from '@/components/Icon'
 import { SkeletonTable } from '@/components/Skeleton'
 import { ADMIN_EMAIL } from '@/lib/admin'
@@ -10,7 +10,6 @@ export default function AdminDashboard() {
   const router = useRouter()
   const [loading, setLoading] = useState(true)
   const [isAuthorized, setIsAuthorized] = useState(false)
-  const [adminClientAvailable, setAdminClientAvailable] = useState(true)
   const [debugInfo, setDebugInfo] = useState<{
     authStartTime: number
     sessionCheckTime: number
@@ -39,14 +38,6 @@ export default function AdminDashboard() {
   const [user, setUser] = useState<any>(null)
 
   useEffect(() => {
-    // Check if admin client is available
-    if (!supabaseAdmin) {
-      console.warn('⚠️ [ADMIN] Admin client not available - some features may be limited')
-      setAdminClientAvailable(false)
-    }
-  }, [])
-
-  useEffect(() => {
     if (!router.isReady) return
     
     const checkAuth = async () => {
@@ -58,7 +49,6 @@ export default function AdminDashboard() {
         console.log('🔍 [ADMIN DEBUG] Timestamp:', new Date().toISOString())
         console.log('🔍 [ADMIN DEBUG] Router ready:', router.isReady)
         console.log('🔍 [ADMIN DEBUG] Current path:', router.pathname)
-        console.log('🔍 [ADMIN DEBUG] Admin client available:', adminClientAvailable)
         
         const { data: { session }, error: sessionError } = await supabase.auth.getSession()
         
