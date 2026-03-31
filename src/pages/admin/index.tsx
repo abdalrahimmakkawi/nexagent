@@ -9,6 +9,19 @@ export default function AdminDashboard() {
   const router = useRouter()
   const [loading, setLoading] = useState(true)
   const [isAuthorized, setIsAuthorized] = useState(false)
+  const [debugInfo, setDebugInfo] = useState<{
+    authStartTime: number
+    sessionCheckTime: number
+    authDuration: number
+    lastError: string | null
+    retryCount: number
+  }>({
+    authStartTime: Date.now(),
+    sessionCheckTime: 0,
+    authDuration: 0,
+    lastError: null,
+    retryCount: 0
+  })
   const [agents, setAgents] = useState<any[]>([])
   const [stats, setStats] = useState<{
     totalClients: number
@@ -27,36 +40,98 @@ export default function AdminDashboard() {
     if (!router.isReady) return
     
     const checkAuth = async () => {
+      const startTime = Date.now()
+      setDebugInfo(prev => ({ ...prev, authStartTime: startTime, sessionCheckTime: startTime }))
+      
       try {
-        console.log('Checking admin authentication...')
-        const { data: { session } } = await supabase.auth.getSession()
+        console.log('🔍 [ADMIN DEBUG] Starting authentication check...')
+        console.log('🔍 [ADMIN DEBUG] Timestamp:', new Date().toISOString())
+        console.log('🔍 [ADMIN DEBUG] Router ready:', router.isReady)
+        console.log('🔍 [ADMIN DEBUG] Current path:', router.pathname)
+        
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+        
+        if (sessionError) {
+          const errorMsg = `Session retrieval error: ${sessionError.message}`
+          console.error('🚨 [ADMIN ERROR]', errorMsg)
+          setDebugInfo(prev => ({ 
+            ...prev, 
+            lastError: errorMsg, 
+            retryCount: prev.retryCount + 1 
+          }))
+          
+          setTimeout(() => {
+            console.log('🔄 [ADMIN DEBUG] Retrying authentication in 3 seconds...')
+            checkAuth()
+          }, 3000)
+          return
+        }
         
         if (!session) {
-          console.log('No session found, redirecting to login')
+          const errorMsg = 'No session found - user not logged in'
+          console.error('🚨 [ADMIN ERROR]', errorMsg)
+          setDebugInfo(prev => ({ 
+            ...prev, 
+            lastError: errorMsg, 
+            retryCount: prev.retryCount + 1 
+          }))
+          
+          console.log('🔄 [ADMIN DEBUG] Attempting redirect to login...')
           router.push('/login')
           return
         }
         
         const adminEmail = 'abdalrahimmakkawi@gmail.com'
-        console.log('Session email:', session.user.email)
-        console.log('Required admin email:', adminEmail)
+        const userEmail = session.user.email
+        const authDuration = Date.now() - startTime
         
-        if (session.user.email !== adminEmail) {
-          console.log('Email mismatch, redirecting to login')
+        console.log('🔍 [ADMIN DEBUG] Session retrieved successfully')
+        console.log('🔍 [ADMIN DEBUG] User email:', userEmail)
+        console.log('🔍 [ADMIN DEBUG] Required admin email:', adminEmail)
+        console.log('🔍 [ADMIN DEBUG] Email match:', userEmail === adminEmail ? '✅' : '❌')
+        console.log('🔍 [ADMIN DEBUG] Auth duration:', authDuration + 'ms')
+        
+        setDebugInfo(prev => ({ 
+          ...prev, 
+          authDuration,
+          lastError: null 
+        }))
+        
+        if (userEmail !== adminEmail) {
+          const errorMsg = `Email mismatch: ${userEmail} != ${adminEmail}`
+          console.error('🚨 [ADMIN ERROR]', errorMsg)
+          setDebugInfo(prev => ({ 
+            ...prev, 
+            lastError: errorMsg, 
+            retryCount: prev.retryCount + 1 
+          }))
+          
+          console.log('🔄 [ADMIN DEBUG] Attempting redirect to login...')
           router.push('/login')
           return
         }
         
         // User is admin — allow access
-        console.log('Admin access granted')
+        console.log('✅ [ADMIN SUCCESS] Admin access granted')
+        console.log('🔍 [ADMIN DEBUG] User ID:', session.user.id)
+        console.log('🔍 [ADMIN DEBUG] Session expires:', new Date(session.expires_at || '').toISOString())
+        
         setUser(session.user)
         setIsAuthorized(true)
         setLoading(false)
         fetchData()
         
-      } catch (error) {
-        console.error('Auth error:', error)
-        console.log('Redirecting to login due to auth error')
+      } catch (error: any) {
+        const errorMsg = `Auth check failed: ${error?.message || 'Unknown error'}`
+        console.error('🚨 [ADMIN ERROR]', errorMsg)
+        console.error('🚨 [ADMIN ERROR] Full error object:', error)
+        setDebugInfo(prev => ({ 
+          ...prev, 
+          lastError: errorMsg, 
+          retryCount: prev.retryCount + 1 
+        }))
+        
+        console.log('🔄 [ADMIN DEBUG] Attempting redirect to login due to auth error...')
         router.push('/login')
       }
     }
@@ -65,7 +140,25 @@ export default function AdminDashboard() {
 }, [router.isReady])
 
   // Don't render anything until auth is confirmed
-  if (!isAuthorized) return null
+  if (!isAuthorized) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 border-t-transparent"></div>
+          <p className="mt-4 text-gray-600">🔍 Admin Authentication Debug Mode</p>
+          <p className="text-sm text-gray-500">Checking session...</p>
+          {debugInfo.lastError && (
+            <p className="mt-2 text-xs text-red-600 bg-red-50 p-2 rounded">
+              Last Error: {debugInfo.lastError}
+            </p>
+          )}
+          <p className="mt-2 text-xs text-gray-400">
+            Retry Count: {debugInfo.retryCount}
+          </p>
+        </div>
+      </div>
+    )
+  }
 
   useEffect(() => {
     if (user) {
@@ -185,7 +278,10 @@ export default function AdminDashboard() {
                 <span className="text-sm" style={{ color: 'rgba(255,255,255,0.6)' }}>Pending Review</span>
                 <Icon name="clock" size={16} style={{ color: '#fbbf24' }} />
               </div>
-              <div className="text-2xl font-bold" style={{ color: '#fbbf24' }}>{stats.pendingReview}</div>
+              <div className="bg-white p-6 rounded-lg shadow">
+                <div className="text-2xl font-bold" style={{ color: '#fbbf24' }}>{stats.pendingReview}</div>
+                <div className="text-gray-600">Pending Review</div>
+              </div>
             </div>
 
             <div className="rounded-lg p-6" style={{ background: 'rgba(255,255,255,0.05)' }}>
@@ -195,107 +291,9 @@ export default function AdminDashboard() {
               </div>
               <div className="text-2xl font-bold" style={{ color: '#22c55e' }}>{stats.activeAgents}</div>
             </div>
-
-            <div className="rounded-lg p-6" style={{ background: 'rgba(255,255,255,0.05)' }}>
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm" style={{ color: 'rgba(255,255,255,0.6)' }}>Total Leads</span>
-                <Icon name="target" size={16} style={{ color: 'rgba(255,255,255,0.4)' }} />
-              </div>
-              <div className="text-2xl font-bold" style={{ color: '#fff' }}>{stats.totalLeads}</div>
-            </div>
-          </div>
-
-          {/* Agents Table */}
-          <div className="rounded-lg overflow-hidden" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }}>
-            <div className="px-6 py-4 border-b" style={{ borderColor: 'rgba(255,255,255,0.1)' }}>
-              <h2 className="text-lg font-bold" style={{ color: '#fff', fontFamily: "'Playfair Display', serif" }}>
-                All Agents
-              </h2>
-            </div>
-
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr style={{ background: 'rgba(255,255,255,0.02)' }}>
-                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: 'rgba(255,255,255,0.6)' }}>
-                      Client
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: 'rgba(255,255,255,0.6)' }}>
-                      Business Type
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: 'rgba(255,255,255,0.6)' }}>
-                      Agent Name
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: 'rgba(255,255,255,0.6)' }}>
-                      Status
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: 'rgba(255,255,255,0.6)' }}>
-                      Created
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: 'rgba(255,255,255,0.6)' }}>
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y" style={{ borderColor: 'rgba(255,255,255,0.05)' }}>
-                  {agents.map((agent) => (
-                    <tr key={agent.id} className="hover:bg-opacity-50" style={{ background: 'rgba(255,255,255,0.02)' }}>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div>
-                          <div className="text-sm font-medium" style={{ color: '#fff' }}>
-                            {agent.clients?.business_name || 'Unknown'}
-                          </div>
-                          <div className="text-xs" style={{ color: 'rgba(255,255,255,0.6)' }}>
-                            {agent.clients?.email}
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className="text-sm" style={{ color: 'rgba(255,255,255,0.8)' }}>
-                          {agent.clients?.business_type || 'N/A'}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className="text-sm font-medium" style={{ color: '#fff' }}>
-                          {agent.name}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        {getStatusBadge(agent.status)}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className="text-sm" style={{ color: 'rgba(255,255,255,0.6)' }}>
-                          {new Date(agent.created_at).toLocaleDateString()}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <button
-                          onClick={() => router.push(`/admin/review/${agent.id}`)}
-                          className="text-sm px-3 py-1 rounded-lg transition-all"
-                          style={{ 
-                            background: 'rgba(99,102,241,0.2)', 
-                            color: '#a5b4fc',
-                            border: '1px solid rgba(99,102,241,0.3)'
-                          }}
-                        >
-                          Review
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-
-            {agents.length === 0 && (
-              <div className="text-center py-12">
-                <Icon name="robot" size={48} style={{ color: 'rgba(255,255,255,0.2)' }} />
-                <p className="mt-4" style={{ color: 'rgba(255,255,255,0.6)' }}>No agents yet</p>
-              </div>
-            )}
           </div>
         </div>
       </div>
-    </div>
-  </>
+    </>
   )
 }
