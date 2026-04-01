@@ -7,10 +7,10 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' })
-  }
-
+  console.log('[ONBOARDING] ===== START =====')
+  console.log('[ONBOARDING] Method:', req.method)
+  console.log('[ONBOARDING] Body keys:', Object.keys(req.body || {}))
+  
   const {
     clientId,
     businessName, businessUrl, businessType,
@@ -18,31 +18,70 @@ export default async function handler(
     topFaqs, tone, competitors, goals, extraInfo
   } = req.body
 
+  console.log('[ONBOARDING] clientId:', clientId)
+  console.log('[ONBOARDING] businessName:', businessName)
+  console.log('[ONBOARDING] businessType:', businessType)
+  
   if (!clientId || !businessName || !businessType || 
       !productsServices || !topFaqs) {
+    console.log('[ONBOARDING] ERROR: Missing required fields')
     return res.status(400).json({ 
       error: 'Missing required fields' 
     })
   }
 
   try {
-    // 1. Save onboarding submission
-    await (supabaseAdmin
-      .from('onboarding_submissions') as any)
-      .insert({
-        client_id: clientId,
+    // Step 1: Ensure client record exists (upsert)
+    console.log('[ONBOARDING] Ensuring client record exists...')
+    const { data: clientRecord, error: clientError } = await supabaseAdmin
+      .from('clients')
+      .upsert({
+        id: clientId,
         business_name: businessName,
-        business_url: businessUrl,
         business_type: businessType,
-        industry,
-        products_services: productsServices,
-        price_range: priceRange,
-        top_faqs: topFaqs,
-        tone: tone || 'friendly',
-        competitors,
-        goals,
-        extra_info: extraInfo,
+        onboarding_completed: false,
+      } as any, { onConflict: 'id', ignoreDuplicates: false })
+      .select()
+      .single()
+
+    console.log('[ONBOARDING] Client upsert result:', clientRecord)
+    console.log('[ONBOARDING] Client upsert error:', clientError)
+    
+    if (clientError) {
+      console.log('[ONBOARDING] FAILED at client upsert')
+      return res.status(500).json({ 
+        error: 'Failed to create client record',
+        detail: clientError.message 
       })
+    }
+
+    // Step 2: Save onboarding submission
+    console.log('[ONBOARDING] Saving onboarding submission...')
+    const { data: submission, error: submissionError } = 
+      await supabaseAdmin
+        .from('onboarding_submissions')
+        .insert({
+          client_id: clientId,
+          business_name: businessName,
+          business_type: businessType || 'General',
+          industry: industry || 'General',
+          products_services: productsServices || '',
+          top_faqs: topFaqs || '',
+          tone: tone || 'friendly',
+        } as any)
+        .select()
+        .single()
+    
+    console.log('[ONBOARDING] Submission saved:', submission?.id)
+    console.log('[ONBOARDING] Submission error:', submissionError)
+    
+    if (submissionError) {
+      console.log('[ONBOARDING] FAILED at submission save')
+      return res.status(500).json({ 
+        error: 'Failed to save submission',
+        detail: submissionError.message 
+      })
+    }
 
     // 2. Auto-assign squad plan for all clients (with fallback)
     try {
@@ -91,6 +130,7 @@ export default async function handler(
     }
 
     // 3. Generate agent config with DeepSeek (with fallback)
+    console.log('[ONBOARDING] Starting agent generation...')
     let agentConfig
     try {
       const onboardingData: OnboardingData = {
@@ -100,9 +140,11 @@ export default async function handler(
         competitors, goals, extraInfo,
       }
 
+      console.log('[ONBOARDING] Onboarding data prepared:', Object.keys(onboardingData))
       agentConfig = await generateAgentConfig(onboardingData)
+      console.log('[ONBOARDING] Agent config generated successfully')
     } catch (configErr) {
-      console.warn('Agent config generation failed:', configErr)
+      console.warn('[ONBOARDING] Agent config generation failed:', configErr)
       // Fallback to basic config
       agentConfig = {
         agentName: `${businessName} AI Assistant`,
@@ -121,6 +163,7 @@ export default async function handler(
     }
 
     // 4. Save generated agent to database (status: pending review)
+    console.log('[ONBOARDING] Creating agent in database...')
     const { data: agent, error: agentError } = await (supabaseAdmin
       .from('agents') as any)
       .insert({
@@ -140,7 +183,7 @@ export default async function handler(
       .select()
       .single()
 
-    console.log('[Onboarding] Agent created with status:', agent.status, 'ID:', agent.id)
+    console.log('[ONBOARDING] Agent created with status:', agent?.status, 'ID:', agent?.id)
 
     if (agentError) {
       console.error('Agent insert FULL error:', JSON.stringify(agentError, null, 2))

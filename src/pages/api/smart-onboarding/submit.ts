@@ -38,13 +38,35 @@ export default async function handler(
   try {
     const onboardingData: SmartOnboardingData = req.body
 
+    console.log('[SMART_ONBOARDING] ===== START =====')
+    console.log('[SMART_ONBOARDING] Body keys:', Object.keys(req.body || {}))
+    console.log('[SMART_ONBOARDING] businessName:', onboardingData.businessName)
+    console.log('[SMART_ONBOARDING] businessType:', onboardingData.businessType)
+
     // Validate required fields
     if (!onboardingData.businessName || !onboardingData.businessType) {
+      console.log('[SMART_ONBOARDING] ERROR: Missing required fields')
       return res.status(400).json({ error: 'Business name and type are required' })
     }
 
     // Get user from session (you'll need to implement auth)
     const clientId = 'demo-user-id' // Replace with actual user ID from session
+
+    // Ensure client exists before agent creation
+    console.log('[SMART_ONBOARDING] Ensuring client record exists...')
+    const { error: clientUpsertError } = await supabaseAdmin
+      .from('clients')
+      .upsert({
+        id: clientId,
+        business_name: onboardingData.businessName || 'Unknown',
+        onboarding_completed: false,
+      } as any, { onConflict: 'id', ignoreDuplicates: false })
+
+    console.log('[SMART_ONBOARDING] Client upsert error:', clientUpsertError)
+    if (clientUpsertError) {
+      console.log('[SMART_ONBOARDING] FAILED at client upsert')
+      return res.status(500).json({ error: 'Failed to create client record' })
+    }
 
     // Generate AI agent configuration with cost optimization
     const agentConfig = await generateSmartAgentConfig(onboardingData)
@@ -73,6 +95,7 @@ export default async function handler(
     }
 
     // Save agent with generated config
+    console.log('[SMART_ONBOARDING] Creating agent for client:', clientId)
     const { data: agent, error: agentError } = await (supabaseAdmin
       .from('agents') as any)
       .insert({
@@ -94,13 +117,16 @@ export default async function handler(
       .select()
       .single()
 
+    console.log('[SMART_ONBOARDING] Agent created:', agent?.id)
+    console.log('[SMART_ONBOARDING] Agent error:', agentError)
+
     if (agentError) {
       console.error('[SMART_ONBOARDING] Agent creation error:', agentError)
       return res.status(500).json({ error: 'Failed to create agent' })
     }
 
     // Update client onboarding status
-    const { error: clientError } = await (supabaseAdmin
+    const { error: clientUpdateError } = await (supabaseAdmin
       .from('clients') as any)
       .update({
         onboarding_completed: true,
@@ -111,8 +137,8 @@ export default async function handler(
       })
       .eq('id', clientId)
 
-    if (clientError) {
-      console.error('[SMART_ONBOARDING] Client update error:', clientError)
+    if (clientUpdateError) {
+      console.error('[SMART_ONBOARDING] Client update error:', clientUpdateError)
       return res.status(500).json({ error: 'Failed to update client' })
     }
 

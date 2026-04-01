@@ -38,7 +38,7 @@ export default function Signup() {
     }
 
     try {
-      const { error } = await supabase.auth.signUp({
+      const { data: signupData, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -49,6 +49,26 @@ export default function Signup() {
       })
 
       if (error) throw error
+
+      // Create client record immediately after signup
+      if (signupData.user) {
+        console.log('[SIGNUP] Creating client record for user:', signupData.user.id)
+        const { error: clientError } = await supabase
+          .from('clients')
+          .insert({
+            id: signupData.user.id,
+            email: email.toLowerCase().trim(),
+            business_name: businessName || '',
+            status: 'pending',
+            plan: 'none',
+          } as any)
+
+        if (clientError) {
+          console.error('[SIGNUP] Failed to create client record:', clientError)
+        } else {
+          console.log('[SIGNUP] Client record created successfully')
+        }
+      }
 
       setSuccess(true)
     } catch (err: any) {
