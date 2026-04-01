@@ -6,6 +6,21 @@ import Icon from '@/components/Icon'
 import { SkeletonTable } from '@/components/Skeleton'
 import { ADMIN_EMAIL } from '@/lib/admin'
 
+// Helper function to make authenticated API calls
+const fetchAdminData = async (endpoint: string) => {
+  const response = await fetch(`/api/admin/${endpoint}`, {
+    headers: {
+      'x-admin-key': process.env.NEXT_PUBLIC_ADMIN_KEY || 'nexagent-admin-2024'
+    }
+  })
+  
+  if (!response.ok) {
+    throw new Error(`Failed to fetch ${endpoint}`)
+  }
+  
+  return response.json()
+}
+
 export default function AdminDashboard() {
   const router = useRouter()
   const [loading, setLoading] = useState(true)
@@ -79,13 +94,8 @@ export default function AdminDashboard() {
   // Fetch pending agents
   const fetchPendingAgents = async () => {
     try {
-      const { data: pendingAgentsData } = await supabase
-        .from('agents')
-        .select('id, name, status, created_at, clients(business_name, email)')
-        .in('status', ['pending_review', 'building', 'generating'])
-        .order('created_at', { ascending: false }) as any
-      
-      setPendingAgents(pendingAgentsData || [])
+      const data = await fetchAdminData('pending-agents')
+      setPendingAgents(data.agents || [])
     } catch (error) {
       console.error('[Admin] Error fetching pending agents:', error)
     }
@@ -144,33 +154,23 @@ export default function AdminDashboard() {
 
   const fetchData = async () => {
     try {
-      // Fetch agents with client info
-      const { data: agentsData } = await supabase
-        .from('agents')
-        .select('*, clients(*)')
-        .order('created_at', { ascending: false })
+      // Fetch stats from API
+      const statsData = await fetchAdminData('stats')
+      
+      // Fetch agents from API
+      const agentsData = await fetchAdminData('all-agents')
 
-      // Fetch stats
-      const { count: totalClients } = await supabase
-        .from('clients')
-        .select('*', { count: 'exact', head: true })
-
-      const { count: totalLeads } = await supabase
-        .from('leads')
-        .select('*', { count: 'exact', head: true })
-
-      const pendingCount = (agentsData as any[])?.filter(a => a.status === 'pending_review').length || 0
-      const activeCount = (agentsData as any[])?.filter(a => a.status === 'active').length || 0
-
-      setAgents(agentsData || [])
       setStats({
-        totalClients: totalClients || 0,
-        pendingReview: pendingCount,
-        activeAgents: activeCount,
-        totalLeads: totalLeads || 0,
+        totalClients: statsData.totalClients,
+        pendingReview: statsData.pendingReview,
+        activeAgents: statsData.activeAgents,
+        totalLeads: statsData.totalLeads
       })
-    } catch (err) {
-      console.error('Failed to fetch data:', err)
+      
+      setAgents(agentsData.agents || [])
+
+    } catch (error) {
+      console.error('[Admin] Error fetching data:', error)
     } finally {
       setLoading(false)
     }

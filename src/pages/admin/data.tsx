@@ -5,6 +5,21 @@ import { supabase } from '@/lib/supabase'
 import Icon from '@/components/Icon'
 import { ADMIN_EMAIL } from '@/lib/admin'
 
+// Helper function to make authenticated API calls
+const fetchAdminData = async (endpoint: string) => {
+  const response = await fetch(`/api/admin/${endpoint}`, {
+    headers: {
+      'x-admin-key': process.env.NEXT_PUBLIC_ADMIN_KEY || 'nexagent-admin-2024'
+    }
+  })
+  
+  if (!response.ok) {
+    throw new Error(`Failed to fetch ${endpoint}`)
+  }
+  
+  return response.json()
+}
+
 export default function DataExplorer() {
   const router = useRouter()
   const [loading, setLoading] = useState(true)
@@ -62,25 +77,21 @@ export default function DataExplorer() {
     try {
       setLoading(true)
       
-      // Fetch all data
-      const [clientsRes, agentsRes, leadsRes, waitlistRes] = await Promise.all([
-        supabase.from('clients').select('*').order('created_at', { ascending: false }),
-        supabase.from('agents').select('*, clients(*)').in('status', ['active', 'pending_review', 'building', 'generating']).order('created_at', { ascending: false }),
-        supabase.from('leads').select('*').order('created_at', { ascending: false }),
-        supabase.from('waitlist').select('*').order('created_at', { ascending: false })
+      // Fetch all data from API endpoints
+      const [clientsData, agentsData] = await Promise.all([
+        fetchAdminData('all-clients'),
+        fetchAdminData('all-agents')
       ])
 
-      setClients(clientsRes.data || [])
-      setAgents(agentsRes.data || [])
-      setLeads(leadsRes.data || [])
-      setWaitlist(waitlistRes.data || [])
+      setClients(clientsData.clients || [])
+      setAgents(agentsData.agents || [])
 
       // Calculate stats
       setStats({
-        totalClients: clientsRes.data?.length || 0,
-        activeAgents: agentsRes.data?.filter((a: any) => a.status === 'active').length || 0,
-        totalLeads: leadsRes.data?.length || 0,
-        waitlistSignups: waitlistRes.data?.length || 0
+        totalClients: clientsData.count || 0,
+        activeAgents: agentsData.agents?.filter((a: any) => a.status === 'active').length || 0,
+        totalLeads: 0, // TODO: Add leads endpoint
+        waitlistSignups: 0 // TODO: Add waitlist endpoint
       })
     } catch (err) {
       console.error('Failed to fetch data:', err)
