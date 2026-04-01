@@ -1,9 +1,5 @@
-import { getNVIDIAClient } from './nvidia'
+import { aiClient, aiModel } from './nvidia-client'
 import { supabaseAdmin } from './supabase'
-
-const nvidia = getNVIDIAClient()
-
-const MODEL = process.env.NVIDIA_MODEL || 'nvidia/nemotron-4-340b-instruct'
 
 // ── TYPES ────────────────────────────────────────
 export type AgentType = 
@@ -63,16 +59,21 @@ Routing rules:
 - shouldCaptureLead: true when customer shows buying intent
 - shouldEscalate: true when sentiment < 0.2 or intent is legal`
 
-  const response = await nvidia.chat([
-    {
-      role: 'system',
-      content: routerPrompt
-    },
-    {
-      role: 'user', 
-      content: `Customer message: "${message}"`
-    }
-  ], MODEL)
+  const response = await aiClient.chat.completions.create({
+    model: aiModel,
+    max_tokens: 200,
+    temperature: 0.1,
+    messages: [
+      {
+        role: 'system',
+        content: routerPrompt
+      },
+      {
+        role: 'user', 
+        content: `Customer message: "${message}"`
+      }
+    ]
+  })
 
   const raw = response.choices[0]?.message?.content || '{}'
   const clean = raw.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()
@@ -233,14 +234,19 @@ export async function multiAgentChat(
     decision
   )
 
-  const response = await nvidia.chat([
-    { role: 'system', content: specialistPrompt },
-    ...context.conversationHistory.slice(-10).map(m => ({
-      role: m.role as 'user' | 'assistant',
-      content: m.content,
-    })),
-    { role: 'user', content: message },
-  ], MODEL)
+  const response = await aiClient.chat.completions.create({
+    model: aiModel,
+    max_tokens: 512,
+    temperature: 0.7,
+    messages: [
+      { role: 'system', content: specialistPrompt },
+      ...context.conversationHistory.slice(-10).map(m => ({
+        role: m.role as 'user' | 'assistant',
+        content: m.content,
+      })),
+      { role: 'user', content: message },
+    ],
+  })
 
   const content = response.choices[0]?.message?.content 
     || "I'm here to help. Could you tell me more?"

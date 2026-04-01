@@ -1,8 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { supabaseAdmin } from '@/lib/supabase'
-import { getNVIDIAClient } from '@/lib/nvidia'
-
-const nvidia = getNVIDIAClient()
+import { aiClient, aiModel, providerName } from '@/lib/nvidia-client'
 
 // Admin secret key for protection
 const ADMIN_SECRET_KEY = process.env.ADMIN_SECRET_KEY || 'nexagent-admin-2024'
@@ -234,15 +232,19 @@ Never be generic — always tie advice to NexAgent's specific situation and real
 
     const start = Date.now()
 
-    // Call NVIDIA with enhanced system prompt
-    const response = await nvidia.chat([
-      { role: 'system', content: systemPrompt },
-      ...conversationHistory.map((msg: any) => ({
-        role: msg.role,
-        content: msg.content,
-      })),
-      { role: 'user', content: message },
-    ], process.env.NVIDIA_MODEL || 'nvidia/nemotron-4-340b-instruct')
+    // Call AI with enhanced system prompt
+    const response = await aiClient.chat.completions.create({
+      model: aiModel,
+      max_tokens: 1500,
+      messages: [
+        { role: 'system', content: systemPrompt },
+        ...conversationHistory.map((msg: any) => ({
+          role: msg.role,
+          content: msg.content,
+        })),
+        { role: 'user', content: message },
+      ],
+    })
 
     const content = response.choices[0]?.message?.content || 
       "I'm having trouble right now. Please try again!"
@@ -250,7 +252,7 @@ Never be generic — always tie advice to NexAgent's specific situation and real
 
     return res.status(200).json({
       content,
-      provider: 'nvidia',
+      provider: providerName,
       latencyMs,
       metrics: {
         clients: metrics.totalClients,

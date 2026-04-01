@@ -1,28 +1,13 @@
 // src/lib/ai-router.ts
 // ─────────────────────────────────────────────────────────────
 // NexAgent AI Router
-// Uses DeepSeek API (OpenAI-compatible) for all queries
+// Uses NVIDIA API (primary) with DeepSeek fallback
 // ─────────────────────────────────────────────────────────────
 
-import OpenAI from 'openai'
-
-// Validate required env vars at startup
-const DEEPSEEK_API_KEY = process.env.DEEPSEEK_API_KEY
-const DEEPSEEK_BASE_URL = process.env.DEEPSEEK_BASE_URL || 'https://api.deepseek.com'
-const DEEPSEEK_MODEL = process.env.DEEPSEEK_MODEL || 'deepseek-chat'
-
-if (!DEEPSEEK_API_KEY) {
-  throw new Error('DEEPSEEK_API_KEY environment variable is required')
-}
-
-// ── Client ──────────────────────────────────────────────────
-const openai = new OpenAI({
-  baseURL: DEEPSEEK_BASE_URL,
-  apiKey: DEEPSEEK_API_KEY,
-})
+import { aiClient, aiModel, providerName } from './nvidia-client'
 
 // ── Types ─────────────────────────────────────────────────────
-export type AIProvider = 'deepseek'
+export type AIProvider = 'nvidia' | 'deepseek'
 
 export interface Message {
   role: 'user' | 'assistant'
@@ -49,8 +34,8 @@ export async function chat(
   const start = Date.now()
 
   try {
-    const response = await openai.chat.completions.create({
-      model: process.env.DEEPSEEK_MODEL || 'deepseek-chat',
+    const response = await aiClient.chat.completions.create({
+      model: aiModel,
       max_tokens: config.maxTokens || 1024,
       messages: [
         { role: 'system', content: config.systemPrompt },
@@ -62,11 +47,11 @@ export async function chat(
 
     return {
       content,
-      provider: 'deepseek',
+      provider: providerName,
       latencyMs: Date.now() - start,
     }
   } catch (error) {
-    console.error('[AI Router] DeepSeek API error:', error)
-    throw new Error('Failed to get response from DeepSeek API. Please check your API key and configuration.')
+    console.error(`[AI Router] ${providerName} API error:`, error)
+    throw new Error(`Failed to get response from ${providerName} API. Please check your API key and configuration.`)
   }
 }

@@ -1,27 +1,4 @@
-import OpenAI from 'openai'
-
-const nvidia = new OpenAI({
-  baseURL: process.env.NVIDIA_BASE_URL || 
-    'https://integrate.api.nvidia.com/v1',
-  apiKey: process.env.NVIDIA_API_KEY || '',
-})
-
-const deepseek = new OpenAI({
-  baseURL: process.env.DEEPSEEK_BASE_URL || 
-    'https://api.deepseek.com',
-  apiKey: process.env.DEEPSEEK_API_KEY!,
-})
-
-// Use NVIDIA for agent generation (better quality)
-// Use DeepSeek for live chat (faster, cheaper)
-const generationClient = process.env.NVIDIA_API_KEY 
-  ? nvidia 
-  : deepseek
-
-const generationModel = process.env.NVIDIA_API_KEY
-  ? (process.env.NVIDIA_MODEL || 
-     'nvidia/llama-3.1-nemotron-ultra-253b-v1')
-  : (process.env.DEEPSEEK_MODEL || 'deepseek-chat')
+import { aiClient, aiModel } from './nvidia-client'
 
 export interface OnboardingData {
   businessName: string
@@ -85,8 +62,8 @@ The JSON must have exactly these fields:
   "suggestedName": "The agent name again"
 }`
 
-  const response = await generationClient.chat.completions.create({
-    model: generationModel,
+  const response = await aiClient.chat.completions.create({
+    model: aiModel,
     max_tokens: 2000,
     temperature: 0.7,
     messages: [{ role: 'user', content: prompt }],

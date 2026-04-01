@@ -2,6 +2,7 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 import { supabaseAdmin } from '@/lib/supabase'
 import { chatRateLimiter, dailyRateLimiter, getClientIP } from '@/lib/rate-limiter'
 import { multiAgentChat, PLAN_AGENTS, AgentContext } from '@/lib/multi-agent'
+import { providerName } from '@/lib/nvidia-client'
 
 export default async function handler(
   req: NextApiRequest,
@@ -101,7 +102,7 @@ export default async function handler(
 
     return res.status(200).json({
       content: result.content,
-      provider: 'deepseek',
+      provider: providerName,
       agentUsed: result.agentUsed,
       sentiment: result.decision.sentiment,
       intent: result.decision.intent,
