@@ -1,10 +1,14 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { supabaseAdmin } from '@/lib/supabase'
+import { randomUUID } from 'crypto'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.headers['x-admin-key'] !== process.env.ADMIN_SECRET_KEY) {
     return res.status(401).json({ error: 'Unauthorized' })
   }
+
+  const testId = randomUUID()
+  const results: any = {}
 
   try {
     console.log('[SIMPLE_TEST] Starting database test...')
@@ -21,7 +25,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     console.log('[SIMPLE_TEST] Existing records:', { existingClients, existingAgents })
 
     // Test 1: Simple client insert
-    const testId = 'test-' + Date.now()
     console.log('[SIMPLE_TEST] Inserting client with ID:', testId)
     
     const { data: client, error: clientError } = await supabaseAdmin
@@ -100,7 +103,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         finalAgentCount
       }
     })
-
   } catch (error) {
     console.error('[SIMPLE_TEST] Error:', error)
     return res.status(500).json({ 
