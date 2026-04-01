@@ -22,6 +22,7 @@ export default function AdminDashboard() {
     totalLeads: 0,
   })
   const [user, setUser] = useState<any>(null)
+  const [pendingAgents, setPendingAgents] = useState<any[]>([])
   const [agentBuildingStatus, setAgentBuildingStatus] = useState<{
     isBuilding: boolean
     currentAgent?: string
@@ -75,6 +76,30 @@ export default function AdminDashboard() {
     }
   }, [user])
 
+  // Fetch pending agents
+  const fetchPendingAgents = async () => {
+    try {
+      const { data: pendingAgentsData } = await supabase
+        .from('agents')
+        .select('id, name, status, created_at, clients(business_name, email)')
+        .in('status', ['pending_review', 'building', 'generating'])
+        .order('created_at', { ascending: false }) as any
+      
+      setPendingAgents(pendingAgentsData || [])
+    } catch (error) {
+      console.error('[Admin] Error fetching pending agents:', error)
+    }
+  }
+
+  // Auto-refresh pending agents every 30 seconds
+  useEffect(() => {
+    if (!user) return
+    
+    fetchPendingAgents()
+    const interval = setInterval(fetchPendingAgents, 30000)
+    return () => clearInterval(interval)
+  }, [user])
+
   // Simulate agent building status updates
   useEffect(() => {
     if (!user) return
@@ -114,6 +139,8 @@ export default function AdminDashboard() {
 
     return () => clearInterval(interval)
   }, [user, agentBuildingStatus.isBuilding])
+
+  const pendingCount = pendingAgents.filter(a => a.status === 'pending_review').length
 
   const fetchData = async () => {
     try {
@@ -170,7 +197,10 @@ export default function AdminDashboard() {
 
   return (
     <>
-      <Head><title>Admin Dashboard — NexAgent</title></Head>
+      <Head>
+        <title>{pendingCount > 0 ? `(${pendingCount}) NexAgent Admin` : 'NexAgent Admin'}</title>
+        <meta name="description" content="NexAgent Admin Dashboard" />
+      </Head>
       <div className="min-h-screen" style={{ background: '#0a0a12' }}>
         {/* Header */}
         <div className="border-b px-6 py-4" style={{ borderColor: 'rgba(255,255,255,0.1)' }}>
@@ -211,7 +241,115 @@ export default function AdminDashboard() {
           </div>
         </div>
 
+        {/* Notification Banner */}
+        {pendingCount > 0 && (
+          <div className="px-6 py-4" style={{ background: 'rgba(251,146,60,0.1)', borderBottom: '1px solid rgba(251,146,60,0.3)' }}>
+            <div className="max-w-7xl mx-auto flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <span className="text-amber-400 font-medium">
+                  ⚡ You have {pendingCount} agent{pendingCount > 1 ? 's' : ''} ready to review
+                </span>
+              </div>
+              <button
+                onClick={() => {
+                  const firstPending = pendingAgents.find(a => a.status === 'pending_review')
+                  if (firstPending) {
+                    router.push(`/admin/review/${firstPending.id}`)
+                  }
+                }}
+                className="px-4 py-2 rounded-lg text-sm font-medium"
+                style={{ 
+                  background: 'rgba(251,146,60,0.2)',
+                  color: '#fb923c',
+                  border: '1px solid rgba(251,146,60,0.3)'
+                }}
+              >
+                Review Now
+              </button>
+            </div>
+          </div>
+        )}
+
         <div className="max-w-7xl mx-auto px-6 py-8">
+          {/* Building Status Section */}
+          <div className="mb-8">
+            {pendingAgents.length > 0 ? (
+              <div className="rounded-lg p-6" style={{ 
+                background: 'rgba(251,146,60,0.1)', 
+                border: '2px solid rgba(251,146,60,0.3)',
+                borderRadius: '12px'
+              }}>
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-xl font-bold" style={{ color: '#fb923c' }}>
+                    🔨 Agents Being Built
+                  </h3>
+                  <button
+                    onClick={fetchPendingAgents}
+                    className="px-4 py-2 rounded-lg text-sm font-medium"
+                    style={{ 
+                      background: 'rgba(251,146,60,0.2)',
+                      color: '#fb923c',
+                      border: '1px solid rgba(251,146,60,0.3)'
+                    }}
+                  >
+                    🔄 Refresh
+                  </button>
+                </div>
+                <div className="space-y-3">
+                  {pendingAgents.map((agent) => (
+                    <div key={agent.id} className="flex items-center justify-between p-4 rounded-lg" style={{ background: 'rgba(255,255,255,0.05)' }}>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3">
+                          <span className="font-medium" style={{ color: '#fff' }}>
+                            {agent.clients?.business_name || 'Unknown Business'}
+                          </span>
+                          <span className="text-sm" style={{ color: 'rgba(255,255,255,0.6)' }}>
+                            → {agent.name}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-3 mt-2">
+                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                            agent.status === 'building' || agent.status === 'generating' 
+                              ? 'bg-blue-500 text-white' 
+                              : 'bg-amber-500 text-white'
+                          }`}>
+                            {agent.status === 'building' && (
+                              <span className="inline-block w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse"></span>
+                            )}
+                            {agent.status === 'generating' && (
+                              <span className="inline-block w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse"></span>
+                            )}
+                            {agent.status.replace('_', ' ')}
+                          </span>
+                          <span className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>
+                            {new Date(agent.created_at).toLocaleString()}
+                          </span>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => router.push(`/admin/review/${agent.id}`)}
+                        className="px-4 py-2 rounded-lg text-sm font-medium"
+                        style={{ 
+                          background: 'rgba(251,146,60,0.2)',
+                          color: '#fb923c',
+                          border: '1px solid rgba(251,146,60,0.3)'
+                        }}
+                      >
+                        Review Now
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <div className="rounded-lg p-4 text-center" style={{ 
+                background: 'rgba(34,197,94,0.1)',
+                border: '1px solid rgba(34,197,94,0.3)'
+              }}>
+                <span className="text-green-500 font-medium">✓ All agents up to date</span>
+              </div>
+            )}
+          </div>
           {/* Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-6 gap-6 mb-8">
             <div className="rounded-lg p-6" style={{ background: 'rgba(255,255,255,0.05)' }}>

@@ -140,6 +140,8 @@ export default async function handler(
       .select()
       .single()
 
+    console.log('[Onboarding] Agent created with status:', agent.status, 'ID:', agent.id)
+
     if (agentError) {
       console.error('Agent insert FULL error:', JSON.stringify(agentError, null, 2))
       return res.status(500).json({ error: 'Agent insert failed', detail: agentError.message, code: agentError.code, hint: agentError.hint })

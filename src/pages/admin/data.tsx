@@ -65,7 +65,7 @@ export default function DataExplorer() {
       // Fetch all data
       const [clientsRes, agentsRes, leadsRes, waitlistRes] = await Promise.all([
         supabase.from('clients').select('*').order('created_at', { ascending: false }),
-        supabase.from('agents').select('*, clients(*)').order('created_at', { ascending: false }),
+        supabase.from('agents').select('*, clients(*)').in('status', ['active', 'pending_review', 'building', 'generating']).order('created_at', { ascending: false }),
         supabase.from('leads').select('*').order('created_at', { ascending: false }),
         supabase.from('waitlist').select('*').order('created_at', { ascending: false })
       ])
@@ -118,15 +118,26 @@ export default function DataExplorer() {
       pending_review: { bg: 'rgba(251,191,36,0.2)', color: '#fbbf24' },
       active: { bg: 'rgba(34,197,94,0.2)', color: '#22c55e' },
       rejected: { bg: 'rgba(239,68,68,0.2)', color: '#ef4444' },
-      cancelled: { bg: 'rgba(239,68,68,0.2)', color: '#ef4444' }
+      cancelled: { bg: 'rgba(239,68,68,0.2)', color: '#ef4444' },
+      building: { bg: 'rgba(59,130,246,0.2)', color: '#3b82f6' },
+      generating: { bg: 'rgba(59,130,246,0.2)', color: '#3b82f6' }
     }
     const style = colors[status as keyof typeof colors] || colors.pending_review
+    
     return (
       <span 
-        className="px-3 py-1 rounded-full text-xs font-semibold"
+        className={`px-3 py-1 rounded-full text-xs font-semibold ${
+          (status === 'building' || status === 'generating') ? 'inline-flex items-center gap-2' : ''
+        }`}
         style={{ background: style.bg, color: style.color }}
       >
-        {status === 'pending_review' ? 'Pending Review' : status}
+        {(status === 'building' || status === 'generating') && (
+          <span className="inline-block w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
+        )}
+        {status === 'pending_review' ? 'Pending Review' : 
+         status === 'building' ? 'Building' :
+         status === 'generating' ? 'Generating' :
+         status}
       </span>
     )
   }
@@ -529,6 +540,15 @@ export default function DataExplorer() {
                 </p>
               </div>
             )}
+          </div>
+
+          {/* Debug Information */}
+          <div className="px-6 py-4 border-t" style={{ borderColor: 'rgba(255,255,255,0.1)' }}>
+            <div className="max-w-7xl mx-auto">
+              <p className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>
+                Showing {clients.length} clients, {agents.length} agents, {leads.length} leads, {waitlist.length} waitlist
+              </p>
+            </div>
           </div>
         </div>
       </div>
