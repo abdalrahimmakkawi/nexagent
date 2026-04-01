@@ -22,8 +22,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           business_name: 'Test School',
           business_type: 'Education',
           status: 'pending',
-          plan: 'none',
-        } as any)
+          plan: 'none'
+        })
         .select()
         .single()
     
@@ -42,8 +42,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           store_id: 'school',
           system_prompt: 'Test prompt for school assistant',
           welcome_message: 'Welcome to our school!',
-          status: 'pending_review',
-        } as any)
+          status: 'pending_review'
+        })
         .select()
         .single()
     
