@@ -41,3 +41,24 @@ export async function testAIConnection(): Promise<boolean> {
     return false
   }
 }
+
+// Filter out thinking content from NVIDIA responses
+export function processAIResponse(response: any): string {
+  let content = response.choices?.[0]?.message?.content || ''
+  
+  // If response has reasoning_content, extract only the actual content
+  if (response.choices?.[0]?.message?.reasoning_content) {
+    // For models that separate reasoning from content
+    content = response.choices[0].message.content || ''
+  }
+  
+  // Remove any thinking/reasoning tags that might be in the content
+  content = content
+    .replace(/<thinking>[\s\S]*?<\/thinking>/gi, '')
+    .replace(/<reasoning>[\s\S]*?<\/reasoning>/gi, '')
+    .replace(/```thinking[\s\S]*?```/gi, '')
+    .replace(/```reasoning[\s\S]*?```/gi, '')
+    .trim()
+  
+  return content
+}

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/router'
 import Head from 'next/head'
-import { supabaseAdmin } from '@/lib/supabase'
+import { supabase } from '@/lib/supabase'
 import Icon from '@/components/Icon'
 import { ADMIN_EMAIL } from '@/lib/admin'
 
@@ -25,7 +25,7 @@ export default function DataExplorer() {
   useEffect(() => {
   const checkAdmin = async () => {
     try {
-      const { data: { session } } = await supabaseAdmin.auth.getSession()
+      const { data: { session } } = await supabase.auth.getSession()
       
       if (!session) {
         router.push('/login')
@@ -64,10 +64,10 @@ export default function DataExplorer() {
       
       // Fetch all data
       const [clientsRes, agentsRes, leadsRes, waitlistRes] = await Promise.all([
-        supabaseAdmin.from('clients').select('*').order('created_at', { ascending: false }),
-        supabaseAdmin.from('agents').select('*, clients(*)').order('created_at', { ascending: false }),
-        supabaseAdmin.from('leads').select('*').order('created_at', { ascending: false }),
-        supabaseAdmin.from('waitlist').select('*').order('created_at', { ascending: false })
+        supabase.from('clients').select('*').order('created_at', { ascending: false }),
+        supabase.from('agents').select('*, clients(*)').order('created_at', { ascending: false }),
+        supabase.from('leads').select('*').order('created_at', { ascending: false }),
+        supabase.from('waitlist').select('*').order('created_at', { ascending: false })
       ])
 
       setClients(clientsRes.data || [])

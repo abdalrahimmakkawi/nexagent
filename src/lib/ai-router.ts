@@ -4,7 +4,7 @@
 // Uses NVIDIA API (primary) with DeepSeek fallback
 // ─────────────────────────────────────────────────────────────
 
-import { aiClient, aiModel, providerName } from './nvidia-client'
+import { aiClient, aiModel, providerName, processAIResponse } from './nvidia-client'
 
 // ── Types ─────────────────────────────────────────────────────
 export type AIProvider = 'nvidia' | 'deepseek'
@@ -43,7 +43,8 @@ export async function chat(
       ],
     })
 
-    const content = response.choices[0]?.message?.content || 'Sorry, I could not generate a response.'
+    const rawContent = response.choices[0]?.message?.content || 'Sorry, I could not generate a response.'
+    const content = processAIResponse(response)
 
     return {
       content,

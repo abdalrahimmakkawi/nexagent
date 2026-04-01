@@ -22,6 +22,14 @@ export default function AdminDashboard() {
     totalLeads: 0,
   })
   const [user, setUser] = useState<any>(null)
+  const [agentBuildingStatus, setAgentBuildingStatus] = useState<{
+    isBuilding: boolean
+    currentAgent?: string
+    progress: number
+  }>({
+    isBuilding: false,
+    progress: 0
+  })
 
   useEffect(() => {
     const checkAdmin = async () => {
@@ -66,6 +74,46 @@ export default function AdminDashboard() {
       fetchData()
     }
   }, [user])
+
+  // Simulate agent building status updates
+  useEffect(() => {
+    if (!user) return
+
+    const interval = setInterval(() => {
+      // Randomly simulate agent building for demo
+      const shouldBuild = Math.random() > 0.7
+      if (shouldBuild && !agentBuildingStatus.isBuilding) {
+        setAgentBuildingStatus({
+          isBuilding: true,
+          currentAgent: 'School Assistant',
+          progress: 0
+        })
+
+        // Simulate building progress
+        let progress = 0
+        const progressInterval = setInterval(() => {
+          progress += 10
+          setAgentBuildingStatus(prev => ({
+            ...prev,
+            progress
+          }))
+
+          if (progress >= 100) {
+            clearInterval(progressInterval)
+            setTimeout(() => {
+              setAgentBuildingStatus({
+                isBuilding: false,
+                currentAgent: undefined,
+                progress: 0
+              })
+            }, 2000)
+          }
+        }, 800)
+      }
+    }, 5000)
+
+    return () => clearInterval(interval)
+  }, [user, agentBuildingStatus.isBuilding])
 
   const fetchData = async () => {
     try {
@@ -165,7 +213,7 @@ export default function AdminDashboard() {
 
         <div className="max-w-7xl mx-auto px-6 py-8">
           {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-6 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-6 gap-6 mb-8">
             <div className="rounded-lg p-6" style={{ background: 'rgba(255,255,255,0.05)' }}>
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm" style={{ color: 'rgba(255,255,255,0.6)' }}>Total Clients</span>
@@ -206,6 +254,25 @@ export default function AdminDashboard() {
               <div className="text-2xl font-bold" style={{ color: '#22c55e' }}>NVIDIA</div>
               <div className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.4)' }}>
                 nemotron-4-340b-instruct
+              </div>
+            </div>
+
+            <div className="rounded-lg p-6" style={{ background: agentBuildingStatus.isBuilding ? 'rgba(59,130,246,0.1)' : 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }}>
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm" style={{ color: 'rgba(255,255,255,0.6)' }}>Agent Building</span>
+                <div className="flex items-center gap-2">
+                  {agentBuildingStatus.isBuilding && (
+                    <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+                  )}
+                  <Icon name="refresh" size={16} style={{ color: agentBuildingStatus.isBuilding ? '#3b82f6' : 'rgba(255,255,255,0.4)' }} />
+                </div>
+              </div>
+              <div className="text-2xl font-bold" style={{ color: agentBuildingStatus.isBuilding ? '#3b82f6' : '#fff' }}>
+                {agentBuildingStatus.isBuilding ? 'Building...' : 'Ready'}
+              </div>
+              <div className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.4)' }}>
+                {agentBuildingStatus.currentAgent ? `Building: ${agentBuildingStatus.currentAgent}` : 'No active builds'}
+                {agentBuildingStatus.progress > 0 && ` (${agentBuildingStatus.progress}%)`}
               </div>
             </div>
           </div>

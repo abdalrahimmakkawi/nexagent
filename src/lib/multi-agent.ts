@@ -1,4 +1,4 @@
-import { aiClient, aiModel } from './nvidia-client'
+import { aiClient, aiModel, processAIResponse } from './nvidia-client'
 import { supabaseAdmin } from './supabase'
 
 // ── TYPES ────────────────────────────────────────
@@ -248,8 +248,8 @@ export async function multiAgentChat(
     ],
   })
 
-  const content = response.choices[0]?.message?.content 
-    || "I'm here to help. Could you tell me more?"
+  const rawContent = response.choices[0]?.message?.content || "I'm here to help. Could you tell me more?"
+  const content = processAIResponse(response)
 
   return {
     content,
