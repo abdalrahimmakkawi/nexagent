@@ -1,5 +1,6 @@
 import { aiClient, aiModel, processAIResponse } from './nvidia-client'
 import { supabaseAdmin } from './supabase'
+import { cleanAIResponse } from './ai-utils'
 
 // ── TYPES ────────────────────────────────────────
 export type AgentType = 
@@ -76,7 +77,7 @@ Routing rules:
   })
 
   const raw = response.choices[0]?.message?.content || '{}'
-  const clean = raw.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()
+  const clean = cleanAIResponse(raw)
   
   try {
     const decision = JSON.parse(clean) as RouterDecision
@@ -249,7 +250,7 @@ export async function multiAgentChat(
   })
 
   const rawContent = response.choices[0]?.message?.content || "I'm here to help. Could you tell me more?"
-  const content = processAIResponse(response)
+  const content = cleanAIResponse(rawContent)
 
   return {
     content,

@@ -1,5 +1,6 @@
 import OpenAI from 'openai'
 import { AgentTool, executeTool } from './agent-tools'
+import { cleanAIResponse } from './ai-utils'
 
 const aiClient = new OpenAI({
   baseURL: process.env.NVIDIA_BASE_URL || 
@@ -114,12 +115,7 @@ export async function runPlanningAgent(
       })
 
       const rawPlan = planResponse.choices[0]?.message?.content || '{}'
-      const cleanPlan = rawPlan
-        .replace(/```json\n?/g, '')
-        .replace(/```\n?/g, '')
-        // Remove thinking content from qwen model
-        .replace(/<think>[\s\S]*?<\/think>/g, '')
-        .trim()
+      const cleanPlan = cleanAIResponse(rawPlan)
 
       plan = JSON.parse(cleanPlan) as AgentPlan
     } catch (err) {
@@ -168,14 +164,11 @@ export async function runPlanningAgent(
       ]
     })
     
-    finalResponse = responseResult.choices[0]?.message?.content || 
+    finalResponse = cleanAIResponse(
+      responseResult.choices[0]?.message?.content || 
       "I'm here to help. How can I assist you?"
+    )
   }
-
-  // Remove thinking tags from qwen model output
-  finalResponse = finalResponse
-    .replace(/<think>[\s\S]*?<\/think>/g, '')
-    .trim()
 
   return { response: finalResponse, actionsExecuted, plan }
 }

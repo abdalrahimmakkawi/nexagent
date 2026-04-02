@@ -24,7 +24,6 @@ export const supabase = (() => {
       throw new Error('Supabase environment variables are not configured properly')
     }
     
-    console.log('🔍 [SUPABASE] Creating singleton client...')
     supabaseInstance = createClient(
       supabaseUrl,
       supabaseAnonKey,
@@ -33,10 +32,14 @@ export const supabase = (() => {
           persistSession: true,
           autoRefreshToken: true,
           detectSessionInUrl: true,
+          lock: async (name, acquireTimeout, fn) => {
+            // Workaround for browsers that don't 
+            // support LockManager properly
+            return fn()
+          },
         }
       }
     )
-    console.log('✅ [SUPABASE] Singleton client created successfully')
   }
   return supabaseInstance
 })()

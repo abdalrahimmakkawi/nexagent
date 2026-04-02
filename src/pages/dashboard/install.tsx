@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import Head from 'next/head'
 import DashboardLayout from '@/components/DashboardLayout'
-import { supabaseAdmin } from '@/lib/supabase'
+import { supabase } from '@/lib/supabase'
 
 interface Client {
   id: string
@@ -31,7 +31,7 @@ export default function InstallPage() {
       // In production, this would come from user session
       const clientId = 'demo-user-id'
       
-      const { data: clientData } = await (supabaseAdmin
+      const { data: clientData } = await (supabase
         .from('clients') as any)
         .select(`
           id,

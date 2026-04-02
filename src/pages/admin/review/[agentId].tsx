@@ -94,24 +94,25 @@ export default function AdminReview() {
 
   const approveAgent = async () => {
     try {
-      const headers: Record<string, string> = {
-        'Content-Type': 'application/json',
-      }
-      
-      if (process.env.ADMIN_SECRET_KEY) {
-        headers['x-admin-key'] = process.env.ADMIN_SECRET_KEY
-      }
+      // Get session token
+      const { data: { session } } = await supabase.auth.getSession()
 
-      const response = await fetch(`/api/admin/approve/${agentId}`, {
+      const response = await fetch('/api/admin/approve-agent', {
         method: 'POST',
-        headers,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session?.access_token}`,
+        },
+        body: JSON.stringify({ agentId }),
       })
 
-      if (response.ok) {
-        alert('Agent approved and client notified!')
+      const result = await response.json()
+
+      if (result.success) {
+        alert('Agent approved! Client has been notified.')
         router.push('/admin')
       } else {
-        alert('Failed to approve agent')
+        alert('Failed to approve: ' + result.error)
       }
     } catch (err) {
       alert('Network error')

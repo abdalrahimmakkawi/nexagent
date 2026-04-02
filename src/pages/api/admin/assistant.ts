@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { supabaseAdmin } from '@/lib/supabase'
 import { aiClient, aiModel, providerName } from '@/lib/nvidia-client'
+import { cleanAIResponse } from '@/lib/ai-utils'
 
 // Admin secret key for protection
 const ADMIN_SECRET_KEY = process.env.ADMIN_SECRET_KEY || 'nexagent-admin-2024'
@@ -246,8 +247,10 @@ Never be generic — always tie advice to NexAgent's specific situation and real
       ],
     })
 
-    const content = response.choices[0]?.message?.content || 
+    const content = cleanAIResponse(
+      response.choices[0]?.message?.content || 
       "I'm having trouble right now. Please try again!"
+    )
     const latencyMs = Date.now() - start
 
     return res.status(200).json({

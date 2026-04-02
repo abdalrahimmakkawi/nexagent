@@ -1,5 +1,6 @@
 import { aiClient, aiModel } from './nvidia-client'
 import { getToolsForPlan } from './agent-tools'
+import { cleanAIResponse } from './ai-utils'
 
 export interface OnboardingData {
   businessName: string
@@ -85,11 +86,7 @@ The JSON must have exactly these fields:
   })
   
   const content = response.choices[0].message.content || ''
-  // Strip markdown fences if present
-  const clean = content
-    .replace(/```json\n?/g, '')
-    .replace(/```\n?/g, '')
-    .trim()
+  const clean = cleanAIResponse(content)
 
   try {
     const config = JSON.parse(clean) as GeneratedAgentConfig

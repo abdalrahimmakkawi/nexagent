@@ -26,6 +26,7 @@ export default function Onboarding() {
   const [loading, setLoading] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [success, setSuccess] = useState(false)
+  const [agentData, setAgentData] = useState<{agentId: string, agentName: string} | null>(null)
   const [user, setUser] = useState<any>(null)
   const [errors, setErrors] = useState<Record<string, string>>({})
   
@@ -155,6 +156,10 @@ export default function Onboarding() {
       
       if (response.ok) {
         setSuccess(true)
+        setAgentData({
+          agentId: result.agentId,
+          agentName: result.agentName
+        })
       } else {
         setErrors({ submit: result.error || 'Failed to submit' })
       }
@@ -172,23 +177,32 @@ export default function Onboarding() {
       <>
         <Head><title>Onboarding Complete — NexAgent</title></Head>
         <div className="min-h-screen flex items-center justify-center px-6" style={{ background: '#0a0a12' }}>
-          <div className="text-center">
+          <div className="text-center max-w-md">
             <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6" style={{ background: 'linear-gradient(135deg,#10b981,#059669)' }}>
               <Icon name="check" size={32} style={{ color: 'white' }} />
             </div>
             <h1 className="text-3xl font-bold mb-4" style={{ color: '#fff', fontFamily: "'Playfair Display', serif" }}>
-              Your agent is being reviewed!
+              Your agent {agentData?.agentName || 'AI Assistant'} is being reviewed!
             </h1>
             <p className="text-lg mb-8" style={{ color: 'rgba(255,255,255,0.6)' }}>
               We'll email you at {user?.email} once it's live. Usually within 24 hours.
             </p>
-            <button
-              onClick={() => router.push('/dashboard')}
-              className="px-8 py-3 rounded-lg font-semibold transition-all"
-              style={{ background: '#6366f1', color: '#fff' }}
-            >
-              Go to dashboard →
-            </button>
+            <div className="space-y-4">
+              <button
+                onClick={() => window.location.href = '/dashboard'}
+                className="w-full px-6 py-3 rounded-lg font-semibold transition-all"
+                style={{ background: '#6366f1', color: '#fff' }}
+              >
+                Go to dashboard →
+              </button>
+              <button
+                onClick={() => window.location.href = '/'}
+                className="w-full px-6 py-3 rounded-lg font-semibold transition-all border"
+                style={{ borderColor: 'rgba(255,255,255,0.2)', color: 'rgba(255,255,255,0.8)' }}
+              >
+                Back to home
+              </button>
+            </div>
           </div>
         </div>
       </>
