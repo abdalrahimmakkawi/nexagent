@@ -1,8 +1,9 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { supabaseAdmin } from '@/lib/supabase'
 import { chatRateLimiter, dailyRateLimiter, getClientIP } from '@/lib/rate-limiter'
-import { multiAgentChat, PLAN_AGENTS, AgentContext } from '@/lib/multi-agent'
 import { providerName } from '@/lib/nvidia-client'
+import { getToolsForPlan } from '@/lib/agent-tools'
+import { runPlanningAgent } from '@/lib/planning-agent'
 
 export default async function handler(
   req: NextApiRequest,
@@ -47,32 +48,30 @@ export default async function handler(
 
     const start = Date.now()
 
-    // Get client's plan to determine active agents
+    // Get client's plan to determine available tools
     const { data: teamData } = await supabaseAdmin
-      .from('agent_teams')
-      .select('plan, active_agents')
-      .eq('client_id', clientId)
+      .from('clients')
+      .select('plan')
+      .eq('id', clientId)
       .single() as any
 
     const plan = (teamData as any)?.plan || 'starter'
-    const activeAgents = (teamData as any)?.active_agents 
-      || PLAN_AGENTS[plan]
+    const availableTools = getToolsForPlan(plan)
 
-    // Build agent context
-    const agentContext: AgentContext = {
-      businessName: (agent as any)?.clients?.business_name 
-        || 'Our Business',
-      industry: (agent as any)?.clients?.industry || '',
-      systemPrompt: (agent as any).system_prompt,
-      activeAgents,
-      conversationHistory: messages.slice(-10),
+    // Build agent context for tool execution
+    const agentContext = {
+      clientId: clientId as string,
+      agentId: agentId,
+      businessName: (agent as any)?.clients?.business_name || 'Business',
     }
 
-    // Run multi-agent system
-    const result = await multiAgentChat(
+    // Run planning agent instead of direct AI call
+    const result = await runPlanningAgent(
       messages[messages.length - 1].content,
-      agentContext,
-      conversationId
+      availableTools,
+      (agent as any).system_prompt,
+      messages.slice(-10),
+      agentContext
     )
 
     // Save messages to database
@@ -101,12 +100,11 @@ export default async function handler(
       }
 
     return res.status(200).json({
-      content: result.content,
+      content: result.response,
       provider: providerName,
-      agentUsed: result.agentUsed,
-      sentiment: result.decision.sentiment,
-      intent: result.decision.intent,
-      latencyMs: result.latencyMs,
+      actionsExecuted: result.actionsExecuted,
+      hadPlan: !!result.plan,
+      latencyMs: Date.now() - start,
     })
 
   } catch (err: unknown) {

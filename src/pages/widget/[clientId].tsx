@@ -21,6 +21,8 @@ interface Message {
   timestamp: Date
   agentUsed?: string
   sentiment?: number
+  actionsExecuted?: string[]
+  hadPlan?: boolean
 }
 
 const AGENT_LABELS: Record<string, string> = {
@@ -170,7 +172,9 @@ export default function WidgetPage() {
       const assistantMessage: Message = {
         role: 'assistant',
         content: data.content,
-        timestamp: new Date()
+        timestamp: new Date(),
+        actionsExecuted: data.actionsExecuted,
+        hadPlan: data.hadPlan
       }
 
       setMessages(prev => [...prev, assistantMessage])
@@ -313,6 +317,21 @@ export default function WidgetPage() {
                 style={message.role === 'user' ? { backgroundColor: config.widgetColor } : {}}
               >
                 {message.content}
+                {/* Show actions executed */}
+                {message.role === 'assistant' && message.actionsExecuted && message.actionsExecuted.length > 0 && (
+                  <div style={{
+                    marginTop: 6,
+                    padding: '4px 10px',
+                    background: 'rgba(118,185,0,0.1)',
+                    border: '1px solid rgba(118,185,0,0.3)',
+                    borderRadius: 6,
+                    fontSize: 11,
+                    color: '#76b900',
+                  }}>
+                    ✓ {message.actionsExecuted.join(' · ')}
+                  </div>
+                )}
+
                 {/* Show agent badge for AI messages */}
                 {message.role === 'assistant' && (message as any).agentUsed && (
                   <div style={{ 

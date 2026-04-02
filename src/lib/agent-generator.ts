@@ -1,4 +1,5 @@
 import { aiClient, aiModel } from './nvidia-client'
+import { getToolsForPlan } from './agent-tools'
 
 export interface OnboardingData {
   businessName: string
@@ -29,6 +30,12 @@ export interface GeneratedAgentConfig {
 export async function generateAgentConfig(
   data: OnboardingData
 ): Promise<GeneratedAgentConfig> {
+  // Get tools available for squad plan (default)
+  const toolsForPlan = getToolsForPlan('squad')
+  const toolsList = toolsForPlan
+    .map(t => `- ${t.name}: ${t.description}`)
+    .join('\n')
+
   const prompt = `You are an expert AI agent designer. 
 A business has submitted their information and you must 
 generate a complete, production-ready AI support agent 
@@ -45,6 +52,14 @@ BUSINESS INFORMATION:
 - Desired tone: ${data.tone}
 - Goals: ${data.goals || 'Handle customer support efficiently'}
 - Extra info: ${data.extraInfo || 'None'}
+
+AVAILABLE ACTIONS YOU CAN TAKE:
+${toolsList}
+
+When a customer requests something you can action,
+extract the required information and use the 
+appropriate tool. Always confirm before taking 
+irreversible actions.
 
 Generate a complete agent configuration. Respond ONLY 
 with a valid JSON object, no markdown, no explanation.
