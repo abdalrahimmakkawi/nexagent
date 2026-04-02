@@ -4,10 +4,6 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || ''
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  console.error('🚨 [SUPABASE] Missing environment variables')
-}
-
 // Singleton pattern to prevent multiple clients
 let supabaseInstance: ReturnType<typeof createClient> | null = null
 let supabaseAdminInstance: ReturnType<typeof createClient> | null = null
@@ -18,9 +14,6 @@ export const supabase = (() => {
     const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
     
     if (!supabaseUrl || !supabaseAnonKey) {
-      console.error('🚨 [SUPABASE] Missing environment variables:')
-      console.error('🚨 [SUPABASE] NEXT_PUBLIC_SUPABASE_URL:', supabaseUrl ? '✅' : '❌ Missing')
-      console.error('🚨 [SUPABASE] NEXT_PUBLIC_SUPABASE_ANON_KEY:', supabaseAnonKey ? '✅' : '❌ Missing')
       throw new Error('Supabase environment variables are not configured properly')
     }
     
@@ -32,9 +25,17 @@ export const supabase = (() => {
           persistSession: true,
           autoRefreshToken: true,
           detectSessionInUrl: true,
-          lock: async (name, acquireTimeout, fn) => {
-            // Workaround for browsers that don't 
-            // support LockManager properly
+          lock: async (name: string, acquireTimeout: number, fn: () => Promise<any>) => {
+            try {
+              // Try the standard LockManager first
+              if (navigator.locks && navigator.locks.request) {
+                return await navigator.locks.request(name, { ifAvailable: true }, fn)
+              }
+            } catch (e) {
+              // Fallback for browsers that don't support LockManager properly
+              console.warn('LockManager not supported, using fallback')
+            }
+            // Workaround for browsers that don't support LockManager properly
             return fn()
           },
         }
@@ -50,9 +51,6 @@ export const supabaseAdmin = (() => {
     const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
     
     if (!supabaseUrl || !supabaseServiceKey) {
-      console.warn('⚠️ [SUPABASE] Admin environment variables not available (admin features disabled)')
-      console.warn('⚠️ [SUPABASE] NEXT_PUBLIC_SUPABASE_URL:', supabaseUrl ? '✅' : '❌ Missing')
-      console.warn('⚠️ [SUPABASE] SUPABASE_SERVICE_ROLE_KEY:', supabaseServiceKey ? '✅' : '❌ Missing')
       // Return a mock admin client that won't crash the app
       return null as any
     }

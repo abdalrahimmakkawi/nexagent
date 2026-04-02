@@ -49,7 +49,8 @@ function getSentimentColor(sentiment?: number): string {
 
 export default function WidgetPage() {
   const router = useRouter()
-  const { clientId } = router.query
+  const { clientId: clientIdQuery } = router.query
+  const clientId = Array.isArray(clientIdQuery) ? clientIdQuery[0] : clientIdQuery
   const [config, setConfig] = useState<WidgetConfig | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -79,7 +80,11 @@ export default function WidgetPage() {
 
   // Fetch widget config
   useEffect(() => {
-    if (!clientId) return
+    if (!clientId || typeof clientId !== 'string') {
+      setError('Invalid client ID')
+      setLoading(false)
+      return
+    }
 
     const fetchConfig = async () => {
       try {
