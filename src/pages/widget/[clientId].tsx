@@ -79,64 +79,64 @@ export default function WidgetPage() {
   }, [messages])
 
   // Fetch widget config
-  useEffect(() => {
+  const fetchConfig = async () => {
     if (!clientId || typeof clientId !== 'string') {
       setError('Invalid client ID')
       setLoading(false)
       return
     }
 
-    const fetchConfig = async () => {
-      try {
-        const response = await fetch(`/api/widget/${clientId}/config`)
-        const data = await response.json()
+    try {
+      const response = await fetch(`/api/widget/${clientId}/config`)
+      const data = await response.json()
 
-        if (!response.ok) {
-          throw new Error(data.error || 'Failed to load widget')
-        }
-
-        setConfig(data)
-
-        // Create conversation and load history
-        const convResponse = await fetch(`/api/widget/${clientId}/conversation`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            agentId: data.agentId,
-            sessionId,
-            loadHistory: true
-          })
-        })
-        
-        const convData = await convResponse.json()
-        if (convResponse.ok) {
-          setConversationId(convData.conversationId)
-          
-          // Load conversation history if exists
-          if (convData.messages && convData.messages.length > 0) {
-            const historyMessages = convData.messages.map((msg: any) => ({
-              role: msg.role,
-              content: msg.content,
-              timestamp: new Date(msg.created_at)
-            }))
-            setMessages(historyMessages)
-          } else {
-            // Add welcome message for new conversations
-            setMessages([{
-              role: 'assistant',
-              content: data.welcomeMessage,
-              timestamp: new Date()
-            }])
-          }
-        }
-
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Unknown error')
-      } finally {
-        setLoading(false)
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to load widget')
       }
-    }
 
+      setConfig(data)
+
+      // Create conversation and load history
+      const convResponse = await fetch(`/api/widget/${clientId}/conversation`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          agentId: data.agentId,
+          sessionId,
+          loadHistory: true
+        })
+      })
+      
+      const convData = await convResponse.json()
+      if (convResponse.ok) {
+        setConversationId(convData.conversationId)
+        
+        // Load conversation history if exists
+        if (convData.messages && convData.messages.length > 0) {
+          const historyMessages = convData.messages.map((msg: any) => ({
+            role: msg.role,
+            content: msg.content,
+            timestamp: new Date(msg.created_at)
+          }))
+          setMessages(historyMessages)
+        } else {
+          // Add welcome message for new conversations
+          setMessages([{
+            role: 'assistant',
+            content: data.welcomeMessage,
+            timestamp: new Date()
+          }])
+        }
+      }
+
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Unknown error')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
     fetchConfig()
   }, [clientId, sessionId])
 
