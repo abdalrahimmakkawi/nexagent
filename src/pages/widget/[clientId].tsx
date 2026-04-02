@@ -67,6 +67,15 @@ export default function WidgetPage() {
   const [conversationId, setConversationId] = useState<string | null>(null)
   
   const messagesEndRef = useRef<HTMLDivElement>(null)
+
+  // Show loading while router query is being resolved
+  if (router.isReady === false) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ background: '#0a0a12' }}>
+        <div className="text-white">Loading...</div>
+      </div>
+    )
+  }
   const inputRef = useRef<HTMLTextAreaElement>(null)
 
   // Auto-scroll to bottom
@@ -138,7 +147,7 @@ export default function WidgetPage() {
 
   useEffect(() => {
     fetchConfig()
-  }, [clientId, sessionId])
+  }, [router.isReady, clientId, sessionId])
 
   // Handle message sending
   const sendMessage = async (messageText: string) => {
