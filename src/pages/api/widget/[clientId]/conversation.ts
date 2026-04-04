@@ -17,63 +17,86 @@ export default async function handler(
   }
 
   try {
+    console.log('[Conversation] Creating for:', { clientId, agentId, sessionId })
+
     // Check if conversation already exists for this session
-    const { data: existing } = await (supabaseAdmin
+    const { data: existing, error: existingError } = await (supabaseAdmin
       .from('conversations') as any)
       .select('*')
       .eq('session_id', sessionId)
       .single()
 
+    console.log('[Conversation] Existing check:', { existing, existingError })
+
     const messages: any[] = []
-    if (loadHistory) {
+    if (loadHistory && existing) {
       const { data: messageHistory } = await (supabaseAdmin
         .from('messages') as any)
         .select('role, content, created_at, provider')
-        .eq('conversation_id', (existing as any).id)
+        .eq('conversation_id', existing.id)
         .order('created_at', { ascending: true })
         .limit(50)
 
       messages.push(...(messageHistory || []))
+      console.log('[Conversation] History loaded:', messageHistory?.length || 0)
     }
 
     if (existing) {
+      console.log('[Conversation] Found existing:', existing.id)
       return res.status(200).json({ 
-        conversationId: (existing as any).id,
+        conversationId: existing.id,
         messages: messages,
         isNew: false
       })
     }
 
     // Get client's agent to find client_id
-    const { data: agent } = await (supabaseAdmin
+    const { data: agent, error: agentError } = await (supabaseAdmin
       .from('agents') as any)
       .select('client_id')
       .eq('id', agentId)
       .single()
 
-    if (!agent) {
+    console.log('[Conversation] Agent lookup:', { agent, agentError })
+
+    if (!agent || agentError) {
+      console.error('[Conversation] Agent not found:', agentError)
       return res.status(404).json({ error: 'Agent not found' })
     }
 
     // Create new conversation
-    const { data: conversation } = await (supabaseAdmin
+    const { data: conversation, error: convError } = await (supabaseAdmin
       .from('conversations') as any)
       .insert({
         agent_id: agentId,
-        client_id: (agent as any).client_id,
+        client_id: agent.client_id,
         session_id: sessionId,
         source: 'widget',
       })
       .select()
       .single()
 
+    console.log('[Conversation] Created:', { conversation, convError })
+
+    if (convError || !conversation) {
+      console.error('[Conversation] Creation failed:', convError)
+      return res.status(500).json({ 
+        error: 'Failed to create conversation',
+        details: convError?.message 
+      })
+    }
+
     return res.status(200).json({ 
-      conversationId: (conversation as any)?.id,
+      conversationId: conversation.id,
       messages: [],
       isNew: true
     })
   } catch (err) {
-    console.error('[/api/widget/conversation]', err)
-    return res.status(500).json({ error: 'Failed to create conversation' })
+    const message = err instanceof Error ? err.message : 'Unknown'
+    console.error('[/api/widget/conversation] Error:', message)
+    return res.status(500).json({ 
+      error: 'Failed to create conversation',
+      details: message
+    })
   }
 }
