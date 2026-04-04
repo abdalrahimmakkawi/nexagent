@@ -48,25 +48,74 @@ function getSentimentColor(sentiment?: number): string {
 }
 
 export default function WidgetPage() {
+  // ══ ALL HOOKS FIRST — NO EXCEPTIONS ══
   const router = useRouter()
   const { clientId: clientIdQuery } = router.query
   const clientId = Array.isArray(clientIdQuery) ? clientIdQuery[0] : clientIdQuery
+  
+  // All useState hooks
   const [config, setConfig] = useState<WidgetConfig | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState('')
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
   const [isTyping, setIsTyping] = useState(false)
   const [showQuickPrompts, setShowQuickPrompts] = useState(true)
   const [showLeadCapture, setShowLeadCapture] = useState(false)
   const [showEscalation, setShowEscalation] = useState(false)
   const [leadValue, setLeadValue] = useState('')
-  const [sessionId] = useState(() => 
-    `widget_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
-  )
   const [conversationId, setConversationId] = useState<string | null>(null)
   
+  // Session ID with sessionStorage persistence
+  const [sessionId] = useState(() => {
+    if (typeof window === 'undefined') {
+      return 'ssr-' + Math.random().toString(36).slice(2)
+    }
+    const existing = sessionStorage.getItem('nexagent-session')
+    if (existing) return existing
+    const newId = 'sess-' + Date.now() + '-' + Math.random().toString(36).slice(2)
+    sessionStorage.setItem('nexagent-session', newId)
+    return newId
+  })
+  
+  // All useRef hooks
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const inputRef = useRef<HTMLTextAreaElement>(null)
+  
+  // All useEffect hooks
+  useEffect(() => {
+    // Auto-scroll to bottom
+    const scrollToBottom = () => {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+    }
+    scrollToBottom()
+  }, [messages])
+  
+  useEffect(() => {
+    // Handle conversation cleanup
+    const cleanup = () => {
+      if (conversationId) {
+        fetch('/api/conversations/end', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ conversationId })
+        }).catch(console.error)
+      }
+    }
+
+    // Cleanup on page unload
+    window.addEventListener('beforeunload', cleanup)
+    
+    // Cleanup after 30 minutes of inactivity
+    const timeout = setTimeout(() => {
+      cleanup()
+    }, 30 * 60 * 1000)
+
+    return () => {
+      window.removeEventListener('beforeunload', cleanup)
+      clearTimeout(timeout)
+    }
+  }, [conversationId])
 
   // Show loading while router query is being resolved
   if (router.isReady === false) {
@@ -76,17 +125,8 @@ export default function WidgetPage() {
       </div>
     )
   }
-  const inputRef = useRef<HTMLTextAreaElement>(null)
 
-  // Auto-scroll to bottom
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }
-
-  useEffect(() => {
-    scrollToBottom()
-  }, [messages])
-
+  // ══ NOW functions and logic ══
   // Fetch widget config
   const fetchConfig = async () => {
     if (!clientId || typeof clientId !== 'string') {
@@ -246,32 +286,7 @@ export default function WidgetPage() {
     }
   }
 
-  // Handle conversation cleanup
-  useEffect(() => {
-    const cleanup = () => {
-      if (conversationId) {
-        fetch('/api/conversations/end', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ conversationId })
-        }).catch(console.error)
-      }
-    }
-
-    // Cleanup on page unload
-    window.addEventListener('beforeunload', cleanup)
-    
-    // Cleanup after 30 minutes of inactivity
-    const timeout = setTimeout(() => {
-      cleanup()
-    }, 30 * 60 * 1000)
-
-    return () => {
-      window.removeEventListener('beforeunload', cleanup)
-      clearTimeout(timeout)
-    }
-  }, [conversationId])
-
+  // ══ CONDITIONAL RENDERS AFTER ALL HOOKS ══
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen bg-gray-50">

@@ -21,8 +21,8 @@ export default async function handler(
       .select(`
         id, name, system_prompt, welcome_message,
         quick_prompts, lead_field, lead_message,
-        widget_color, widget_position, status,
-        clients(id, email)
+        escalation_triggers, widget_color, widget_position, status,
+        clients(id, email, business_name, industry)
       `)
       .eq('client_id', clientId)
       .eq('status', 'active')
@@ -30,27 +30,40 @@ export default async function handler(
 
     if (!agent) {
       return res.status(404).json({ 
-        error: 'Agent not found or not active' 
+        error: 'Agent not found or not approved yet',
+        hint: 'Make sure the agent status is active'
       })
     }
 
-    // Return only what the widget needs
+    // Return only what the widget needs with safe defaults
     // Never expose system_prompt to client side
     return res.status(200).json({
-      agentId: (agent as any).id,
-      name: (agent as any).name,
-      welcomeMessage: (agent as any).welcome_message,
-      quickPrompts: (agent as any).quick_prompts || [],
-      leadField: (agent as any).lead_field,
-      leadMessage: (agent as any).lead_message,
-      escalationTriggers: (agent as any).escalation_triggers || [],
+      agentId: (agent as any).id || '',
+      name: (agent as any).name || 'Assistant',
+      welcomeMessage: (agent as any).welcome_message || 
+        'Hello! How can I help you today?',
+      quickPrompts: (agent as any).quick_prompts || [
+        'How can I help?',
+        'Tell me more',
+        'What services do you offer?',
+      ],
+      leadField: (agent as any).lead_field || 'email',
+      leadMessage: (agent as any).lead_message || 
+        'Leave your contact info for updates',
+      escalationTriggers: (agent as any).escalation_triggers || [
+        'human', 'speak to person', 'manager', 'complaint'
+      ],
       widgetColor: (agent as any).widget_color || '#6366f1',
       widgetPosition: (agent as any).widget_position || 'bottom-right',
-      industry: (agent.clients as any)?.industry || '',
-      businessName: (agent.clients as any)?.business_name || '',
+      industry: (agent.clients as any)?.industry || 'General',
+      businessName: (agent.clients as any)?.business_name 
+        || 'Business',
     })
   } catch (err) {
     console.error('[/api/widget/config]', err)
-    return res.status(500).json({ error: 'Failed to fetch config' })
+    return res.status(500).json({ 
+      error: 'Failed to fetch agent configuration',
+      details: err instanceof Error ? err.message : 'Unknown error'
+    })
   }
 }
