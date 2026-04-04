@@ -82,50 +82,6 @@ export default function WidgetPage() {
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
   
-  // All useEffect hooks
-  useEffect(() => {
-    // Auto-scroll to bottom
-    const scrollToBottom = () => {
-      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-    }
-    scrollToBottom()
-  }, [messages])
-  
-  useEffect(() => {
-    // Handle conversation cleanup
-    const cleanup = () => {
-      if (conversationId) {
-        fetch('/api/conversations/end', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ conversationId })
-        }).catch(console.error)
-      }
-    }
-
-    // Cleanup on page unload
-    window.addEventListener('beforeunload', cleanup)
-    
-    // Cleanup after 30 minutes of inactivity
-    const timeout = setTimeout(() => {
-      cleanup()
-    }, 30 * 60 * 1000)
-
-    return () => {
-      window.removeEventListener('beforeunload', cleanup)
-      clearTimeout(timeout)
-    }
-  }, [conversationId])
-
-  // Show loading while router query is being resolved
-  if (router.isReady === false) {
-    return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: '#0a0a12' }}>
-        <div className="text-white">Loading...</div>
-      </div>
-    )
-  }
-
   // ══ NOW functions and logic ══
   // Fetch widget config
   const fetchConfig = async () => {
@@ -184,10 +140,6 @@ export default function WidgetPage() {
       setLoading(false)
     }
   }
-
-  useEffect(() => {
-    fetchConfig()
-  }, [router.isReady, clientId, sessionId])
 
   // Handle message sending
   const sendMessage = async (messageText: string) => {
@@ -285,8 +237,56 @@ export default function WidgetPage() {
       console.error('Failed to submit lead:', err)
     }
   }
+  
+  // All useEffect hooks - must come after all function definitions
+  useEffect(() => {
+    // Auto-scroll to bottom
+    const scrollToBottom = () => {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+    }
+    scrollToBottom()
+  }, [messages])
+  
+  useEffect(() => {
+    // Handle conversation cleanup
+    const cleanup = () => {
+      if (conversationId) {
+        fetch('/api/conversations/end', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ conversationId })
+        }).catch(console.error)
+      }
+    }
+
+    // Cleanup on page unload
+    window.addEventListener('beforeunload', cleanup)
+    
+    // Cleanup after 30 minutes of inactivity
+    const timeout = setTimeout(() => {
+      cleanup()
+    }, 30 * 60 * 1000)
+
+    return () => {
+      window.removeEventListener('beforeunload', cleanup)
+      clearTimeout(timeout)
+    }
+  }, [conversationId])
+
+  useEffect(() => {
+    fetchConfig()
+  }, [router.isReady, clientId, sessionId])
 
   // ══ CONDITIONAL RENDERS AFTER ALL HOOKS ══
+  // Show loading while router query is being resolved
+  if (router.isReady === false) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ background: '#0a0a12' }}>
+        <div className="text-white">Loading...</div>
+      </div>
+    )
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen bg-gray-50">
