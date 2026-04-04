@@ -92,49 +92,77 @@ export default function WidgetPage() {
     }
 
     try {
+      console.log('[Widget] Fetching config for clientId:', clientId)
       const response = await fetch(`/api/widget/${clientId}/config`)
       const data = await response.json()
 
+      console.log('[Widget] Config response:', { status: response.status, data })
+
       if (!response.ok) {
+        console.error('[Widget] Config API error:', data)
         throw new Error(data.error || 'Failed to load widget')
       }
 
       setConfig(data)
+      console.log('[Widget] Config set successfully')
 
-      // Create conversation and load history
-      const convResponse = await fetch(`/api/widget/${clientId}/conversation`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          agentId: data.agentId,
-          sessionId,
-          loadHistory: true
+      // Try to create conversation - don't fail if this doesn't work
+      try {
+        const convResponse = await fetch(`/api/widget/${clientId}/conversation`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            agentId: data.agentId,
+            sessionId,
+            loadHistory: true
+          })
         })
-      })
-      
-      const convData = await convResponse.json()
-      if (convResponse.ok) {
-        setConversationId(convData.conversationId)
         
-        // Load conversation history if exists
-        if (convData.messages && convData.messages.length > 0) {
-          const historyMessages = convData.messages.map((msg: any) => ({
-            role: msg.role,
-            content: msg.content,
-            timestamp: new Date(msg.created_at)
-          }))
-          setMessages(historyMessages)
+        const convData = await convResponse.json()
+        console.log('[Widget] Conversation response:', { status: convResponse.status, data: convData })
+        
+        if (convResponse.ok) {
+          setConversationId(convData.conversationId)
+          
+          // Load conversation history if exists
+          if (convData.messages && convData.messages.length > 0) {
+            const historyMessages = convData.messages.map((msg: any) => ({
+              role: msg.role,
+              content: msg.content,
+              timestamp: new Date(msg.created_at)
+            }))
+            setMessages(historyMessages)
+            console.log('[Widget] History loaded:', historyMessages.length, 'messages')
+          } else {
+            // Add welcome message for new conversations
+            setMessages([{
+              role: 'assistant',
+              content: data.welcomeMessage,
+              timestamp: new Date()
+            }])
+            console.log('[Widget] Welcome message added')
+          }
         } else {
-          // Add welcome message for new conversations
+          console.warn('[Widget] Conversation creation failed, but continuing:', convData)
+          // Still add welcome message even if conversation creation fails
           setMessages([{
             role: 'assistant',
             content: data.welcomeMessage,
             timestamp: new Date()
           }])
         }
+      } catch (convErr) {
+        console.warn('[Widget] Conversation error, but continuing:', convErr)
+        // Still add welcome message even if conversation creation fails
+        setMessages([{
+          role: 'assistant',
+          content: data.welcomeMessage,
+          timestamp: new Date()
+        }])
       }
 
     } catch (err) {
+      console.error('[Widget] Config fetch error:', err)
       setError(err instanceof Error ? err.message : 'Unknown error')
     } finally {
       setLoading(false)
