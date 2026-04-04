@@ -1,5 +1,17 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { supabaseAdmin } from '@/lib/supabase'
+import { createClient } from '@supabase/supabase-js'
+
+// Create admin client directly to bypass RLS
+const supabaseAdmin = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false
+    }
+  }
+)
 
 export default async function handler(
   req: NextApiRequest,
@@ -20,8 +32,8 @@ export default async function handler(
     console.log('[Conversation] Creating for:', { clientId, agentId, sessionId })
 
     // Check if conversation already exists for this session
-    const { data: existing, error: existingError } = await (supabaseAdmin
-      .from('conversations') as any)
+    const { data: existing, error: existingError } = await supabaseAdmin
+      .from('conversations')
       .select('*')
       .eq('session_id', sessionId)
       .single()
@@ -30,8 +42,8 @@ export default async function handler(
 
     const messages: any[] = []
     if (loadHistory && existing) {
-      const { data: messageHistory } = await (supabaseAdmin
-        .from('messages') as any)
+      const { data: messageHistory } = await supabaseAdmin
+        .from('messages')
         .select('role, content, created_at, provider')
         .eq('conversation_id', existing.id)
         .order('created_at', { ascending: true })
@@ -51,8 +63,8 @@ export default async function handler(
     }
 
     // Get client's agent to find client_id
-    const { data: agent, error: agentError } = await (supabaseAdmin
-      .from('agents') as any)
+    const { data: agent, error: agentError } = await supabaseAdmin
+      .from('agents')
       .select('client_id')
       .eq('id', agentId)
       .single()
@@ -64,9 +76,9 @@ export default async function handler(
       return res.status(404).json({ error: 'Agent not found' })
     }
 
-    // Create new conversation
-    const { data: conversation, error: convError } = await (supabaseAdmin
-      .from('conversations') as any)
+    // Create new conversation with admin client to bypass RLS
+    const { data: conversation, error: convError } = await supabaseAdmin
+      .from('conversations')
       .insert({
         agent_id: agentId,
         client_id: agent.client_id,
